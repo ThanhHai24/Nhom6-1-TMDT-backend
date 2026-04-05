@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import { getAllUsers, getUserById, handleCreateUser, handleDeleteUser, updateUserById } from "../services/user.service";
 
 const getHomePage = async (req: Request, res: Response) => {
-    const users = await getAllUsers();
-    res.render("home", {
-        users: users
+    res.render("webPage/index", {
+        users: await getAllUsers()
     })
 }
 

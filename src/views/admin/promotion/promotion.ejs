@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- PROMOTIONS PAGE -->
+                    <div class="page active" id="page-promotions">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý khuyến mãi</h2>
+                                <div class="breadcrumb">Hệ quản trị → Khuyến mãi</div>
+                            </div>
+                            <button class="btn primary">+ Tạo khuyến mãi</button>
+                        </div>
+                        <div class="promo-grid">
+                            <div class="promo-card">
+                                <div class="promo-type">Giảm theo %</div>
+                                <div class="promo-name">Flash Sale T3/2026</div>
+                                <div class="promo-code">FLASH30</div>
+                                <div style="font-size:13px;color:#5F5E5A">Giảm <b>30%</b> cho đơn từ 2 triệu · Còn 3
+                                    ngày</div>
+                                <div class="promo-bar">
+                                    <div class="promo-fill" style="width:73%"></div>
+                                </div>
+                                <div class="promo-stats"><span>Đã dùng: 1,460</span><span>Giới hạn: 2,000</span></div>
+                            </div>
+                            <div class="promo-card">
+                                <div class="promo-type">Miễn phí ship</div>
+                                <div class="promo-name">Freeship toàn quốc</div>
+                                <div class="promo-code">FREESHIP</div>
+                                <div style="font-size:13px;color:#5F5E5A">Miễn phí vận chuyển toàn quốc · Không giới hạn
+                                </div>
+                                <div class="promo-bar">
+                                    <div class="promo-fill" style="width:45%"></div>
+                                </div>
+                                <div class="promo-stats"><span>Đã dùng: 4,520</span><span>Giới hạn: 10,000</span></div>
+                            </div>
+                            <div class="promo-card">
+                                <div class="promo-type">Giảm trực tiếp</div>
+                                <div class="promo-name">Ưu đãi thành viên VIP</div>
+                                <div class="promo-code">VIP500K</div>
+                                <div style="font-size:13px;color:#5F5E5A">Giảm <b>500,000 ₫</b> cho thành viên VIP · Còn
+                                    15 ngày
+                                </div>
+                                <div class="promo-bar">
+                                    <div class="promo-fill" style="width:20%"></div>
+                                </div>
+                                <div class="promo-stats"><span>Đã dùng: 200</span><span>Giới hạn: 1,000</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Tất cả chương trình khuyến mãi</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên chương trình</th>
+                                        <th>Mã</th>
+                                        <th>Loại</th>
+                                        <th>Giá trị</th>
+                                        <th>Đã dùng</th>
+                                        <th>Hạn dùng</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Flash Sale T3/2026</td>
+                                        <td style="font-family:monospace">FLASH30</td>
+                                        <td>Giảm %</td>
+                                        <td>30%</td>
+                                        <td>1,460/2,000</td>
+                                        <td>02/04/2026</td>
+                                        <td><span class="badge active">Đang chạy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Freeship toàn quốc</td>
+                                        <td style="font-family:monospace">FREESHIP</td>
+                                        <td>Miễn ship</td>
+                                        <td>100%</td>
+                                        <td>4,520/10,000</td>
+                                        <td>30/04/2026</td>
+                                        <td><span class="badge active">Đang chạy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ưu đãi thành viên VIP</td>
+                                        <td style="font-family:monospace">VIP500K</td>
+                                        <td>Giảm tiền</td>
+                                        <td>500,000 ₫</td>
+                                        <td>200/1,000</td>
+                                        <td>15/04/2026</td>
+                                        <td><span class="badge active">Đang chạy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Khuyến mãi Tết 2026</td>
+                                        <td style="font-family:monospace">TET2026</td>
+                                        <td>Giảm %</td>
+                                        <td>20%</td>
+                                        <td>8,240/8,240</td>
+                                        <td>10/02/2026</td>
+                                        <td><span class="badge inactive">Đã kết thúc</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- WAREHOUSE PAGE -->
+                    <div class="page active" id="page-warehouse">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý kho</h2>
+                                <div class="breadcrumb">Hệ quản trị → Quản lý kho</div>
+                            </div>
+                            <div style="display:flex;gap:8px"><button class="btn">Nhập kho</button><button
+                                    class="btn primary">Xuất kho</button></div>
+                        </div>
+                        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+                            <div class="stat-card teal">
+                                <div class="stat-label">Tổng sản phẩm trong kho</div>
+                                <div class="stat-value">48,294</div>
+                            </div>
+                            <div class="stat-card amber">
+                                <div class="stat-label">Sắp hết hàng (&lt;50 sp)</div>
+                                <div class="stat-value">34</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-label">Hết hàng</div>
+                                <div class="stat-value">12</div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Danh sách tồn kho</span>
+                                <div class="toolbar" style="margin:0">
+                                    <div class="search-box" style="max-width:220px"><svg width="14" height="14"
+                                            viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+                                            <circle cx="7" cy="7" r="5" />
+                                            <path d="M11 11l3 3" />
+                                        </svg><input type="text" placeholder="Tìm sản phẩm..."></div>
+                                </div>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>SKU</th>
+                                        <th>Vị trí kho</th>
+                                        <th>Tồn kho</th>
+                                        <th>Đã bán (tháng)</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>iPhone 15 Pro Max 256GB</td>
+                                        <td style="font-family:monospace;font-size:12px">IP15PM-256</td>
+                                        <td>A1-02</td>
+                                        <td>
+                                            <div class="stock-level">
+                                                <div class="stock-bar">
+                                                    <div class="stock-fill high" style="width:80%"></div>
+                                                </div><span class="stock-num">400</span>
+                                            </div>
+                                        </td>
+                                        <td>1,204</td>
+                                        <td><span class="badge active">Đủ hàng</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MacBook Air M4 16GB</td>
+                                        <td style="font-family:monospace;font-size:12px">MBA-M4-16</td>
+                                        <td>B2-07</td>
+                                        <td>
+                                            <div class="stock-level">
+                                                <div class="stock-bar">
+                                                    <div class="stock-fill mid" style="width:35%"></div>
+                                                </div><span class="stock-num">87</span>
+                                            </div>
+                                        </td>
+                                        <td>342</td>
+                                        <td><span class="badge pending">Trung bình</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>AirPods Pro 3</td>
+                                        <td style="font-family:monospace;font-size:12px">APP3-MCS</td>
+                                        <td>C3-01</td>
+                                        <td>
+                                            <div class="stock-level">
+                                                <div class="stock-bar">
+                                                    <div class="stock-fill low" style="width:12%"></div>
+                                                </div><span class="stock-num">23</span>
+                                            </div>
+                                        </td>
+                                        <td>891</td>
+                                        <td><span class="badge danger">Sắp hết</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Samsung Galaxy S25</td>
+                                        <td style="font-family:monospace;font-size:12px">SGS25-128</td>
+                                        <td>A2-04</td>
+                                        <td>
+                                            <div class="stock-level">
+                                                <div class="stock-bar">
+                                                    <div class="stock-fill low" style="width:2%"></div>
+                                                </div><span class="stock-num">4</span>
+                                            </div>
+                                        </td>
+                                        <td>620</td>
+                                        <td><span class="badge danger">Cần nhập</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

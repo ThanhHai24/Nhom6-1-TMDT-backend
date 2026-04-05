@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- SHIPPING PAGE -->
+                    <div class="page active" id="page-shipping">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý vận chuyển</h2>
+                                <div class="breadcrumb">Hệ quản trị → Vận chuyển</div>
+                            </div>
+                        </div>
+                        <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+                            <div class="stat-card blue">
+                                <div class="stat-label">Chờ bàn giao</div>
+                                <div class="stat-value">52</div>
+                            </div>
+                            <div class="stat-card teal">
+                                <div class="stat-label">Đang vận chuyển</div>
+                                <div class="stat-value">80</div>
+                            </div>
+                            <div class="stat-card amber">
+                                <div class="stat-label">Giao thành công</div>
+                                <div class="stat-value">215</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-label">Giao thất bại</div>
+                                <div class="stat-value">8</div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="toolbar">
+                                <div class="search-box"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+                                        stroke="#888" stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg><input type="text" placeholder="Tìm mã đơn, mã vận đơn..."></div>
+                                <select class="filter-select">
+                                    <option>Tất cả đơn vị VC</option>
+                                    <option>Giao hàng nhanh</option>
+                                    <option>Viettel Post</option>
+                                </select>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Mã vận đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Đơn vị VC</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260330002</td>
+                                        <td style="font-family:monospace;font-size:12px">GHN2026001</td>
+                                        <td>Trần Thị Bình</td>
+                                        <td>Hà Nội</td>
+                                        <td>Giao hàng nhanh</td>
+                                        <td><span class="badge active">Đang giao</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260329010</td>
+                                        <td style="font-family:monospace;font-size:12px">VTP2026044</td>
+                                        <td>Hoàng Văn Dũng</td>
+                                        <td>TP. Hồ Chí Minh</td>
+                                        <td>Viettel Post</td>
+                                        <td><span class="badge pending">Chờ bàn giao</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260329008</td>
+                                        <td style="font-family:monospace;font-size:12px">GHN2025998</td>
+                                        <td>Ngô Thị Lan</td>
+                                        <td>Đà Nẵng</td>
+                                        <td>Giao hàng nhanh</td>
+                                        <td><span class="badge info">Đã giao</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

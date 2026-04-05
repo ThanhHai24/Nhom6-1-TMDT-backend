@@ -3,6 +3,9 @@ require("dotenv").config();
 import webRoutes from "./routes/web";
 import getConnection from "./config/database";
 import initDatabase from "config/seed";
+import userRoutes from "routes/userRoutes";
+import path from "path/win32";
+import adminRoutes from "routes/adminRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -16,13 +19,23 @@ app.set("views", __dirname + "/views");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// middleware to set currentUrl for active link in sidebar
+app.use((req, res, next) => {
+    res.locals.currentUrl = req.originalUrl;
+    next();
+});
+
+
 // config route
 webRoutes(app);
+userRoutes(app);
+adminRoutes(app);
 
 getConnection();
 
 // Config static files
 app.use(express.static("public"));
+
 
 // seed data
 initDatabase();

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- NOTIFICATIONS PAGE -->
+                    <div class="page active" id="page-notifications">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý thông báo</h2>
+                                <div class="breadcrumb">Hệ quản trị → Thông báo</div>
+                            </div>
+                            <button class="btn primary">+ Tạo thông báo</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Thông báo hệ thống</span><span
+                                    class="card-action">Đánh dấu tất cả đã đọc</span></div>
+                            <div class="notif-item notif-unread">
+                                <div class="notif-icon" style="background:#E6F1FB">🛒</div>
+                                <div class="notif-body">
+                                    <div class="notif-title">12 đơn hàng mới cần phê duyệt</div>
+                                    <div class="notif-desc">Có 12 đơn hàng đang chờ xác nhận từ hệ thống</div>
+                                </div>
+                                <div class="notif-time">14:32</div>
+                            </div>
+                            <div class="notif-item notif-unread">
+                                <div class="notif-icon" style="background:#FCEBEB">⚠️</div>
+                                <div class="notif-body">
+                                    <div class="notif-title">Cảnh báo tồn kho thấp</div>
+                                    <div class="notif-desc">AirPods Pro 3 chỉ còn 23 sản phẩm — Cần nhập thêm hàng</div>
+                                </div>
+                                <div class="notif-time">13:15</div>
+                            </div>
+                            <div class="notif-item notif-unread">
+                                <div class="notif-icon" style="background:#EAF3DE">💰</div>
+                                <div class="notif-body">
+                                    <div class="notif-title">Thanh toán VNPAY thành công</div>
+                                    <div class="notif-desc">Đơn #DH20260330003 — 6,490,000 ₫ đã được xác nhận</div>
+                                </div>
+                                <div class="notif-time">11:50</div>
+                            </div>
+                            <div class="notif-item">
+                                <div class="notif-icon" style="background:#F1EFE8">👤</div>
+                                <div class="notif-body">
+                                    <div class="notif-title">Người dùng mới đăng ký</div>
+                                    <div class="notif-desc">Phạm Hương Giang vừa tạo tài khoản mới</div>
+                                </div>
+                                <div class="notif-time">10:22</div>
+                            </div>
+                            <div class="notif-item">
+                                <div class="notif-icon" style="background:#FAEEDA">🎁</div>
+                                <div class="notif-body">
+                                    <div class="notif-title">Khuyến mãi FLASH30 sắp hết hạn</div>
+                                    <div class="notif-desc">Chương trình Flash Sale T3/2026 sẽ kết thúc sau 3 ngày</div>
+                                </div>
+                                <div class="notif-time">09:00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- ORDERS PAGE -->
+                    <div class="page active" id="page-orders">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý đơn hàng</h2>
+                                <div class="breadcrumb">Hệ quản trị → Đơn hàng</div>
+                            </div>
+                            <button class="btn">Xuất báo cáo</button>
+                        </div>
+                        <div class="status-flow">
+                            <div class="status-step active"><span class="status-count">347</span>Tất cả</div>
+                            <div class="status-step"><span class="status-count">162</span>Chờ xử lý</div>
+                            <div class="status-step"><span class="status-count">52</span>Đóng gói</div>
+                            <div class="status-step"><span class="status-count">80</span>Đang giao</div>
+                            <div class="status-step"><span class="status-count">20</span>Đã giao</div>
+                            <div class="status-step"><span class="status-count">33</span>Hủy/Hoàn</div>
+                        </div>
+                        <div class="card">
+                            <div class="toolbar">
+                                <div class="search-box"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+                                        stroke="#888" stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg><input type="text" placeholder="Tìm mã đơn, khách hàng..."></div>
+                                <select class="filter-select">
+                                    <option>Hôm nay</option>
+                                    <option>7 ngày qua</option>
+                                    <option>30 ngày qua</option>
+                                </select>
+                                <select class="filter-select">
+                                    <option>Đơn vị vận chuyển</option>
+                                    <option>Giao hàng nhanh</option>
+                                    <option>Viettel Post</option>
+                                </select>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Đơn vị VC</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260330001</td>
+                                        <td>Nguyễn Văn An</td>
+                                        <td>iPhone 15 Pro Max × 1</td>
+                                        <td>34,990,000 ₫</td>
+                                        <td>GHN</td>
+                                        <td><span class="badge pending">Chờ xử lý</span></td>
+                                        <td><button class="btn sm primary">Phê duyệt</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260330002</td>
+                                        <td>Trần Thị Bình</td>
+                                        <td>Samsung Galaxy S25 × 2</td>
+                                        <td>42,000,000 ₫</td>
+                                        <td>Viettel</td>
+                                        <td><span class="badge active">Đang giao</span></td>
+                                        <td><button class="btn sm">Theo dõi</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260330003</td>
+                                        <td>Lê Minh Châu</td>
+                                        <td>AirPods Pro 3 × 1</td>
+                                        <td>6,490,000 ₫</td>
+                                        <td>GHN</td>
+                                        <td><span class="badge info">Hoàn thành</span></td>
+                                        <td><button class="btn sm">Chi tiết</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-family:monospace;font-size:12px">#DH20260330004</td>
+                                        <td>Phạm Hương Giang</td>
+                                        <td>MacBook Air M4 × 1</td>
+                                        <td>28,990,000 ₫</td>
+                                        <td>—</td>
+                                        <td><span class="badge danger">Đã hủy</span></td>
+                                        <td><button class="btn sm">Chi tiết</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>
