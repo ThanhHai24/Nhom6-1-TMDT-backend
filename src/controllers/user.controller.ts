@@ -45,4 +45,4 @@ const postUpdateUser = async (req: Request, res: Response) => {
     return res.redirect("/");
 }
 
-export { getCreateUserPage, postCreateUser, postDeleteUser, getViewUser, postUpdateUser }
+export { postCreateUser, postDeleteUser, getViewUser, postUpdateUser }

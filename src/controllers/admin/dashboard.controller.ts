@@ -4,9 +4,6 @@ const getDashboardPage = async (req: Request, res: Response) => {
     res.render("admin/dashboard/dashboard");
 }
 
-const getUsersPage = async (req: Request, res: Response) => {
-    res.render("admin/users/user");
-}
 
 const getProductsPage = async (req: Request, res: Response) => {
     res.render("admin/products/product");
@@ -36,4 +33,4 @@ const getHistoryPage = async (req: Request, res: Response) => {
     res.render("admin/history/history");
 }
 
-export { getDashboardPage, getUsersPage, getProductsPage, getOrdersPage, getWarehousePage, getPromotionPage, getShippingPage, getNotificationPage, getHistoryPage }
+export { getDashboardPage, getProductsPage, getOrdersPage, getWarehousePage, getPromotionPage, getShippingPage, getNotificationPage, getHistoryPage }
