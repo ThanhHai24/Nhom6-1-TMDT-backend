@@ -9,7 +9,7 @@ const getConnection = async () => {
         host: 'localhost',
         user: 'root',
         password: 'Thanhhai2004@',
-        database: 'nodejspro',
+        database: 'pcstore',
     });
     return connection;
 }

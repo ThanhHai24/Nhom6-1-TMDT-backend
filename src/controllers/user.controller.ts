@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
 import { getAllUsers, getUserById, handleCreateUser, handleDeleteUser, updateUserById } from "../services/user.service";
 
-const getHomePage = async (req: Request, res: Response) => {
-    res.render("webPage/index", {
-        users: await getAllUsers()
-    })
-}
+
 
 const getCreateUserPage = (req: Request, res: Response) => {
     res.render("create-user")
@@ -49,4 +45,4 @@ const postUpdateUser = async (req: Request, res: Response) => {
     return res.redirect("/");
 }
 
-export { getHomePage, getCreateUserPage, postCreateUser, postDeleteUser, getViewUser, postUpdateUser }
+export { getCreateUserPage, postCreateUser, postDeleteUser, getViewUser, postUpdateUser }
