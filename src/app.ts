@@ -1,6 +1,5 @@
 import express from "express"
 require("dotenv").config();
-import webRoutes from "./routes/web";
 import getConnection from "./config/database";
 import initDatabase from "config/seed";
 import userRoutes from "routes/userRoutes";
@@ -27,7 +26,6 @@ app.use((req, res, next) => {
 
 
 // config route
-webRoutes(app);
 userRoutes(app);
 adminRoutes(app);
 

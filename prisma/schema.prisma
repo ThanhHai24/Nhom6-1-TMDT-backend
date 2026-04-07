@@ -7,18 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  admin
-  manager
-  staff
-  customer
-}
-
-enum Status {
-  active
-  inactive
-}
-
 model User {
   id         BigInt   @id @default(autoincrement())
   username   String   @db.VarChar(100)
@@ -32,4 +20,16 @@ model User {
   created_At DateTime @default(now())
 
   @@map("users")
+}
+
+enum Role {
+  admin
+  manager
+  staff
+  customer
+}
+
+enum Status {
+  active
+  inactive
 }
