@@ -36,7 +36,7 @@ app.use(express.static("public"));
 
 
 // seed data
-// initDatabase();
+initDatabase();
 app.listen(PORT, () => {
     console.log(`My app is running on port: ${PORT}`);
 })

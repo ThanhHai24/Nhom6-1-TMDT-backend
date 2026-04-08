@@ -557,6 +557,31 @@
         color: var(--blue-600);
     }
 
+    .badge.admin {
+        background: var(--teal-50);
+        color: var(--teal-600);
+    }
+
+    .badge.manager {
+        background: var(--amber-50);
+        color: var(--amber-600);
+    }
+
+    .badge.receptionist {
+        background: var(--blue-50);
+        color: var(--blue-600);
+    }
+
+    .badge.warehouse {
+        background: var(--teal-50);
+        color: var(--teal-600);
+    }
+
+    .badge.customer {
+        background: var(--green-50);
+        color: var(--green-600);
+    }
+
     /* Buttons */
     .btn {
         padding: 7px 14px;
@@ -597,6 +622,16 @@
 
     .btn.danger-outline:hover {
         background: var(--red-50);
+    }
+
+    .btn.green-outline {
+        border-color: #3B6D11;
+        color: #3B6D11;
+
+    }
+
+    .btn.green-outline:hover {
+        background: var(--green-50);
     }
 
     /* Search & filter bar */
