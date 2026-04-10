@@ -13,159 +13,187 @@
     <!-- SIDEBAR -->
     <%- include('../layout/sidebar') -%>
 
-    <!-- MAIN -->
-    <main class="main">
-        <!-- HEADER -->
-        <%- include('../layout/header') -%>
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
 
-        <div class="content">
+                <div class="content">
 
-            <!-- USERS PAGE -->
-            <div class="page active" id="page-users">
-                <div class="page-header">
-                    <div>
-                        <h2>Quản lý người dùng</h2>
-                        <div class="breadcrumb">Hệ quản trị → Quản lý người dùng</div>
-                    </div>
-                    <a href="/admin/users/create"><button class="btn primary">+ Thêm người dùng</button></a>
-                </div>
-
-                <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
-                    <div class="stat-card blue">
-                        <div class="stat-label">Tổng người dùng</div>
-                        <div class="stat-value"><%= usercount %></div>
-                    </div>
-                    <div class="stat-card teal">
-                        <div class="stat-label">Đang hoạt động</div>
-                        <div class="stat-value"><%= activeUsersCount %></div>
-                    </div>
-                    <div class="stat-card red">
-                        <div class="stat-label">Bị khóa</div>
-                        <div class="stat-value"><%= inactiveUsersCount %></div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="toolbar">
-                        <div class="search-box">
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888"
-                                stroke-width="1.5">
-                                <circle cx="7" cy="7" r="5" />
-                                <path d="M11 11l3 3" />
-                            </svg>
-                            <input type="text" placeholder="Tìm theo tên, email, SĐT, CCCD...">
+                    <!-- USERS PAGE -->
+                    <div class="page active" id="page-users">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý người dùng</h2>
+                                <div class="breadcrumb">Hệ quản trị → Quản lý người dùng</div>
+                            </div>
+                            <a href="/admin/users/create"><button class="btn primary">+ Thêm người dùng</button></a>
                         </div>
-                        <select class="filter-select">
-                            <option>Tất cả vai trò</option>
-                            <option>Khách hàng</option>
-                            <option>Quản lý cửa hàng</option>
-                            <option>Lễ tân</option>
-                            <option>Nhân viên kho</option>
-                        </select>
-                        <select class="filter-select">
-                            <option>Tất cả trạng thái</option>
-                            <option>Đang hoạt động</option>
-                            <option>Bị khóa</option>
-                        </select>
-                        <button class="btn">Bộ lọc</button>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Người dùng</th>
-                                <th>Vai trò</th>
-                                <th>SĐT</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% users.forEach( function (user) { %>
-                            <tr>
-                                <%
-                                const avatarUrl = user.avatar || 'https://via.placeholder.com/40?text=NA';
-                                %>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar" style="background:#378ADD">
-                                            <img src="<%= avatarUrl %>" alt="Avatar"
-                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                            <span class="user-initials"><%= user.fullName.charAt(0) %></span>
-                                        </div>
-                                        <div>
-                                            <div class="user-name"><%= user.fullName %></div>
-                                            <div class="user-email"><%= user.email %></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <%
-                                    const roleMap = {
-                                        ADMIN: 'admin',
-                                        RECEPTIONIST: 'receptionist',
-                                        WAREHOUSE: 'warehouse',
-                                        MANAGER: 'manager',
-                                        CUSTOMER: 'customer'
-                                    };
-                                %>
-                                <%
-                                    const roleNameMap = {
-                                        ADMIN: 'Quản trị viên',
-                                        RECEPTIONIST: 'Lễ tân',
-                                        WAREHOUSE: 'Nhân viên kho',
-                                        MANAGER: 'Quản lý cửa hàng',
-                                        CUSTOMER: 'Khách hàng'
-                                    };
-                                %>
-                                <td><span
-                                        class="badge <%= roleMap[user.role] || 'default' %>"><%= roleNameMap[user.role] || user.role %></span>
-                                </td>
-                                <td><%= user.phone %></td>
-                                <td>12/01/2025</td>
-                                <%
-                                    const statusMap = {
-                                        ACTIVE: 'active',
-                                        INACTIVE: 'danger',
-                                    };
-                                %>
-                                <%
-                                const statusNameMap = {
-                                    ACTIVE: 'Hoạt động',
-                                    INACTIVE: 'Bị khóa',
-                                };
-                                %>
-                                <td><span
-                                        class="badge <%= statusMap[user.status] || 'default' %>"><%= statusNameMap[user.status] || user.status %></span>
-                                </td>
-                                <td style="">
-                                    <a href="/admin/users/<%= user.id %>"><button class="btn sm">Chi tiết</button></a>
-                                    <% if(user.status === 'ACTIVE') { %>
-                                    <button class="btn sm danger-outline">Khóa</button>
-                                    <% } else { %>
-                                    <button class="btn sm green-outline">Mở khóa</button>
-                                    <% } %>
-                                </td>
-                            </tr>
-                            <% }) %>
 
-                        </tbody>
-                    </table>
-                    <div class="pagination">
-                        <span>Hiển thị 1–4 / 12,483 người dùng</span>
-                        <div class="page-btns">
-                            <div class="page-btn">‹</div>
-                            <div class="page-btn active">1</div>
-                            <div class="page-btn">2</div>
-                            <div class="page-btn">3</div>
-                            <div class="page-btn">…</div>
-                            <div class="page-btn">›</div>
+                        <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
+                            <div class="stat-card blue">
+                                <div class="stat-label">Tổng người dùng</div>
+                                <div class="stat-value">
+                                    <%= usercount %>
+                                </div>
+                            </div>
+                            <div class="stat-card teal">
+                                <div class="stat-label">Đang hoạt động</div>
+                                <div class="stat-value">
+                                    <%= activeUsersCount %>
+                                </div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-label">Bị khóa</div>
+                                <div class="stat-value">
+                                    <%= inactiveUsersCount %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="toolbar">
+                                <div class="search-box">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888"
+                                        stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg>
+                                    <form method="get" action="/admin/users" class="search-box">
+                                        <input type="text" name="q" value="<%= q %>"
+                                            placeholder="Tìm theo tên, email, SĐT, CCCD...">
+                                        <button class="btn">Tìm</button>
+                                    </form>
+                                </div>
+                                <select class="filter-select">
+                                    <option>Tất cả vai trò</option>
+                                    <option>Khách hàng</option>
+                                    <option>Quản lý cửa hàng</option>
+                                    <option>Lễ tân</option>
+                                    <option>Nhân viên kho</option>
+                                </select>
+                                <select class="filter-select">
+                                    <option>Tất cả trạng thái</option>
+                                    <option>Đang hoạt động</option>
+                                    <option>Bị khóa</option>
+                                </select>
+                                <button class="btn">Bộ lọc</button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Người dùng</th>
+                                        <th>Vai trò</th>
+                                        <th>SĐT</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% users.forEach( function (user) { %>
+                                        <tr>
+                                            <% const avatarUrl=user.avatar || 'UserAvatar.png' ; %>
+                                                <td>
+                                                    <div class="user-cell">
+                                                        <div class="user-avatar" style="background:#eeeeee">
+                                                            <img class="user-avatar"
+                                                                src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
+                                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                            <!-- <span class="user-initials">
+                                                                <%= user.fullName.charAt(0) %>
+                                                            </span> -->
+                                                        </div>
+                                                        <div>
+                                                            <div class="user-name">
+                                                                <%= user.fullName %>
+                                                            </div>
+                                                            <div class="user-email">
+                                                                <%= user.email %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <% const roleMap={ ADMIN: 'admin' , RECEPTIONIST: 'receptionist' ,
+                                                    WAREHOUSE: 'warehouse' , MANAGER: 'manager' , CUSTOMER: 'customer'
+                                                    }; %>
+                                                    <% const roleNameMap={ ADMIN: 'Quản trị viên' ,
+                                                        RECEPTIONIST: 'Lễ tân' , WAREHOUSE: 'Nhân viên kho' ,
+                                                        MANAGER: 'Quản lý cửa hàng' , CUSTOMER: 'Khách hàng' }; %>
+                                                        <td><span class="badge <%= roleMap[user.role] || 'default' %>">
+                                                                <%= roleNameMap[user.role] || user.role %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <%= user.phone %>
+                                                        </td>
+                                                        <td>12/01/2025</td>
+                                                        <% const statusMap={ ACTIVE: 'active' , INACTIVE: 'danger' , };
+                                                            %>
+                                                            <% const statusNameMap={ ACTIVE: 'Hoạt động' ,
+                                                                INACTIVE: 'Bị khóa' , }; %>
+                                                                <td><span
+                                                                        class="badge <%= statusMap[user.status] || 'default' %>">
+                                                                        <%= statusNameMap[user.status] || user.status %>
+                                                                    </span>
+                                                                </td>
+                                                                <td style="">
+                                                                    <a href="/admin/users/<%= user.id %>"><button
+                                                                            class="btn sm">Chi tiết</button></a>
+                                                                    <% if(user.status==='ACTIVE' ) { %>
+                                                                        <form style="display: inline;"
+                                                                            action="/admin/users/lock/<%= user.id%>"
+                                                                            method="post">
+                                                                            <button
+                                                                                class="btn sm danger-outline">Khóa</button>
+                                                                        </form>
+                                                                        <% } else { %>
+                                                                            <form style="display: inline;"
+                                                                                action="/admin/users/active/<%= user.id%>"
+                                                                                method="post">
+                                                                                <button class="btn sm green-outline">Mở
+                                                                                    khóa</button>
+                                                                            </form>
+                                                                            <% } %>
+                                                                                <form style="display: inline;"
+                                                                                    action="/admin/users/delete/<%= user.id%>"
+                                                                                    method="post">
+                                                                                    <button
+                                                                                        class="btn sm danger-outline">Xóa</button>
+                                                                                </form>
+                                                                </td>
+                                        </tr>
+                                        <% }) %>
+
+                                </tbody>
+                            </table>
+                            <div class="pagination">
+                                <span>Trang <%= currentPage %> / <%= totalPages %></span>
+                                <div class="page-btns">
+                                    <!-- Prev -->
+                                    <% if (currentPage> 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>&q=<%= q %>" class="page-btn">‹</a>
+                                        <% } %>
+                                            <!-- Page numbers -->
+                                            <% for (let i=1; i <=totalPages; i++) { %>
+                                                <a href="?page=<%= i %>&q=<%= q %>"
+                                                    class="page-btn <%= i === currentPage ? 'active' : '' %>">
+                                                    <%= i %>
+                                                </a>
+                                                <% } %>
+
+                                                    <!-- Next -->
+                                                    <% if (currentPage < totalPages) { %>
+                                                        <a href="?page=<%= currentPage + 1 %>&q=<%= q %>"
+                                                            class="page-btn">›</a>
+                                                        <% } %>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-        </div>
-    </main>
+                </div>
+        </main>
 </body>
 
 </html>
