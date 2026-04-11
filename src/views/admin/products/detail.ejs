@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/48.0.0/ckeditor5.css" crossorigin>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- ADD PRODUCT PAGE -->
+                    <div class="page active" id="page-add-product">
+                        <div class="page-header">
+                            <div>
+                                <h2>Chi tiết sản phẩm</h2>
+                                <div class="breadcrumb">Hệ quản trị → <span onclick="showPage('products')"
+                                        style="cursor:pointer;color:var(--accent)">Danh mục sản phẩm</span> → <%= product?.name %>
+                                </div>
+                            </div>
+                            <a href="/admin/products"><button class="btn">← Quay lại</button></a>
+                        </div>
+
+                        <form action="/admin/product/handleupdate" method="POST" onsubmit="submitAddProduct(event);"
+                            enctype="multipart/form-data">
+                            <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+
+                                <!-- Left: Main form -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <!-- Thông tin cơ bản -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Thông tin cơ bản</span>
+                                            <span style="font-size:12px;color:var(--text-muted)"><span
+                                                    style="color:#E24B4A">*</span> Bắt
+                                                buộc</span>
+                                        </div>
+
+                                        <div class="form-grid">
+                                            <div class="form-group full">
+                                                <label class="form-label">Tên sản phẩm <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="name" class="form-input" type="text" id="inp-name"
+                                                    placeholder="VD: iPhone 15 Pro Max 256GB" value="<%= product?.name %>">
+                                                <input type="hidden" name="id" value="<%= product?.id %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">SKU / Mã sản phẩm <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="sku" class="form-input" type="text" id="inp-sku"
+                                                    placeholder="Mã sản phẩm sẽ được định sẵn."
+                                                    style="font-family:monospace;" disabled value="<%= product?.sku %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Thương hiệu</label>
+                                                <select name="brand" class="form-input form-select" id="inp-brand">
+                                                    <option value="">-- Chọn Thương hiệu --</option>
+                                                    <% brands.forEach( function (brand) { %>
+                                                        <option value="<%= brand.id %>" <%= String(brand.id) === String(product?.brandId) ? 'selected' : '' %>>
+                                                            <%= brand.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Danh mục <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <select name="category" class="form-input form-select"
+                                                    id="inp-category" disabled>
+                                                    <option value="">-- Chọn danh mục --</option>
+                                                    <% categories.forEach( function (category) { %>
+                                                        <option value="<%= category.id %>" <%= String(category.id) === String(product?.categoryId) ? 'selected' : '' %>>
+                                                            <%= category.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Nhà phân phối</label>
+                                                <select name="supplier" class="form-input form-select"
+                                                    id="inp-supplier">
+                                                    <option value="">-- Chọn nhà phân phối --</option>
+                                                    <% suppliers.forEach( function (supplier) { %>
+                                                        <option value="<%= supplier.id %>" <%= String(supplier.id) === String(product?.supplierId) ? 'selected' : '' %>>
+                                                            <%= supplier.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                            <div class="form-group full">
+                                                <label class="form-label">Mô tả ngắn</label>
+                                                <input name="shortDescription" class="form-input" type="text"
+                                                    id="inp-short-desc"
+                                                    placeholder="Mô tả ngắn gọn về sản phẩm, hiển thị trên danh sách" value="<%= product?.shortDescription %>">
+                                            </div>
+                                            <div class="form-group full">
+                                                <label class="form-label">Mô tả chi tiết</label>
+                                                <textarea name="description" id="editor"><%= product?.description %></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Giá & Kho -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Giá bán & Tồn kho</span>
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Giá nhập (₫) <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="cost" class="form-input" type="number" id="inp-cost"
+                                                    placeholder="VD: 20000000" min="0" oninput="calcMargin()" value="<%= product?.cost %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Giá bán (₫) <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="price" class="form-input" type="number" id="inp-price"
+                                                    placeholder="VD: 34990000" min="0" oninput="calcMargin()" value="<%= product?.price %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Giá khuyến mãi (₫)</label>
+                                                <input name="discountPrice" class="form-input" type="number"
+                                                    id="inp-discount" placeholder="Để trống nếu không có" min="0">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Biên lợi nhuận</label>
+                                                <div class="form-input"
+                                                    style="background:var(--bg);color:var(--text-muted);cursor:default;"
+                                                    id="margin-display">Nhập giá để tính</div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Số lượng tồn kho <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="stock" class="form-input" type="number" id="inp-stock"
+                                                    placeholder="VD: 100" min="0" value="<%= product?.stock %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Ngưỡng cảnh báo hết hàng</label>
+                                                <input name="lowStockThreshold" class="form-input" type="number"
+                                                    id="inp-stock-alert" placeholder="VD: 10" min="0" value="<%= product?.lowStockThreshold %>">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ảnh bìa sản phẩm -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Ảnh bìa sản phẩm</span>
+                                            <span style="font-size:12px;color:var(--text-muted)">1 ảnh · PNG, JPG, WEBP
+                                                · tối đa 5MB</span>
+                                        </div>
+                                        <div>
+                                            <input type="hidden" name="existingCover" id="existingCover" value="<%= product?.image || '' %>">
+                                            <input type="file" name="image" id="coverImageFile"
+                                                accept=".jpg,.jpeg,.png,.webp" style="display:none;"
+                                                onchange="handleCoverImage(this)">
+
+                                            <!-- Drop zone (ẩn khi đã có preview) -->
+                                            <label for="coverImageFile" id="coverDropZone"
+                                                style="display:<%= product?.image ? 'none' : 'flex' %>;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:10px;padding:36px 24px;cursor:pointer;transition:all 0.2s;gap:8px;"
+                                                onmouseover="this.style.borderColor='var(--accent)'"
+                                                onmouseout="this.style.borderColor='var(--border)'">
+                                                <div style="font-size:36px;">🖼️</div>
+                                                <div style="font-size:13px;font-weight:600;">Kéo thả hoặc click để tải
+                                                    ảnh bìa</div>
+                                                <div style="font-size:11px;color:var(--text-muted);">Chỉ chọn 1 ảnh duy
+                                                    nhất</div>
+                                            </label>
+
+                                            <!-- Preview ảnh bìa -->
+                                            <div id="coverPreviewWrapper"
+                                                style="display:<%= product?.image ? 'block' : 'none' %>;position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);width:300px;height:300px;max-width:100%;margin:0 auto;">
+                                                <img id="coverPreviewImg" src="<%= product?.image ? '/admin/productImages/' + product.image : '' %>" alt="Ảnh bìa"
+                                                    style="width:100%;height:100%;object-fit:cover;display:block;">
+                                                <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);opacity:0;transition:opacity 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;"
+                                                    id="coverOverlay" onmouseover="this.style.opacity=1"
+                                                    onmouseout="this.style.opacity=0">
+                                                    <label for="coverImageFile"
+                                                        style="cursor:pointer;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:500;backdrop-filter:blur(4px);transition:background 0.2s;"
+                                                        onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                                                        onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                                                        🔄 Đổi ảnh
+                                                    </label>
+                                                    <button type="button" onclick="removeCoverImage()"
+                                                        style="cursor:pointer;background:rgba(226,75,74,0.75);color:#fff;border:1px solid rgba(226,75,74,0.5);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:500;backdrop-filter:blur(4px);transition:background 0.2s;"
+                                                        onmouseover="this.style.background='rgba(226,75,74,1)'"
+                                                        onmouseout="this.style.background='rgba(226,75,74,0.75)'">
+                                                        🗑 Xóa
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ảnh sản phẩm (nhiều ảnh) -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;">
+                                            <span class="card-title">Ảnh sản phẩm</span>
+                                            <span style="font-size:12px;color:var(--text-muted)">Nhiều ảnh · PNG, JPG,
+                                                WEBP · tối đa 5MB/ảnh</span>
+                                        </div>
+
+                                        <!-- Drop zone -->
+                                        <label for="productImagesFile" id="productDropZone"
+                                            style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:10px;padding:28px 24px;cursor:pointer;transition:all 0.2s;gap:6px;margin-bottom:14px;"
+                                            onmouseover="this.style.borderColor='var(--accent)'"
+                                            onmouseout="this.style.borderColor='var(--border)'">
+                                            <div style="font-size:30px;">📸</div>
+                                            <div style="font-size:13px;font-weight:600;">Click hoặc kéo thả ảnh vào đây
+                                            </div>
+                                            <div style="font-size:11px;color:var(--text-muted);">Chọn nhiều ảnh cùng lúc
+                                                (Ctrl + Click)</div>
+                                        </label>
+                                        <input type="file" name="images" id="productImagesFile"
+                                            accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;"
+                                            onchange="handleProductImages(this)">
+
+                                        <!-- Grid preview -->
+                                        <div id="productImagesGrid"
+                                            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;">
+                                        </div>
+
+                                        <!-- Đếm số ảnh -->
+                                        <div id="productImagesCount"
+                                            style="display:none;font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Thông số kỹ thuật -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Thông số kỹ thuật</span>
+                                            <button type="button" class="btn sm" onclick="addSpec()">+ Thêm thông
+                                                số</button>
+                                        </div>
+                                        <div id="spec-list" style="display:flex;flex-direction:column;gap:10px;">
+                                            <div class="spec-row"
+                                                style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                                <input type="text" name="specKey[]" class="form-input"
+                                                    placeholder="VD: CPU, RAM, Màn hình...">
+                                                <input type="text" name="specValue[]" class="form-input"
+                                                    placeholder="VD: Apple M4, 16GB, 6.7 inch...">
+                                                <button type="button" class="btn sm danger-outline"
+                                                    onclick="removeSpec(this)">✕</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Right: Status & Actions -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <!-- Trạng thái -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Trạng thái sản phẩm</span>
+                                        </div>
+                                        <div style="display:flex;flex-direction:column;gap:8px;">
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--accent);border-radius:8px;cursor:pointer;"
+                                                id="status-active-lbl">
+                                                <input type="radio" name="status" value="ACTIVE" <%= (!product || product.status === 'ACTIVE') ? 'checked' : '' %>
+                                                    onchange="selectStatus('active')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Đang bán</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Hiển thị & cho
+                                                        phép đặt hàng</div>
+                                                </div>
+                                            </label>
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;"
+                                                id="status-inactive-lbl">
+                                                <input type="radio" name="status" value="INACTIVE" <%= product?.status === 'INACTIVE' ? 'checked' : '' %>
+                                                    onchange="selectStatus('inactive')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Ngưng bán</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Ẩn khỏi cửa
+                                                        hàng</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thuộc tính nổi bật -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Thuộc tính</span></div>
+                                        <div style="display:flex;flex-direction:column;gap:10px;">
+                                            <label
+                                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+                                                <input type="checkbox" name="isFeatured" id="inp-featured"
+                                                    style="width:14px;height:14px;accent-color:var(--accent);" <%= product?.isFeatured ? 'checked' : '' %>>
+                                                ⭐ Sản phẩm nổi bật
+                                            </label>
+                                            <label
+                                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+                                                <input type="checkbox" name="isNew" id="inp-new"
+                                                    style="width:14px;height:14px;accent-color:var(--accent);" <%= product?.isNew ? 'checked' : '' %>>
+                                                🆕 Sản phẩm mới
+                                            </label>
+                                            <label
+                                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+                                                <input type="checkbox" name="isHot" id="inp-bestseller"
+                                                    style="width:14px;height:14px;accent-color:var(--accent);" <%= product?.isHot ? 'checked' : '' %>>
+                                                🔥 Bán chạy
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ghi chú nội bộ -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Ghi chú nội bộ</span></div>
+                                        <textarea class="form-input form-textarea" name="note" id="inp-note"
+                                            placeholder="Ghi chú về sản phẩm này (chỉ admin thấy)..."
+                                            style="width:100%;resize:vertical;min-height:90px;"></textarea>
+                                    </div>
+
+                                    <!-- Action buttons -->
+                                    <div style="display:flex;flex-direction:column;gap:8px;">
+                                        <button class="btn primary" type="submit"
+                                            style="width:100%;padding:10px;font-size:14px;">Cập nhật sản
+                                            phẩm</button>
+                                        <a href="/admin/products"><button class="btn" type="button"
+                                                style="width:100%;padding:10px;font-size:14px;">Quay
+                                                lại</button></a>
+                                    </div>
+
+                                    <!-- Validation summary -->
+                                    <div id="form-errors"
+                                        style="display:none;background:var(--red-50);border:1px solid var(--red-200);border-radius:8px;padding:12px;">
+                                        <div
+                                            style="font-size:12px;font-weight:500;color:var(--red-600);margin-bottom:6px;">
+                                            Vui lòng kiểm tra lại:
+                                        </div>
+                                        <ul id="error-list"
+                                            style="font-size:12px;color:var(--red-600);padding-left:16px;line-height:1.8;">
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+        </main>
+        <script src="https://cdn.ckeditor.com/ckeditor5/48.0.0/ckeditor5.umd.js" crossorigin></script>
+        <script src="../js/main.js"></script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                calcMargin();
+                selectStatus('<%= (product?.status || "ACTIVE").toLowerCase() %>');
+                
+                // Show existing product images in grid
+                <% if (product?.images) { 
+                    try {
+                        const imgs = JSON.parse(product.images);
+                        if (imgs.length > 0) {
+                            %>
+                            const grid = document.getElementById('productImagesGrid');
+                            <% imgs.forEach(img => { %>
+                                {
+                                    const cell = document.createElement('div');
+                                    cell.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;background:var(--bg);';
+                                    cell.innerHTML = `
+                                        <img src="/admin/productImages/<%= img %>" alt="Ảnh thư viện"
+                                            style="width:100%;height:100%;object-fit:cover;display:block;">
+                                        <button type="button" onclick="removeExistingImage(this)"
+                                            title="Xóa ảnh này"
+                                            style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(226,75,74,0.85);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s;backdrop-filter:blur(2px);"
+                                            onmouseover="this.style.background='rgba(226,75,74,1)';this.style.transform='scale(1.15)'"
+                                            onmouseout="this.style.background='rgba(226,75,74,0.85)';this.style.transform='scale(1)'">✕</button>
+                                        <input type="hidden" name="existingImages" value="<%= img %>">
+                                    `;
+                                    grid.appendChild(cell);
+                                }
+                            <% }); %>
+                            <%
+                        }
+                    } catch(e){}
+                } %>
+            });
+            /* =============================================
+               ẢNH BÌA – chỉ 1 ảnh
+            ============================================= */
+            function handleCoverImage(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const url = URL.createObjectURL(file);
+                document.getElementById('coverPreviewImg').src = url;
+                document.getElementById('coverDropZone').style.display = 'none';
+                document.getElementById('coverPreviewWrapper').style.display = 'block';
+            }
+
+            function removeCoverImage() {
+                document.getElementById('coverImageFile').value = '';
+                document.getElementById('coverPreviewImg').src = '';
+                document.getElementById('coverPreviewWrapper').style.display = 'none';
+                document.getElementById('coverDropZone').style.display = 'flex';
+                
+                const existingCover = document.getElementById('existingCover');
+                if (existingCover) existingCover.value = '';
+            }
+
+            function removeExistingImage(btn) {
+                btn.parentElement.remove();
+            }
+
+            /* =============================================
+               ẢNH SẢN PHẨM – nhiều ảnh, có preview + xóa
+            ============================================= */
+            let productFiles = []; // DataTransfer để quản lý files
+
+            function handleProductImages(input) {
+                const newFiles = Array.from(input.files);
+                newFiles.forEach(f => productFiles.push(f));
+                renderProductPreviews();
+            }
+
+            function removeProductImage(index) {
+                productFiles.splice(index, 1);
+                renderProductPreviews();
+            }
+
+            function syncProductFilesInput() {
+                const dt = new DataTransfer();
+                productFiles.forEach(f => dt.items.add(f));
+                document.getElementById('productImagesFile').files = dt.files;
+            }
+
+            function renderProductPreviews() {
+                const grid = document.getElementById('productImagesGrid');
+                const counter = document.getElementById('productImagesCount');
+                grid.innerHTML = '';
+
+                productFiles.forEach((file, idx) => {
+                    const url = URL.createObjectURL(file);
+                    const cell = document.createElement('div');
+                    cell.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;background:var(--bg);';
+                    cell.innerHTML = `
+                        <img src="${url}" alt="Ảnh ${idx + 1}"
+                            style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.06)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                        <button type="button" onclick="removeProductImage(${idx})"
+                            title="Xóa ảnh này"
+                            style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(226,75,74,0.85);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s;backdrop-filter:blur(2px);"
+                            onmouseover="this.style.background='rgba(226,75,74,1)';this.style.transform='scale(1.15)'"
+                            onmouseout="this.style.background='rgba(226,75,74,0.85)';this.style.transform='scale(1)'">✕</button>
+                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);color:#fff;font-size:9px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${file.name}</div>
+                    `;
+                    grid.appendChild(cell);
+                });
+
+                if (productFiles.length > 0) {
+                    counter.style.display = 'block';
+                    counter.textContent = `Đã chọn: ${productFiles.length} ảnh`;
+                } else {
+                    counter.style.display = 'none';
+                }
+                syncProductFilesInput();
+            }
+        </script>
+        <script>
+            function selectStatus(val) {
+                ['active', 'draft', 'inactive'].forEach(s => {
+                    const lbl = document.getElementById('status-' + s + '-lbl');
+                    if (lbl) lbl.style.borderColor = s === val ? 'var(--accent)' : 'var(--border)';
+                });
+            }
+
+            function calcMargin() {
+                const cost = parseFloat(document.getElementById('inp-cost').value) || 0;
+                const price = parseFloat(document.getElementById('inp-price').value) || 0;
+                const el = document.getElementById('margin-display');
+                if (cost > 0 && price > 0) {
+                    const margin = ((price - cost) / price * 100).toFixed(1);
+                    const profit = (price - cost).toLocaleString('vi-VN');
+                    el.textContent = margin + '% (' + profit + ' ₫)';
+                    el.style.color = price >= cost ? '#1D9E75' : '#E24B4A';
+                } else {
+                    el.textContent = 'Nhập giá để tính';
+                    el.style.color = 'var(--text-muted)';
+                }
+            }
+
+            function addSpec() {
+                const list = document.getElementById('spec-list');
+                const row = document.createElement('div');
+                row.className = 'spec-row';
+                row.style = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
+                row.innerHTML = `
+                    <input type="text" name="specKey[]" class="form-input" placeholder="VD: CPU, RAM, Màn hình...">
+                    <input type="text" name="specValue[]" class="form-input" placeholder="VD: Apple M4, 16GB, 6.7 inch...">
+                    <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
+                `;
+                list.appendChild(row);
+            }
+
+            function removeSpec(btn) {
+                const rows = document.querySelectorAll('.spec-row');
+                if (rows.length > 1) btn.closest('.spec-row').remove();
+            }
+
+            function submitAddProduct(event) {
+                const errors = [];
+                const name = document.getElementById('inp-name').value.trim();
+                const category = document.getElementById('inp-category').value;
+                const cost = document.getElementById('inp-cost').value;
+                const price = document.getElementById('inp-price').value;
+                const stock = document.getElementById('inp-stock').value;
+
+                if (!name) errors.push('Tên sản phẩm không được để trống');
+                if (!category) errors.push('Vui lòng chọn danh mục sản phẩm');
+                if (!cost || parseFloat(cost) < 0) errors.push('Giá nhập không hợp lệ');
+                if (!price || parseFloat(price) < 0) errors.push('Giá bán không hợp lệ');
+                if (!stock || parseInt(stock) < 0) errors.push('Số lượng tồn kho không hợp lệ');
+
+                const errBox = document.getElementById('form-errors');
+                const errList = document.getElementById('error-list');
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+                    errBox.style.display = 'block';
+                    errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+                errBox.style.display = 'none';
+
+                const btn = event.submitter;
+                btn.textContent = 'Đang lưu...';
+                btn.disabled = true;
+            }
+        </script>
+
+</body>
+
+</html>

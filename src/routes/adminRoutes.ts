@@ -1,7 +1,9 @@
-import { getDashboardPage, getHistoryPage, getNotificationPage, getOrdersPage, getProductsPage, getPromotionPage, getShippingPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
+import { getCategoriesPage } from 'controllers/admin/category.controller';
+import { getDashboardPage, getHistoryPage, getNotificationPage, getOrdersPage, getPromotionPage, getShippingPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
+import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
 import { getCreateUserPage, getUserDetailPage, getUsers, getUsersPage, PostActiveUser, PostCreateUser, PostDeleteUser, PostLockUser, PostUpdateUser } from 'controllers/admin/user.controller';
 import express from 'express';
-import { avatarUploadMiddleware } from 'src/middleware/multer';
+import { avatarUploadMiddleware, productUploadMiddleware } from 'src/middleware/multer';
 const router = express.Router();
 
 const userRoutes = (app: express.Express) => {
@@ -17,8 +19,17 @@ const userRoutes = (app: express.Express) => {
     router.post("/users/lock/:id", PostLockUser);
     router.post("/users/active/:id", PostActiveUser);
 
+
+    // Category
+    router.get('/categories', getCategoriesPage);
     // Product
     router.get('/products', getProductsPage);
+    router.get('/products/create', getCreateProductPage);
+    router.post('/product/handlecreate', productUploadMiddleware(), PostCreateProduct)
+    router.get('/products/:id', getProductDetailPage);
+    router.post('/product/handleupdate', productUploadMiddleware(), PostUpdateProduct);
+    router.post("/products/lock/:id", PostLockProduct);
+    router.post("/products/active/:id", PostActiveProduct);
     // Orders
     router.get('/orders', getOrdersPage);
     // Warehouse

@@ -1,7 +1,7 @@
 import express from "express"
 require("dotenv").config();
 import getConnection from "./config/database";
-import initDatabase from "config/seed";
+import initDatabase from "config/index.seed";
 import userRoutes from "routes/userRoutes";
 import path from "path/win32";
 import adminRoutes from "routes/adminRoutes";

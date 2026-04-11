@@ -30,12 +30,20 @@
             </svg>
             Người dùng
         </a>
+        <a class="nav-item <%= currentUrl === '/admin/categories' ? 'active' : '' %>" href="/admin/categories">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path
+                    d="M1 3.5A1.5 1.5 0 012.5 2H6l1.5 2H14a1 1 0 011 1v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12V3.5z" />
+                <path d="M4 9v3M4 9h4M8 9v3" stroke-linecap="round" />
+            </svg>
+            Danh mục
+        </a>
         <a class="nav-item <%= currentUrl === '/admin/products' ? 'active' : '' %>" href="/admin/products">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M2 3h12l-1 9H3L2 3z" />
                 <path d="M6 3V2a2 2 0 014 0v1" />
             </svg>
-            Danh mục sản phẩm
+            Sản phẩm
         </a>
         <a class="nav-item <%= currentUrl === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">

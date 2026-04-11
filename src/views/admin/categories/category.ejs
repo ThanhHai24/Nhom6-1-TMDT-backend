@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Quản lý danh mục</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <div class="page active" id="page-category">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý danh mục</h2>
+                                <div class="breadcrumb">Hệ quản trị → Quản lý danh mục</div>
+                            </div>
+                        </div>
+
+                        <!-- ===================== DANH MỤC CHA ===================== -->
+                        <div class="card" style="margin-bottom: 24px;">
+                            <div class="card-header" style="margin-bottom: 16px;">
+                                <span class="card-title">Danh mục cha</span>
+                                <a href="/admin/categories/parent/create">
+                                    <button class="btn primary sm">+ Thêm danh mục cha</button>
+                                </a>
+                            </div>
+
+                            <div class="toolbar">
+                                <div class="search-box">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888"
+                                        stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg>
+                                    <input type="text" id="parent-search" placeholder="Tìm danh mục cha..."
+                                        oninput="filterTable('parent-tbody', this.value, 'parent-status-filter')">
+                                </div>
+                                <select class="filter-select" id="parent-status-filter"
+                                    onchange="filterTable('parent-tbody', document.getElementById('parent-search').value, 'parent-status-filter')">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="active">Đang hoạt động</option>
+                                    <option value="inactive">Ngưng hoạt động</option>
+                                </select>
+                            </div>
+
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên danh mục</th>
+                                        <th>Slug</th>
+                                        <th>Số danh mục con</th>
+                                        <th>Số sản phẩm</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parent-tbody">
+                                    <% parentCategories.forEach(function (category) { %>
+                                        <tr data-status="<%= category.status === 'ACTIVE' ? 'active' : 'inactive' %>">
+                                            <td>
+                                                <div class="user-cell">
+                                                    <div
+                                                        style="width:36px;height:36px;background:#E3F2FD;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">
+                                                        <%= category.icon || '📁' %>
+                                                    </div>
+                                                    <div class="user-name">
+                                                        <%= category.name %>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="font-family:monospace;font-size:12px">
+                                                <%= category.slug %>
+                                            </td>
+                                            <td>
+                                                <%= category.children.length %>
+                                            </td>
+                                            <td>—</td>
+                                            <td
+                                                style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);font-size:12px">
+                                                <%= category.description || '—' %>
+                                            </td>
+                                            <td><span
+                                                    class="badge <%= category.status === 'ACTIVE' ? 'active' : 'inactive' %>">
+                                                    <%= category.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
+                                                </span></td>
+                                            <td style="display:flex;gap:6px;padding-top:10px">
+                                                <a href="/admin/categories/parent/edit/<%= category.id %>"><button
+                                                        class="btn sm">Sửa</button></a>
+                                                <button class="btn sm danger-outline">Xóa</button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ===================== DANH MỤC CON ===================== -->
+                        <div class="card">
+                            <div class="card-header" style="margin-bottom: 16px;">
+                                <span class="card-title">Danh mục con</span>
+                                <a href="/admin/categories/child/create">
+                                    <button class="btn primary sm">+ Thêm danh mục con</button>
+                                </a>
+                            </div>
+
+                            <div class="toolbar">
+                                <div class="search-box">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888"
+                                        stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg>
+                                    <input type="text" id="child-search" placeholder="Tìm danh mục con..."
+                                        oninput="filterTable('child-tbody', this.value, 'child-status-filter')">
+                                </div>
+                                <select class="filter-select" id="child-parent-filter"
+                                    onchange="filterTable('child-tbody', document.getElementById('child-search').value, 'child-status-filter')">
+                                    <option value="">Tất cả danh mục cha</option>
+                                    <option value="PC & Máy tính bàn">PC & Máy tính bàn</option>
+                                    <option value="Laptop">Laptop</option>
+                                    <option value="Linh kiện">Linh kiện</option>
+                                    <option value="Thiết bị ngoại vi">Thiết bị ngoại vi</option>
+                                    <option value="Phụ kiện & Cáp">Phụ kiện & Cáp</option>
+                                </select>
+                                <select class="filter-select" id="child-status-filter"
+                                    onchange="filterTable('child-tbody', document.getElementById('child-search').value, 'child-status-filter')">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="active">Đang hoạt động</option>
+                                    <option value="inactive">Ngưng hoạt động</option>
+                                </select>
+                            </div>
+
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên danh mục con</th>
+                                        <th>Slug</th>
+                                        <th>Danh mục cha</th>
+                                        <th>Số sản phẩm</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="child-tbody">
+
+                                    <% childCategories.forEach(function (child) { %>
+                                        <tr data-status="<%= child.status === 'ACTIVE' ? 'active' : 'inactive' %>"
+                                            data-parent="<%= child.parent ? child.parent.name : '' %>">
+                                            <td>
+                                                <div class="user-cell">
+                                                    <div
+                                                        style="width:36px;height:36px;background:#FAEEDA;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">
+                                                        <%= child.icon || '📂' %>
+                                                    </div>
+                                                    <div class="user-name">
+                                                        <%= child.name %>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="font-family:monospace;font-size:12px">
+                                                <%= child.slug %>
+                                            </td>
+                                            <td>
+                                                <% if (child.parent) { %>
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;gap:5px;background:#FFF3E0;color:#b45309;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;">
+                                                        <%= child.parent.icon || '📁' %>
+                                                            <%= child.parent.name %>
+                                                    </span>
+                                                    <% } else { %>
+                                                        —
+                                                        <% } %>
+                                            </td>
+                                            <td>—</td>
+                                            <td
+                                                style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);font-size:12px">
+                                                <%= child.description || '—' %>
+                                            </td>
+                                            <td><span
+                                                    class="badge <%= child.status === 'ACTIVE' ? 'active' : 'inactive' %>">
+                                                    <%= child.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
+                                                </span></td>
+                                            <td style="display:flex;gap:6px;padding-top:10px">
+                                                <a href="/admin/categories/child/edit/<%= child.id %>"><button
+                                                        class="btn sm">Sửa</button></a>
+                                                <button class="btn sm danger-outline">Xóa</button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+        </main>
+
+        <!-- DELETE CONFIRM MODAL -->
+        <div id="delete-overlay"
+            style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;">
+            <div
+                style="background:var(--card-bg,#fff);border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+                <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Xác nhận xóa danh mục</div>
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.7;">
+                    Bạn có chắc muốn xóa danh mục <strong id="del-name"></strong>?<br>
+                    Thao tác này không thể hoàn tác và có thể ảnh hưởng đến
+                    <strong id="del-count"></strong> sản phẩm đang liên kết.
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="btn" onclick="closeDelete()">Hủy</button>
+                    <button class="btn danger-outline" onclick="executeDelete()">Xóa danh mục</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ─── Search & filter ──────────────────────────────
+            function filterTable(tbodyId, search, statusFilterId) {
+                const status = document.getElementById(statusFilterId).value;
+                const parentFilter = document.getElementById('child-parent-filter');
+                const parent = (tbodyId === 'child-tbody' && parentFilter) ? parentFilter.value : '';
+                const q = search.toLowerCase();
+
+                document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
+                    const name = tr.querySelector('.user-name')?.textContent.toLowerCase() || '';
+                    const slug = tr.cells[1]?.textContent.toLowerCase() || '';
+                    const matchQ = !q || name.includes(q) || slug.includes(q);
+                    const matchS = !status || tr.dataset.status === status;
+                    const matchP = !parent || tr.dataset.parent === parent;
+                    tr.style.display = matchQ && matchS && matchP ? '' : 'none';
+                });
+            }
+
+            // ─── Delete confirm ───────────────────────────────
+            let deleteTarget = null;
+
+            function confirmDelete(btn, name, count) {
+                deleteTarget = btn.closest('tr');
+                document.getElementById('del-name').textContent = name;
+                document.getElementById('del-count').textContent = count + ' sản phẩm';
+                const overlay = document.getElementById('delete-overlay');
+                overlay.style.display = 'flex';
+            }
+            function closeDelete() {
+                document.getElementById('delete-overlay').style.display = 'none';
+            }
+            function executeDelete() {
+                if (deleteTarget) {
+                    deleteTarget.style.transition = 'opacity 0.25s';
+                    deleteTarget.style.opacity = '0';
+                    setTimeout(() => deleteTarget.remove(), 260);
+                }
+                closeDelete();
+            }
+
+            document.getElementById('delete-overlay').addEventListener('click', function (e) {
+                if (e.target === this) closeDelete();
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeDelete();
+            });
+        </script>
+
+</body>
+
+</html>

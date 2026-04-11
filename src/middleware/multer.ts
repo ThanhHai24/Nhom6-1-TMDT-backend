@@ -53,5 +53,35 @@ const avatarUploadMiddleware = (fieldName: string, dir: string = 'admin/userImag
         }
     }).single(fieldName);
 }
-export { avatarUploadMiddleware };
+const productUploadMiddleware = (dir: string = 'admin/productImages') => {
+    return multer({
+        storage: multer.diskStorage({
+            destination: 'public/' + dir,
+            filename: (req, file, cb) => {
+                const extension = path.extname(file.originalname);
+                cb(null, v4() + extension);
+            }
+        }),
+        limits: {
+            fileSize: 1024 * 1024 * 5
+        },
+        fileFilter: (req: Express.Request, file: Express.Multer.File, cb: Function) => {
+            if (
+                file.mimetype === 'image/png' ||
+                file.mimetype === 'image/jpg' ||
+                file.mimetype === 'image/jpeg' ||
+                file.mimetype === 'image/webp'
+            ) {
+                cb(null, true);
+            } else {
+                cb(new Error('Only JPEG and PNG images are allowed.'), false);
+            }
+        }
+    }).fields([
+        { name: 'image', maxCount: 1 },
+        { name: 'images', maxCount: 10 },
+    ]);
+}
+
+export { avatarUploadMiddleware, productUploadMiddleware };
 export default fileUploadMiddleware;

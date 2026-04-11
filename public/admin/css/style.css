@@ -678,8 +678,9 @@
 
     /* User avatar small */
     .user-cell {
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        width: fit-content;
         gap: 10px;
     }
 
@@ -698,6 +699,9 @@
 
     .user-name {
         font-weight: 500;
+        max-width: 250px;
+        overflow-wrap: break-word;
+        word-break: break-word;
     }
 
     .user-email {
