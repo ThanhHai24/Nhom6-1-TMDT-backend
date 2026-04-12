@@ -1,7 +1,11 @@
+import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
 import { getCategoriesPage } from 'controllers/admin/category.controller';
-import { getDashboardPage, getHistoryPage, getNotificationPage, getOrdersPage, getPromotionPage, getShippingPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
+import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getShippingPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
+import { getOrdersPage } from 'controllers/admin/order.controller';
 import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
-import { getCreateUserPage, getUserDetailPage, getUsers, getUsersPage, PostActiveUser, PostCreateUser, PostDeleteUser, PostLockUser, PostUpdateUser } from 'controllers/admin/user.controller';
+import { getCreateShippingProviderPage, getShippingProviderDetailPage, getShippingProvidersPage, PostActiveShippingProvider, PostCreateShippingProvider, PostDeleteShippingProvider, PostLockShippingProvider, PostUpdateShippingProvider } from 'controllers/admin/shippingProvider.controller';
+import { getCreateSupplierPage, getSupplierDetailPage, getSuppliersPage, PostActiveSupplier, PostCreateSupplier, PostDeleteSupplier, PostLockSupplier, PostUpdateSupplier } from 'controllers/admin/supplier.controller';
+import { getCreateUserPage, getUserDetailPage, getUsers, PostActiveUser, PostCreateUser, PostDeleteUser, PostLockUser, PostUpdateUser } from 'controllers/admin/user.controller';
 import express from 'express';
 import { avatarUploadMiddleware, productUploadMiddleware } from 'src/middleware/multer';
 const router = express.Router();
@@ -30,6 +34,33 @@ const userRoutes = (app: express.Express) => {
     router.post('/product/handleupdate', productUploadMiddleware(), PostUpdateProduct);
     router.post("/products/lock/:id", PostLockProduct);
     router.post("/products/active/:id", PostActiveProduct);
+    // Brand
+    router.get('/brands', getBrandsPage);
+    router.get('/brands/create', getCreateBrandPage);
+    router.post('/brands/handlecreate', PostCreateBrand);
+    router.get('/brands/:id', getBrandDetailPage);
+    router.post('/brands/handleupdate', PostUpdateBrand);
+    router.post("/brands/lock/:id", PostLockBrand);
+    router.post("/brands/active/:id", PostActiveBrand);
+    router.post("/brands/delete/:id", PostDeleteBrand);
+    // Supplier
+    router.get('/suppliers', getSuppliersPage);
+    router.get('/suppliers/create', getCreateSupplierPage);
+    router.post('/suppliers/handlecreate', PostCreateSupplier);
+    router.get('/suppliers/:id', getSupplierDetailPage);
+    router.post('/suppliers/handleupdate', PostUpdateSupplier);
+    router.post("/suppliers/lock/:id", PostLockSupplier);
+    router.post("/suppliers/active/:id", PostActiveSupplier);
+    router.post("/suppliers/delete/:id", PostDeleteSupplier);
+    // Shipping Providers
+    router.get('/shipping-providers', getShippingProvidersPage);
+    router.get('/shipping-providers/create', getCreateShippingProviderPage);
+    router.post('/shipping-providers/handlecreate', PostCreateShippingProvider);
+    router.get('/shipping-providers/:id', getShippingProviderDetailPage);
+    router.post('/shipping-providers/handleupdate', PostUpdateShippingProvider);
+    router.post("/shipping-providers/lock/:id", PostLockShippingProvider);
+    router.post("/shipping-providers/active/:id", PostActiveShippingProvider);
+    router.post("/shipping-providers/delete/:id", PostDeleteShippingProvider);
     // Orders
     router.get('/orders', getOrdersPage);
     // Warehouse

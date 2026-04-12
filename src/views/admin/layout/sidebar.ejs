@@ -45,6 +45,20 @@
             </svg>
             Sản phẩm
         </a>
+        <a class="nav-item <%= currentUrl === '/admin/brands' ? 'active' : '' %>" href="/admin/brands">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 7h.01M3 11l8-8h6v6l-8 8-6-6z" />
+            </svg>
+            Thương hiệu
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/suppliers' ? 'active' : '' %>" href="/admin/suppliers">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 21V8l7 4V8l7 4V3l4 2v16H3z" />
+            </svg>
+            Nhà cung cấp
+        </a>
         <a class="nav-item <%= currentUrl === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M3 3h10l-1.5 8H4.5L3 3z" />
@@ -67,6 +81,15 @@
                 <path d="M5 3l3 5 3-5" />
             </svg>
             Khuyến mãi
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/shipping-providers' ? 'active' : '' %>" href="/admin/shipping-providers">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 9h10V3H1v6z" />
+                <path d="M11 5h3l1 4v2h-4V5z" />
+                <circle cx="4" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+            </svg>
+            Đơn vị vận chuyển
         </a>
         <a class="nav-item <%= currentUrl === '/admin/shipping' ? 'active' : '' %>" href="/admin/shipping">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">

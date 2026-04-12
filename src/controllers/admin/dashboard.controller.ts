@@ -4,10 +4,6 @@ const getDashboardPage = async (req: Request, res: Response) => {
     res.render("admin/dashboard/dashboard");
 }
 
-const getOrdersPage = async (req: Request, res: Response) => {
-    res.render("admin/orders/order");
-}
-
 const getWarehousePage = async (req: Request, res: Response) => {
     res.render("admin/warehouse/warehouse");
 }
@@ -28,4 +24,4 @@ const getHistoryPage = async (req: Request, res: Response) => {
     res.render("admin/history/history");
 }
 
-export { getDashboardPage, getOrdersPage, getWarehousePage, getPromotionPage, getShippingPage, getNotificationPage, getHistoryPage }
+export { getDashboardPage, getWarehousePage, getPromotionPage, getShippingPage, getNotificationPage, getHistoryPage }

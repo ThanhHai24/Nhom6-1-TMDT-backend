@@ -35,6 +35,8 @@ model User {
   status    Status    @default(ACTIVE)
   createdAt DateTime  @default(now())
 
+  orders Order[]
+
   @@map("users")
 }
 
@@ -109,10 +111,113 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
 
   brandId BigInt
-  brand   Brand    @relation(fields: [brandId], references: [id])
+  brand   Brand  @relation(fields: [brandId], references: [id])
 
   supplierId BigInt
   supplier   Supplier @relation(fields: [supplierId], references: [id])
 
+  orderItems OrderItem[]
+
   @@map("products")
+}
+
+enum OrderStatus {
+  PENDING // mới tạo
+  CONFIRMED // đã xác nhận
+  PROCESSING // đang chuẩn bị hàng
+  SHIPPED // đã giao cho shipper
+  DELIVERED // giao thành công
+  CANCELLED // hủy
+  RETURNED // trả hàng
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+  VNPAY
+  MOMO
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id              BigInt        @id @default(autoincrement())
+  userId          BigInt?
+  user            User?         @relation(fields: [userId], references: [id])
+  customerName    String        @db.VarChar(150)
+  customerPhone   String        @db.VarChar(20)
+  shippingAddress String        @db.VarChar(255)
+  totalAmount     Int           @db.Int
+  status          OrderStatus   @default(PENDING)
+  paymentMethod   PaymentMethod @default(COD)
+  paymentStatus   PaymentStatus @default(PENDING)
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  orderItems     OrderItem[]
+  shippingOrders ShippingOrder[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        BigInt   @id @default(autoincrement())
+  orderId   BigInt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId BigInt
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @db.Int
+  price     Int      @db.Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_items")
+}
+
+enum ShippingStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  RETURNED
+}
+
+model ShippingProvider {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @db.VarChar(150)
+  code      String   @unique @db.VarChar(50)
+  apiKey    String   @db.VarChar(255)
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shippingOrders ShippingOrder[]
+
+  @@map("shipping_providers")
+}
+
+model ShippingOrder {
+  id                    BigInt           @id @default(autoincrement())
+  orderId               BigInt
+  order                 Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  providerId            BigInt
+  provider              ShippingProvider @relation(fields: [providerId], references: [id])
+  trackingNumber        String           @unique @db.VarChar(150)
+  shippingCost          Int?             @db.Int
+  estimatedDeliveryDate DateTime?
+  actualDeliveryDate    DateTime?
+  status                ShippingStatus   @default(PENDING)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@map("shipping_orders")
 }

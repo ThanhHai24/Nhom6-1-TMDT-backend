@@ -25,19 +25,31 @@ const getUsers = async (req: Request, res: Response) => {
 
     const page = parseInt(req.query.page as string) || 1;
     const q = (req.query.q as string) || "";
+    const role = (req.query.role as string) || "";
+    const status = (req.query.status as string) || "";
 
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    const where = q ? {
-        OR: [
-            { fullName: { contains: q, mode: "insensitive" } },
+    const where: any = {};
+    
+    if (q) {
+        where.OR = [
+            { fullName: { contains: q } },
             { email: { contains: q } },
             { phone: { contains: q } },
             { idCard: { contains: q } },
-        ],
+        ];
     }
-        : {};
+    
+    if (role) {
+        where.role = role;
+    }
+    
+    if (status) {
+        where.status = status;
+    }
+
     const [users, total] = await Promise.all([
         prisma.user.findMany({
             where,
@@ -55,6 +67,8 @@ const getUsers = async (req: Request, res: Response) => {
         currentPage: page,
         totalPages: totalPages,
         q: q,
+        role: role,
+        status: status,
         usercount: usercount,
         activeUsersCount: activeUsersCount,
         inactiveUsersCount: inactiveUsersCount
