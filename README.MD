@@ -57,7 +57,7 @@ src/
 ### 1. Clone repo
 
 ```bash
-git clone https://github.com/ThanhHai24/ECOM-PCSTORE-NodeJS.git
+git clone https://github.com/ThanhHai24/Nhom6-1-TMDT-backend.git
 cd ECOM-PCSTORE-NodeJS
 ```
 
@@ -76,8 +76,8 @@ npm install
 Tạo file `.env`:
 
 ```env
-DATABASE_URL="mysql://user:password@localhost:3306/pcstore"
-PORT=3000
+DATABASE_URL=""
+PORT=
 ```
 
 ---
