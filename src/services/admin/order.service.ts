@@ -37,5 +37,23 @@ const getReturnedOrdersCount = async () => {
     return await prisma.order.count({ where: { status: "RETURNED" } });
 }
 
+const getOrderById = async (id: string) => {
+    return await prisma.order.findUnique({
+        where: { id: +id },
+        include: {
+            orderItems: {
+                include: {
+                    product: true
+                }
+            },
+            shippingOrders: {
+                include: {
+                    provider: true
+                }
+            },
+            user: true
+        }
+    });
+}
 
-export { getAllOrders, getOrderCount, getPendingOrdersCount, getConfirmedOrdersCount, getProcessingOrdersCount, getShippedOrdersCount, getDeliveredOrdersCount, getCancelledOrdersCount, getReturnedOrdersCount }
+export { getAllOrders, getOrderCount, getPendingOrdersCount, getConfirmedOrdersCount, getProcessingOrdersCount, getShippedOrdersCount, getDeliveredOrdersCount, getCancelledOrdersCount, getReturnedOrdersCount, getOrderById }

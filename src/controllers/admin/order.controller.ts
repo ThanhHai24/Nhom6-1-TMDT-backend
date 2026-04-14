@@ -1,6 +1,6 @@
 import { prisma } from "config/client";
 import { Request, Response } from "express";
-import { getAllOrders, getCancelledOrdersCount, getConfirmedOrdersCount, getDeliveredOrdersCount, getOrderCount, getPendingOrdersCount, getProcessingOrdersCount, getReturnedOrdersCount, getShippedOrdersCount } from "services/admin/order.service";
+import { getAllOrders, getCancelledOrdersCount, getConfirmedOrdersCount, getDeliveredOrdersCount, getOrderById, getOrderCount, getPendingOrdersCount, getProcessingOrdersCount, getReturnedOrdersCount, getShippedOrdersCount } from "services/admin/order.service";
 
 const getOrders = async (req: Request, res: Response) => {
     const ordercount = await getOrderCount();
@@ -21,16 +21,16 @@ const getOrders = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    
+
     if (q) {
         where.OR = [
             { customerName: { contains: q } },
             { customerPhone: { contains: q } },
             { shippingAddress: { contains: q } },
-            {code: {contains: q}}
+            { code: { contains: q } }
         ];
     }
-    
+
     if (status) {
         where.status = status;
     }
@@ -76,4 +76,10 @@ const getOrders = async (req: Request, res: Response) => {
     });
 }
 
-export { getOrders }
+const getOrderDetailPage = async (req: Request, res: Response) => {
+    const orderId = req.params.id as string;
+    const order = await getOrderById(orderId);
+    res.render("admin/orders/detail", { order });
+}
+
+export { getOrders, getOrderDetailPage }

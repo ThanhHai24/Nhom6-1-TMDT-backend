@@ -108,7 +108,7 @@
                                         <td><%= productText %></td>
                                         <td><%= Number(order.totalAmount).toLocaleString('vi-VN') %> ₫</td>
                                         <td><span class="badge <%= statusClass %>"><%= statusName || order.status %></span></td>
-                                        <td><button class="btn sm primary">Chi tiết</button></td>
+                                        <td><a href="/admin/order/<%= order.id %>"><button class="btn sm primary">Chi tiết</button></a></td>
                                     </tr>
                                     <% }) %>
                                     <tr>

@@ -1,7 +1,7 @@
 import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
 import { getCategoriesPage } from 'controllers/admin/category.controller';
 import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getShippingPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
-import { getOrders } from 'controllers/admin/order.controller';
+import { getOrderDetailPage, getOrders } from 'controllers/admin/order.controller';
 import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
 import { getCreateShippingProviderPage, getShippingProviderDetailPage, getShippingProvidersPage, PostActiveShippingProvider, PostCreateShippingProvider, PostDeleteShippingProvider, PostLockShippingProvider, PostUpdateShippingProvider } from 'controllers/admin/shippingProvider.controller';
 import { getCreateSupplierPage, getSupplierDetailPage, getSuppliersPage, PostActiveSupplier, PostCreateSupplier, PostDeleteSupplier, PostLockSupplier, PostUpdateSupplier } from 'controllers/admin/supplier.controller';
@@ -63,6 +63,7 @@ const userRoutes = (app: express.Express) => {
     router.post("/shipping-providers/delete/:id", PostDeleteShippingProvider);
     // Orders
     router.get('/orders', getOrders);
+    router.get('/order/:id', getOrderDetailPage);
     // Warehouse
     router.get('/warehouse', getWarehousePage);
     // Promotion
