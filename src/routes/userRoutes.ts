@@ -4,7 +4,6 @@ import express from 'express';
 const router = express.Router();
 
 const userRoutes = (app: express.Express) => {
-    router.get('/', getHomePage)
     router.get('/product', getProductPage)
 
     // Auth
@@ -13,6 +12,11 @@ const userRoutes = (app: express.Express) => {
     router.get('/register', authController.getRegisterPage)
     // router.post('/register', PostRegister)
     // router.get('/logout', PostLogout)
+
+    // Index
+    router.get('/', getHomePage )
+    router.get('/product/:slug', getProductPage)
+    
     app.use("/", router);
 }
 

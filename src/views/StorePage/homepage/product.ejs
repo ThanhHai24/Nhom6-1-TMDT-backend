@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <title>PCStore - Cửa hàng máy tính</title>
-    <link rel="stylesheet" href="client/css/style.css">
+    <link rel="stylesheet" href="../client/css/style.css">
     <style>
         :root {
             --main-bg: url("/client/images/backweb.webp"
@@ -41,21 +41,38 @@
                     <div class="product-detail-container">
                         <!-- Product Images -->
                         <div class="product-images">
-                            <img src="client/images/PC00001-1.jpg" alt="MainImage" class="main-image" id="mainImage">
-                            <div class="thumbnail-gallery">
-                                <img src="client/images/PC00001-1.jpg" alt="Thumbnail 2"
-                                    class="thumbnail {{ $loop->first ? 'active' : '' }}"
-                                    onclick="changeMainImage(this)">
-                            </div>
+                            <img src="../admin/productImages/<%= product.image%>" alt="MainImage" class="main-image" id="mainImage">
+                            <%
+    let images = [];
+
+    try {
+        images = JSON.parse(product.images || "[]");
+    } catch (e) {
+        images = [];
+    }
+%>
+
+<div class="thumbnail-gallery">
+    <% if (images.length > 0) { %>
+        <% images.forEach((img, index) => { %>
+            <img 
+                src="/admin/productImages/<%= img %>" 
+                class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                onclick="changeMainImage(this)">
+        <% }) %>
+    <% } else { %>
+        <img src="/client/images/no-image.png" class="thumbnail active">
+    <% } %>
+</div>
                         </div>
 
                         <!-- Product Info -->
                         <div class="product-info">
-                            <h1 class="product-title">Product Name</h1>
+                            <h1 class="product-title"><%= product.name%></h1>
                             <div class="product-meta">
                                 <div class="meta-item">
                                     Mã SP:
-                                    <span>Product Code</span>
+                                    <span><%= product.sku%></span>
                                 </div>
                                 <div class="meta-item">
                                     Đánh giá:
@@ -70,7 +87,7 @@
                                     <span></span>
                                 </div>
                                 <div class="meta-item">
-                                    Đã bán: sold_count
+                                    Đã bán: <%= product.sold%>
                                     <span></span>
                                 </div>
                             </div>
@@ -890,8 +907,79 @@
         <%- include("../layout/footer.ejs") %>
     </footer>
     </div>
-    @yield("scripts")
+    <script>
+    // =========================
+    // PRODUCT IMAGE SLIDER
+    // =========================
 
+    const mainImage = document.getElementById("mainImage");
+    const thumbnails = document.querySelectorAll(".thumbnail");
+
+    let currentIndex = 0;
+
+    // Đổi ảnh khi click thumbnail
+    function changeMainImage(el) {
+        mainImage.src = el.src;
+
+        thumbnails.forEach(img => img.classList.remove("active"));
+        el.classList.add("active");
+
+        currentIndex = Array.from(thumbnails).indexOf(el);
+    }
+    // =========================
+    // QUANTITY CONTROL
+    // =========================
+
+    function changeQuantity(amount) {
+        const input = document.getElementById("quantityInput");
+        let value = parseInt(input.value) || 1;
+
+        value += amount;
+
+        if (value < 1) value = 1;
+
+        input.value = value;
+    }
+
+
+    // =========================
+    // ADD TO CART (AJAX)
+    // =========================
+
+    async function addToCart(e) {
+        e.preventDefault();
+
+        const form = document.getElementById("addToCartForm");
+        const formData = new FormData(form);
+
+        try {
+            const res = await axios.post("/cart/add", formData);
+
+            alert("✅ Đã thêm vào giỏ hàng!");
+        } catch (err) {
+            console.error(err);
+            alert("❌ Lỗi thêm giỏ hàng!");
+        }
+    }
+
+
+    // =========================
+    // TOGGLE DESCRIPTION / SPECS
+    // =========================
+
+    function toggleSection(id, btn) {
+        const el = document.getElementById(id);
+
+        if (el.classList.contains("expanded")) {
+            el.classList.remove("expanded");
+            btn.innerText = "Xem thêm";
+        } else {
+            el.classList.add("expanded");
+            btn.innerText = "Thu gọn";
+        }
+    }
+
+</script>
 </body>
 
 </html>

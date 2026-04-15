@@ -34,14 +34,14 @@
                             <div class="stat-card blue">
                                 <div class="stat-icon blue">👥</div>
                                 <div class="stat-label">Tổng người dùng</div>
-                                <div class="stat-value">12,483</div>
-                                <div class="stat-change"><span>+8.2%</span> so với tháng trước</div>
+                                <div class="stat-value"><%= usersCount.toLocaleString('vi-VN')%></div>
+                                <div class="stat-change"><span>+<%= usersThisMonth.toLocaleString('vi-VN')%></span> người dùng mới</div>
                             </div>
                             <div class="stat-card teal">
                                 <div class="stat-icon teal">📦</div>
-                                <div class="stat-label">Sản phẩm đang bán</div>
-                                <div class="stat-value">3,241</div>
-                                <div class="stat-change"><span>+42</span> sản phẩm mới</div>
+                                <div class="stat-label">Sản phẩm </div>
+                                <div class="stat-value"><%= productsCount.toLocaleString('vi-VN')%></div>
+                                <div class="stat-change"><span>+<%= productsThisMonth.toLocaleString('vi-VN')%></span> sản phẩm mới</div>
                             </div>
                             <div class="stat-card amber">
                                 <div class="stat-icon amber">🎁</div>

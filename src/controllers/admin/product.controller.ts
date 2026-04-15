@@ -38,7 +38,7 @@ const PostCreateProduct = async (req: Request, res: Response) => {
     const coverImage = uploadedFiles?.['image']?.[0];
     const productImages = uploadedFiles?.['images'] ?? [];
 
-    await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage?.filename, productImages.map((img) => img.filename), isHot === 'on', isNew === 'on', isFeatured === 'on', category, brand, supplier);
+    await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage?.filename, productImages.map((img) => img.filename), isHot, isNew, isFeatured, category, brand, supplier);
     res.redirect("/admin/products");
 }
 
@@ -84,7 +84,7 @@ const PostUpdateProduct = async (req: Request, res: Response) => {
     }
     finalImages.push(...productImages.map(img => img.filename));
 
-    await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot === 'on', isNew === 'on', isFeatured === 'on', category, brand, supplier);
+    await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot, isNew, isFeatured, category, brand, supplier);
     res.redirect("/admin/products");
 }
 export { getProductsPage, getCreateProductPage, PostCreateProduct, PostActiveProduct, PostLockProduct, getProductDetailPage, PostUpdateProduct }

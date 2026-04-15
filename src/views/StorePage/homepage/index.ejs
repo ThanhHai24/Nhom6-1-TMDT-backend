@@ -78,22 +78,24 @@
                     <div class="product-slider">
                         <button class="slider-btn prev-btn">❮</button>
                         <div class="product-container">
-                            <a href="/product/{{ $product_hot -> slug }}" style="text-decoration: none;">
-                                <div class="product-card">
-                                    <div class="bestseller-label">Hot</div>
-                                    <div class="product-image">
-                                        <img src="/client/images/PC00001-1.jpg" alt="PC Gaming">
-                                    </div>
-                                    <h3 class="product-title">Hot Product 1</h3>
-                                    <div class="product-price">100.000.000đ
+                            <% hotproducts.forEach(function (hotproduct) {%>
+                                <a href="/product/<%= hotproduct.slug%>" style="text-decoration: none;">
+                                    <div class="product-card">
+                                        <div class="bestseller-label">Hot</div>
+                                        <div class="product-image">
+                                            <img src="/client/images/PC00001-1.jpg" alt="PC Gaming">
+                                        </div>
+                                        <h3 class="product-title"><%= hotproduct.name%></h3>
+                                        <div class="product-price"><%= hotproduct.price.toLocaleString('vi-VN')%>đ
 
-                                        <span class="original-price">10.000.000đ</span>
+                                            <span class="original-price"><%= hotproduct.price.toLocaleString('vi-VN')%>đ</span>
 
-                                    </div>
-                                    <div class="product-stats">
-                                        <span>⭐ Đã bán: 100</span>
-                                    </div>
-                            </a>
+                                        </div>
+                                        <div class="product-stats">
+                                            <span>⭐ Đã bán: 100</span>
+                                        </div>
+                                </a>
+                            <%})%>
                         </div>
                     </div>
                     <button class="slider-btn next-btn">❯</button>
