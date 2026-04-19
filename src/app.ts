@@ -5,6 +5,7 @@ import initDatabase from "config/index.seed";
 import userRoutes from "routes/userRoutes";
 import path from "path/win32";
 import adminRoutes from "routes/adminRoutes";
+import apiRoutes from "routes/apiRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 // config route
 userRoutes(app);
 adminRoutes(app);
+apiRoutes(app);
 
 getConnection();
 
