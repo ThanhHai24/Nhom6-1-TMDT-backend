@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <title>PCStore - Cửa hàng máy tính</title>
+    <link rel="stylesheet" href="../client/css/style.css">
+    <style>
+        :root {
+            --main-bg: url("/client/images/backweb.webp"
+
+                );
+            --promotion-bg: url("/client/images/background_offer_detail.png"
+
+                );
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <%- include("../layout/header.ejs") %>
+        </header>
+
+        <nav class="main-nav">
+            <%- include("../layout/navbar.ejs") %>
+        </nav>
+
+        <main>
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="#">Trang chủ</a> &gt; <a href="#">PC GAMING</a>
+                </div>
+                <div class="product-section">
+                    <div class="product-detail-container">
+                        <!-- Product Images -->
+                        <div class="product-images">
+                            <img src="../admin/productImages/<%= product.image%>" alt="MainImage" class="main-image" id="mainImage">
+                            <%
+    let images = [];
+
+    try {
+        images = JSON.parse(product.images || "[]");
+    } catch (e) {
+        images = [];
+    }
+%>
+
+<div class="thumbnail-gallery">
+    <% if (images.length > 0) { %>
+        <% images.forEach((img, index) => { %>
+            <img 
+                src="/admin/productImages/<%= img %>" 
+                class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                onclick="changeMainImage(this)">
+        <% }) %>
+    <% } else { %>
+        <img src="/client/images/no-image.png" class="thumbnail active">
+    <% } %>
+</div>
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="product-info">
+                            <h1 class="product-title"><%= product.name%></h1>
+                            <div class="product-meta">
+                                <div class="meta-item">
+                                    Mã SP:
+                                    <span><%= product.sku%></span>
+                                </div>
+                                <div class="meta-item">
+                                    Đánh giá:
+                                    <span></span>
+                                </div>
+                                <div class="meta-item">
+                                    Bình luận:
+                                    <span></span>
+                                </div>
+                                <div class="meta-item">
+                                    Lượt xem: view_count
+                                    <span></span>
+                                </div>
+                                <div class="meta-item">
+                                    Đã bán: <%= product.sold%>
+                                    <span></span>
+                                </div>
+                            </div>
+
+                            <div class="warranty-info">
+                                <span class="warranty-badge">Bảo hành:</span>
+                                <span>12t</span>
+                                <span style="margin-left: 15px;">|</span>
+                                <span style="margin-left: 10px;">Tình trạng:</span>
+                                <span class="stock-status">Còn hàng</span>
+                            </div>
+
+                            <!-- Price Section -->
+                            <div class="price-section">
+                                <div class="current-price">10,000,000đ</div>
+
+                                <span class="original-price">10.000.000đ</span>
+                                <span class="discount">Tiết kiệm
+                                    0đ</span>
+
+                            </div>
+
+                            <!-- Promotion Box -->
+
+                            <div class="promotion-box">
+                                <div class="promotion-header">
+                                    <div class="promotion-icon"><i class="bi bi-gift-fill"></i></div>
+                                    KHUYẾN MÃI
+                                </div>
+                                <div class="promotion-list" style="color: black">
+                                    <div class="promotion-item">Giảm 10% tối đa 500.000đ cho đơn hàng từ 5.000.000đ
+                                        (Mã: PROMO10)</div>
+                                    <div class="promotion-item">Giảm 15% tối đa 1.000.000đ cho đơn hàng từ 10.000.000đ
+                                        (Mã: PROMO15)</div>
+                                    <div class="promotion-item">Giảm 20% tối đa 2.000.000đ cho đơn hàng từ 20.000.000đ
+                                        (Mã: PROMO20)</div>
+                                </div>
+                            </div>
+
+
+
+                            <!-- Quantity & Actions -->
+                            <form action="/cart/add" method="POST" id="addToCartForm">
+                                <div class="quantity-section">
+                                    <input type="hidden" name="product_id" value="{{ $product -> id }}">
+                                    <span class="quantity-label">Số lượng:</span>
+                                    <div class="quantity-control">
+                                        <a class="quantity-btn" onclick="changeQuantity(-1)">-</a>
+                                        <input type="number" name="product_qty" class="quantity-input" value="1"
+                                            id="quantityInput" min="1">
+                                        <a class="quantity-btn" onclick="changeQuantity(1)">+</a>
+                                    </div>
+
+                                    <button type="button" class="cart-btn" onclick="addToCart(event)">
+                                        <i class="ri-shopping-cart-2-line"></i> Thêm vào giỏ hàng
+                                    </button>
+
+                                </div>
+
+                                <div class="action-buttons">
+
+                                    <button type="submit" name="buy-now" class="primary-btn">
+                                        ĐẶT MUA NGAY
+                                        <div style="font-size: 12px; font-weight: normal; margin-top: 3px;">Giao hàng
+                                            tận nơi nhanh chóng</div>
+                                    </button>
+
+                                    <div class="secondary-actions">
+                                        <a class="secondary-btn">
+                                            TRẢ GÓP QUA HỖ SƠ
+                                            <div style="font-size: 11px; font-weight: normal; margin-top: 3px;">Chỉ từ
+                                                xxx.xxx₫/tháng</div>
+                                        </a>
+                                        <a class="secondary-btn">
+                                            TRẢ GÓP QUA THẺ
+                                            <div style="font-size: 11px; font-weight: normal; margin-top: 3px;">Chỉ từ
+                                                xxx.xxx₫/tháng</div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </form>
+
+                            <!-- Features -->
+                            <div class="features-section">
+                                <h2 class="features-title">YÊN TÂM MUA HÀNG</h2>
+                                <div class="features-grid">
+                                    <div class="feature-item">
+                                        <div class="feature-icon"><i class="bi bi-wallet2"></i></div>
+                                        <div class="feature-text">
+                                            <div class="feature-label">Cam kết giá tốt nhất thị trường.</div>
+                                            <div class="feature-desc">Đảm bảo giá cạnh tranh nhất</div>
+                                        </div>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon"><i class="bi bi-patch-check"></i></div>
+                                        <div class="feature-text">
+                                            <div class="feature-label">Sản phẩm mới 100%.</div>
+                                            <div class="feature-desc">Chính hãng, fullbox</div>
+                                        </div>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon"><i class="bi bi-arrow-repeat"></i></div>
+                                        <div class="feature-text">
+                                            <div class="feature-label">Lỗi 1 đổi 1 ngay lập tức.</div>
+                                            <div class="feature-desc">Hỗ trợ nhanh chóng</div>
+                                        </div>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon"><i class="bi bi-ticket-detailed-fill"></i></div>
+                                        <div class="feature-text">
+                                            <div class="feature-label">Hỗ trợ trả góp - Thủ tục nhanh gọn.</div>
+                                            <div class="feature-desc">Duyệt nhanh, lãi suất tốt</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="products-section">
+                    <div class="section-header">
+                        <h2 class="section-title">SẢN PHẨM LIÊN QUAN</h2>
+                        <div class="filter-options">
+
+                        </div>
+                    </div>
+                    <div class="product-slider">
+                        <button class="slider-btn prev-btn">❮</button>
+                        <div class="product-container">
+
+                            <a href="/product/{{ $relatedProduct -> slug }}" style="text-decoration: none;">
+                                <div class="product-card">
+
+                                    <div class="bestseller-label">Hot</div>
+
+
+                                    <div class="product-image">
+                                        <img src="client/images/PC00001-1.jpg" alt="PC Gaming">
+                                    </div>
+                                    <h3 class="product-title">Related Product</h3>
+                                    <div class="product-price">100.000đ
+
+                                        <span class="original-price">100.000đ</span>
+
+                                    </div>
+
+                                    <div class="product-stats">
+                                        <span>⭐ Đã bán: 100</span>
+                                    </div>
+                            </a>
+                        </div>
+
+                    </div>
+                    <button class="slider-btn next-btn">❯</button>
+            </div>
+            </section>
+
+
+            <section class="info-section">
+                <div class="info-container">
+                    <div class="description">
+
+                        <h2 class="description-title">Giới thiệu sản phẩm: Product Name</h2>
+                        <div class="description-detail" id="description-content">
+
+                        </div>
+                        <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
+
+                    </div>
+
+                    <div class="specs">
+                        <h2 class="specs-title">Thông số kỹ thuật</h2>
+                        <div class="specs-detail" id="specs-content">
+
+                            @if($product->product_type_id == 7)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Hãng sản xuất</td>
+                                        <td>{{ $product -> cpu -> brand }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Socket</td>
+                                        <td>{{ $product -> cpu -> socket_type }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dòng sản phẩm</td>
+                                        <td>{{ $product -> cpu -> series }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Thế hệ</td>
+                                        <td>{{ $product -> cpu -> generation }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kiến trúc</td>
+                                        <td>{{ $product -> cpu -> architecture }}</td>
+                                    </tr>
+                                    <td>Tiến trình</td>
+                                    <td>{{ $product -> cpu -> manufacturing_process }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số nhân</td>
+                                        <td>{{ $product -> cpu -> cores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số luồng</td>
+                                        <td>{{ $product -> cpu -> threads }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tần số Cơ sở</td>
+                                        <td>{{ $product -> cpu -> base_clock }}GHz</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tần số Turbo Tối đa</td>
+                                        <td>{{ $product -> cpu -> boost_clock }}GHz</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L1 cache</td>
+                                        <td>{{ $product -> cpu -> l1_cache }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L2 cache</td>
+                                        <td>{{ $product -> cpu -> l2_cache }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L3 cache</td>
+                                        <td>{{ $product -> cpu -> l3_cache }}Mb</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Công suất Turbo Tối đa</td>
+                                        <td>{{ $product -> cpu -> tdp }}W</td>
+                                    </tr>
+                                    <td>Nhiệt độ tối đa</td>
+                                    <td>{{ $product -> cpu -> max_temp }} oC</td>
+                                    </tr>
+                                    <td>Bộ xử lý đồ họa</td>
+                                    <td>{{ $product -> cpu -> integrated_graphics }}</td>
+                                    </tr>
+                                    <td>Hỗ trợ bộ nhớ</td>
+                                    <td>{{ $product -> cpu -> memory_support }}</td>
+                                    </tr>
+                                    <td>Dung lượng bộ nhớ tối đa</td>
+                                    <td>{{ $product -> cpu -> max_memory }} GB</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số kênh bộ nhớ Tối đa</td>
+                                        <td>{{ $product -> cpu -> memory_channels }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số cổng PCI Express Tối đa</td>
+                                        <td>{{ $product -> cpu -> pcie_lanes }}</td>
+                                    </tr>
+                                    <td>Phiên bản PCI Express</td>
+                                    <td>{{ $product -> cpu -> pcie_version }}</td>
+                                    </tr>
+                                    <td>Overclock</td>
+                                    <td>{{ $product->cpu->unlocked ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ảo hóa</td>
+                                        <td>{{ $product->cpu->virtualization ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 8)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Chipset</td>
+                                        <td>{{ $product -> gpu -> gpu_chipset }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kiến trúc</td>
+                                        <td>{{ $product -> gpu -> architecture }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tiến trình</td>
+                                        <td>{{ $product -> gpu -> manufacturing_process }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Nhân CUDA</td>
+                                        <td>{{ $product -> gpu -> cuda_cores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Stream Processors</td>
+                                        <td>{{ $product -> gpu -> stream_processors }}</td>
+                                    </tr>
+                                    <td>RT Cores</td>
+                                    <td>{{ $product -> gpu -> rt_cores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tensor Cores</td>
+                                        <td>{{ $product -> gpu -> tensor_cores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Xung nhịp cơ bản/ Boost</td>
+                                        <td>{{ $product -> gpu -> base_clock }}/{{ $product -> gpu -> boost_clock }}MHz
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bộ nhớ</td>
+                                        <td>{{ $product -> gpu -> memory_size }} {{ $product -> gpu -> memory_type }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Giao diện bộ nhớ</td>
+                                        <td>{{ $product -> gpu -> memory_bus }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Băng thông</td>
+                                        <td>{{ $product -> gpu -> memory_bandwidth }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Công suất tối đa</td>
+                                        <td>{{ $product -> gpu -> tdp }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Nguồn đề xuất</td>
+                                        <td>{{ $product -> gpu -> recommended_psu }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dài x Rộng x Cao</td>
+                                        <td>{{ $product -> gpu -> length }}x{{ $product -> gpu -> width }}x{{ $product -> gpu -> height }}
+                                        </td>
+                                    </tr>
+                                    <td>Số khe pci cần thiết</td>
+                                    <td>{{ $product -> gpu -> pcie_slots_required }}</td>
+                                    </tr>
+                                    <td>Cồng nguồn</td>
+                                    <td>{{ $product -> gpu -> power_connectors}}</td>
+                                    </tr>
+                                    <td>Cổng xuất hình</td>
+                                    <td>{{ $product -> gpu -> display_outputs }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 11)
+                            <table>
+                                <tbody>
+
+                                    <tr>
+                                        <td>Socket</td>
+                                        <td>{{ $product -> motherboard -> socket_type }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Chipset</td>
+                                        <td>{{ $product -> motherboard -> chipset }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích cỡ</td>
+                                        <td>{{ $product -> motherboard -> form_factor }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số khe RAM</td>
+                                        <td>{{ $product -> motherboard -> memory_slots }} /
+                                            {{ $product -> motherboard -> memory_type }}</td>
+                                    </tr>
+                                    <td>Dung lượng RAM tối đa</td>
+                                    <td>{{ $product -> motherboard -> max_memory}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tốc độ bộ nhớ</td>
+                                        <td>{{ $product -> motherboard -> memory_speed }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cổng PCIE:</td>
+                                        <td>16x:{{ $product -> motherboard -> pcie_x16_slots }}
+                                            8x:{{ $product -> motherboard -> pcie_x8_slots }}
+                                            4x:{{ $product -> motherboard -> pcie_x4_slots }}
+                                            1x:{{ $product -> motherboard -> pcie_x1_slots }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Storage</td>
+                                        <td>{{ $product -> motherboard -> sata_ports }}x SATA3
+                                            {{ $product -> motherboard -> m2_slots }}x
+                                            {{ $product -> motherboard -> m2_specs }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cổng USB</td>
+                                        <td>{{ $product -> motherboard -> usb_ports }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cổng xuất hình</td>
+                                        <td>{{ $product -> motherboard -> display_ports }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Âm thanh</td>
+                                        <td>{{ $product -> motherboard -> audio_chipset  }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kết nối mạng</td>
+                                        <td>{{ $product -> motherboard -> network_chipset }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Wifi</td>
+                                        <td>{{ $product -> motherboard -> wifi_builtin ? 'Có' : 'Không'}}</td>
+                                    </tr>
+                                    <td>Bluetooth</td>
+                                    <td>{{ $product -> motherboard -> bluetooth_builtin ? 'Có' : 'Không'  }}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 9)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Dung lượng</td>
+                                        <td>{{ $product -> rammodule -> modules_count }}x{{ $product -> rammodule -> capacity }}GB
+                                            {{ $product -> rammodule -> type }}
+                                            {{ $product -> rammodule -> form_factor }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Độ trễ</td>
+                                        <td>{{ $product -> rammodule -> timings }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Điện áp</td>
+                                        <td>{{ $product -> rammodule -> voltage }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ECC</td>
+                                        <td>{{ $product -> rammodule -> ecc_support ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>RGB</td>
+                                        <td>{{ $product -> rammodule -> rgb_lighting ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tản nhiệt</td>
+                                        <td>{{ $product -> rammodule -> heat_spreader }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 10)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Thể loại</td>
+                                        <td>{{ $product -> storagedevice -> type }}
+                                            {{ $product -> storagedevice -> interface }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích cỡ</td>
+                                        <td>{{ $product -> storagedevice -> form_factor}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Đọc/Ghi tuần tự</td>
+                                        <td>{{ $product -> storagedevice -> sequential_read }}/{{ $product -> storagedevice -> sequential_write }}
+                                            MB/s</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Đọc ghi ngẫu nhiên</td>
+                                        <td>{{ $product -> storagedevice -> random_read_iops }}/{{ $product -> storagedevice -> random_write_iops }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>NAND nhớ</td>
+                                        <td>{{ $product -> storagedevice -> nand_type }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tuổi thọ</td>
+                                        <td>{{ $product -> storagedevice -> mtbf }} giờ</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dram Cache</td>
+                                        <td>{{ $product -> storagedevice -> dram_cache }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 12)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Công suất</td>
+                                        <td>{{ $product -> powersupply -> wattage }}W</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Chứng nhận</td>
+                                        <td>{{ $product -> powersupply -> certification }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích thước</td>
+                                        <td>{{ $product -> powersupply -> form_factor }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Loại</td>
+                                        <td>{{ $product -> powersupply -> modular_type }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dây kết nối</td>
+                                        <td>{{ $product -> powersupply -> connectors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Quạt tản nhiệt</td>
+                                        <td>{{ $product -> powersupply -> fan_size }}cm
+                                            {{ $product -> powersupply -> noise_level }}dBA</td>
+                                    </tr>
+                                    <td>ZeroRPM</td>
+                                    <td>{{ $product -> powersupply -> fan_less_mode ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 13)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Kích cỡ</td>
+                                        <td>{{ $product -> cases -> form_factor }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bo mạch hỗ trợ</td>
+                                        <td>{{ $product -> cases -> motherboard_support }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích thước</td>
+                                        <td>{{ $product -> cases -> length }}x{{ $product -> cases -> width }}x{{ $product -> cases -> height }}mm
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Chiều dài GPU tối đa</td>
+                                        <td>{{ $product -> cases -> max_gpu_length}}</td>
+                                    </tr>
+                                    <td>Độ cao tản nhiệt tối đa</td>
+                                    <td>{{ $product -> cases -> max_cpu_cooler_height }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích thước nguồn tối đa</td>
+                                        <td>{{ $product -> cases -> max_psu_length}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hỗ trợ Radiator</td>
+                                        <td>{{ $product -> cases -> radiator_support }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Khe mở rộng</td>
+                                        <td>{{ $product -> cases -> expansion_slots }}</td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Thiết bị lưu trữ</td>
+                                        <td>{{ $product -> cases -> drive_bays }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Số quạt tối đa</td>
+                                        <td>{{ $product -> cases -> max_fans }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kính cường lực</td>
+                                        <td>{{ $product -> cases -> tempered_glass ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Chất liệu</td>
+                                        <td>{{ $product -> cases -> material }}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 14)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Khả năng tương thích</td>
+                                        <td>{{ $product -> coolingsystem -> socket_compatibility }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Chiều cao</td>
+                                        <td>{{ $product -> coolingsystem -> height }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kích thước Radiator</td>
+                                        <td>{{ $product -> coolingsystem -> radiator_size }}mm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tốc độ bơm</td>
+                                        <td>{{ $product -> coolingsystem -> pump_speed }}rpm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Quạt</td>
+                                        <td>{{ $product -> coolingsystem -> fan_configuration }} </td>
+                                    </tr>
+                                    <td>Độ ồn</td>
+                                    <td>{{ $product -> coolingsystem -> noise_level }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TDP</td>
+                                        <td>{{ $product -> coolingsystem -> max_tdp }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Đèn RGB</td>
+                                        <td>{{ $product -> coolingsystem -> rgb_lighting ? 'Có' : 'Không' }}</td>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @elseif($product->category_id == 2)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Hãng sản xuất</td>
+                                        <td>{{ $product -> laptopspec -> brand }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Model</td>
+                                        <td>{{ $product -> laptopspec -> model }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Card đồ họa</td>
+                                        <td>{{ $product -> laptopspec -> gpu }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>RAM</td>
+                                        <td>{{ $product -> laptopspec -> ram_configuration}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ổ cứng</td>
+                                        <td>{{ $product -> laptopspec -> storage_configuration}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Màn hình</td>
+                                        <td>{{ $product -> laptopspec -> monitor }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bàn phím</td>
+                                        <td>{{ $product -> laptopspec -> keyboard }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cổng I/O:</td>
+                                        <td>{{ $product -> laptopspec -> io_ports }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LAN</td>
+                                        <td>{{ $product -> laptopspec -> lan }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Wifi</td>
+                                        <td>{{ $product -> laptopspec -> wifi }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bluetooth</td>
+                                        <td>{{ $product -> laptopspec -> bluetooth }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Webcam</td>
+                                        <td>{{$product -> laptopspec -> webcam}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hệ điều hành</td>
+                                        <td>{{ $product -> laptopspec -> os }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pin</td>
+                                        <td>{{ $product -> laptopspec -> battery }}</td>
+                                    </tr>
+                                    <td>Trọng lượng</td>
+                                    <td>{{ $product -> laptopspec -> weight }}</td>
+                                    </tr>
+                                    <td>Kích thước</td>
+                                    <td>{{ $product -> laptopspec -> dimensions }}</td>
+                                    </tr>
+                                    <td>Màu sắc</td>
+                                    <td>{{ $product -> laptopspec -> color }}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @elseif($product->category_id == 1)
+                            @php
+                            $ramConfig = is_string($product->pcConfiguration->ram_configuration)
+                            ? json_decode($product->pcConfiguration->ram_configuration, true)
+                            : $product->pcConfiguration->ram_configuration;
+
+                            $storageConfig = is_string($product->pcConfiguration->storage_configuration)
+                            ? json_decode($product->pcConfiguration->storage_configuration, true)
+                            : $product->pcConfiguration->storage_configuration;
+                            @endphp
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>CPU</td>
+                                        <td><a
+                                                href="/product/{{ $product->pcConfiguration->cpu?->product->slug}}">{{ $product->pcConfiguration->cpu?->product->name ?? 'Chưa có' }}</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Card Đồ họa</td>
+                                        <td><a href="/product/{{ $product->pcConfiguration->gpu?->product->slug}}">{{ $product->pcConfiguration->gpu?->product->name ?? 'Chưa có' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mainboard</td>
+                                        <td><a
+                                                href="/product/{{ $product->pcConfiguration->motherboard?->product->slug}}">{{ $product->pcConfiguration->motherboard?->product->name ?? 'Chưa có' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>RAM</td>
+                                        <td>
+                                            @foreach ($ramConfig ?? [] as $ram)
+                                            <li>
+                                                {{ $ramProducts[$ram['ram_id']]->name ?? 'Không tìm thấy RAM' }}
+                                                x{{ $ram['quantity'] }}
+                                            </li>
+                                            @endforeach
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ổ cứng</td>
+                                        <td>
+                                            @foreach ($storageConfig ?? [] as $storage)
+                                            @php
+                                            $storageName = $storage['storage_id'] ?
+                                            ($storageProducts[$storage['storage_id']]->name ?? 'Không tìm thấy Storage')
+                                            : 'Không xác định';
+                                            @endphp
+                                            <li>
+                                                {{ $storageName }} x{{ $storage['quantity'] }}
+                                            </li>
+                                            @endforeach
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PSU</td>
+                                        <td><a
+                                                href="/product/{{ $product->pcConfiguration->powersupply?->product->slug}}">{{ $product->pcConfiguration->powerSupply?->product->name ?? 'Chưa có' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Case</td>
+                                        <td><a href="/product/{{ $product->pcConfiguration->case?->product->slug}}">{{ $product->pcConfiguration->case?->product->name ?? 'Chưa có' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tản nhiệt</td>
+                                        <td><a
+                                                href="/product/{{ $product->pcConfiguration->coolingsystem?->product->slug}}">{{ $product->pcConfiguration->coolingsystem?->product->name ?? 'Chưa có' }}
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @elseif($product->product_type_id == 15)
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Kích thước</td>
+                                        <td>{{ $product -> monitor -> screen_size }}"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Độ phân giải</td>
+                                        <td>{{ $product -> monitor -> resolution }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tần số quét</td>
+                                        <td>{{ $product -> monitor -> refresh_rate }} Hz/td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tỷ lệ khung hình</td>
+                                        <td>{{ $product -> monitor -> aspect_ratio }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tấm nền</td>
+                                        <td>{{ $product -> monitor -> panel_type }} </td>
+                                    </tr>
+                                    <td>Tốc độ phản hồi</td>
+                                    <td>{{ $product -> monitor -> response_time }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Độ sáng</td>
+                                        <td>{{ $product -> monitor -> brightness }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Gam màu</td>
+                                        <td>{{ $product -> monitor -> color_gamut }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>HDR</td>
+                                        <td>{{ $product -> monitor -> hdr_format }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kết nối</td>
+                                        <td>{{ $product -> monitor -> connectivity }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Loa</td>
+                                        <td>{{ $product -> monitor -> built_in_speakers ? 'Có' : 'Không' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hiệu chỉnh</td>
+                                        <td>{{ $product -> monitor -> stand_adjustability }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vesa</td>
+                                        <td>{{ $product -> monitor -> vesa_size }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @else
+                            {!! $product -> specification !!}
+                            @endif
+
+                        </div>
+                        <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
+                    </div>
+                </div>
+            </section>
+    </div>
+    </main>
+
+    <footer>
+        <%- include("../layout/footer.ejs") %>
+    </footer>
+    </div>
+    <script>
+    // =========================
+    // PRODUCT IMAGE SLIDER
+    // =========================
+
+    const mainImage = document.getElementById("mainImage");
+    const thumbnails = document.querySelectorAll(".thumbnail");
+
+    let currentIndex = 0;
+
+    // Đổi ảnh khi click thumbnail
+    function changeMainImage(el) {
+        mainImage.src = el.src;
+
+        thumbnails.forEach(img => img.classList.remove("active"));
+        el.classList.add("active");
+
+        currentIndex = Array.from(thumbnails).indexOf(el);
+    }
+    // =========================
+    // QUANTITY CONTROL
+    // =========================
+
+    function changeQuantity(amount) {
+        const input = document.getElementById("quantityInput");
+        let value = parseInt(input.value) || 1;
+
+        value += amount;
+
+        if (value < 1) value = 1;
+
+        input.value = value;
+    }
+
+
+    // =========================
+    // ADD TO CART (AJAX)
+    // =========================
+
+    async function addToCart(e) {
+        e.preventDefault();
+
+        const form = document.getElementById("addToCartForm");
+        const formData = new FormData(form);
+
+        try {
+            const res = await axios.post("/cart/add", formData);
+
+            alert("✅ Đã thêm vào giỏ hàng!");
+        } catch (err) {
+            console.error(err);
+            alert("❌ Lỗi thêm giỏ hàng!");
+        }
+    }
+
+
+    // =========================
+    // TOGGLE DESCRIPTION / SPECS
+    // =========================
+
+    function toggleSection(id, btn) {
+        const el = document.getElementById(id);
+
+        if (el.classList.contains("expanded")) {
+            el.classList.remove("expanded");
+            btn.innerText = "Xem thêm";
+        } else {
+            el.classList.add("expanded");
+            btn.innerText = "Thu gọn";
+        }
+    }
+
+</script>
+</body>
+
+</html>

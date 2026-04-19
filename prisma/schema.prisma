@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  RECEPTIONIST
+  WAREHOUSE
+  CUSTOMER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        BigInt    @id @default(autoincrement())
+  username  String    @db.VarChar(100)
+  password  String    @db.VarChar(255)
+  email     String    @db.VarChar(150)
+  fullName  String    @db.VarChar(150)
+  phone     String    @db.VarChar(20)
+  idCard    String    @db.VarChar(20)
+  dob       DateTime?
+  gender    String    @db.VarChar(10)
+  avatar    String?   @db.VarChar(255)
+  role      Role      @default(CUSTOMER)
+  status    Status    @default(ACTIVE)
+  createdAt DateTime  @default(now())
+
+  orders   Order[]
+  reviews  Review[]
+  wishlist Wishlist?
+
+  @@map("users")
+}
+
+model Category {
+  id          BigInt   @id @default(autoincrement())
+  name        String   @db.VarChar(150)
+  slug        String   @unique @db.VarChar(200)
+  description String?  @db.Text
+  icon        String?  @db.VarChar(255)
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Self-relation: parentId = null  →  danh mục cha (root)
+  //                parentId != null →  danh mục con
+  parentId BigInt?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id          BigInt    @id @default(autoincrement())
+  name        String    @db.VarChar(150)
+  slug        String    @unique @db.VarChar(200)
+  description String?   @db.Text
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("brands")
+}
+
+model Supplier {
+  id          BigInt    @id @default(autoincrement())
+  name        String    @db.VarChar(150)
+  slug        String    @unique @db.VarChar(200)
+  description String?   @db.Text
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("suppliers")
+}
+
+model Product {
+  id                BigInt   @id @default(autoincrement())
+  name              String   @db.VarChar(150)
+  slug              String   @unique @db.VarChar(200)
+  sku               String   @unique @db.VarChar(200)
+  shortDescription  String   @db.VarChar(255)
+  description       String?  @db.Text
+  cost              Int      @db.Int
+  price             Int      @db.Int
+  stock             Int      @db.Int
+  lowStockThreshold Int      @default(10)
+  image             String?  @db.VarChar(255)
+  images            String?  @db.Text
+  status            Status   @default(ACTIVE)
+  isHot             Boolean  @default(false)
+  isNew             Boolean  @default(false)
+  isFeatured        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  categoryId BigInt
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  brandId BigInt
+  brand   Brand  @relation(fields: [brandId], references: [id])
+
+  supplierId BigInt
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+
+  @@map("products")
+}
+
+enum OrderStatus {
+  PENDING // mới tạo
+  CONFIRMED // đã xác nhận
+  PROCESSING // đang chuẩn bị hàng
+  SHIPPED // đã giao cho shipper
+  DELIVERED // giao thành công
+  CANCELLED // hủy
+  RETURNED // trả hàng
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+  VNPAY
+  MOMO
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id              BigInt        @id @default(autoincrement())
+  code            String        @unique @db.VarChar(20)
+  userId          BigInt?
+  user            User?         @relation(fields: [userId], references: [id])
+  customerName    String        @db.VarChar(150)
+  customerPhone   String        @db.VarChar(20)
+  shippingAddress String        @db.VarChar(255)
+  totalAmount     Int           @db.Int
+  status          OrderStatus   @default(PENDING)
+  paymentMethod   PaymentMethod @default(COD)
+  paymentStatus   PaymentStatus @default(PENDING)
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  orderItems     OrderItem[]
+  shippingOrders ShippingOrder[]
+  payments       Payment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        BigInt   @id @default(autoincrement())
+  orderId   BigInt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId BigInt
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @db.Int
+  price     Int      @db.Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_items")
+}
+
+enum ShippingStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  RETURNED
+}
+
+model ShippingProvider {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @db.VarChar(150)
+  code      String   @unique @db.VarChar(50)
+  apiKey    String   @db.VarChar(255)
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shippingOrders ShippingOrder[]
+
+  @@map("shipping_providers")
+}
+
+model ShippingOrder {
+  id                    BigInt           @id @default(autoincrement())
+  orderId               BigInt
+  order                 Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  providerId            BigInt
+  provider              ShippingProvider @relation(fields: [providerId], references: [id])
+  trackingNumber        String           @unique @db.VarChar(150)
+  shippingCost          Int?             @db.Int
+  estimatedDeliveryDate DateTime?
+  actualDeliveryDate    DateTime?
+  status                ShippingStatus   @default(PENDING)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@map("shipping_orders")
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+model Promotion {
+  id            BigInt    @id @default(autoincrement())
+  name          String    @db.VarChar(255)
+  type          PromotionType?
+  discountValue Decimal?  @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @db.Decimal(10, 2)
+  startDate     DateTime?
+  endDate       DateTime?
+
+  coupons       Coupon[]
+
+  @@map("promotions")
+}
+
+model Coupon {
+  id            BigInt     @id @default(autoincrement())
+  code          String     @unique @db.VarChar(100)
+  discountValue Decimal?   @db.Decimal(10, 2)
+  usageLimit    Int?
+  status        Boolean?   @default(true)
+  promotionId   BigInt?
+  promotion     Promotion? @relation(fields: [promotionId], references: [id])
+
+  @@map("coupons")
+}
+
+model Review {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt?
+  user      User?    @relation(fields: [userId], references: [id])
+  productId BigInt?
+  product   Product? @relation(fields: [productId], references: [id])
+  rating    Int
+  comment   String?  @db.Text
+
+  @@map("reviews")
+}
+
+model Wishlist {
+  id      BigInt   @id @default(autoincrement())
+  userId  BigInt   @unique
+  user    User     @relation(fields: [userId], references: [id])
+
+  items   WishlistItem[]
+
+  @@map("wishlist")
+}
+
+model WishlistItem {
+  id          BigInt   @id @default(autoincrement())
+  wishlistId  BigInt
+  wishlist    Wishlist @relation(fields: [wishlistId], references: [id])
+  productId   BigInt
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@map("wishlist_items")
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Payment {
+  id                BigInt                   @id @default(autoincrement())
+  orderId           BigInt?
+  order             Order?                   @relation(fields: [orderId], references: [id])
+  paymentMethodId   BigInt?
+  amount            Decimal                  @db.Decimal(10, 2)
+  status            PaymentTransactionStatus @default(PENDING)
+  transactionCode   String?                  @db.VarChar(255)
+  createdAt         DateTime?                @default(now())
+
+  @@map("payments")
+}
+
+model BankAccount {
+  id            BigInt   @id @default(autoincrement())
+  bankName      String   @db.VarChar(100)
+  accountNumber String   @db.VarChar(50)
+  accountName   String   @db.VarChar(255)
+  qrCodeUrl     String?  @db.VarChar(255)
+  status        Boolean? @default(true)
+
+  @@map("bank_accounts")
+}

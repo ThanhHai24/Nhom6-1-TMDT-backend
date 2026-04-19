@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- USERS PAGE -->
+                    <div class="page active" id="page-users">
+                        <div class="page-header">
+                            <div>
+                                <h2>Quản lý đơn vị vận chuyển</h2>
+                                <div class="breadcrumb">Hệ quản trị → Quản lý đơn vị vận chuyển</div>
+                            </div>
+                            <a href="/admin/shipping-providers/create"><button class="btn primary">+ Thêm đơn vị vận chuyển</button></a>
+                        </div>
+
+                        <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
+                            <div class="stat-card blue">
+                                <div class="stat-label">Tổng đơn vị vận chuyển</div>
+                                <div class="stat-value">
+                                    <%= shippingProviderCount %>
+                                </div>
+                            </div>
+                            <div class="stat-card teal">
+                                <div class="stat-label">Đang hoạt động</div>
+                                <div class="stat-value">
+                                    <%= activeShippingProvidersCount %>
+                                </div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-label">Bị khóa</div>
+                                <div class="stat-value">
+                                    <%= inactiveShippingProvidersCount %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <form method="GET" action="/admin/shipping-providers" class="toolbar">
+                                <div class="search-box" style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg>
+                                    <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Tìm theo tên, email, SĐT, CCCD..." style="border: none; outline: none; background: transparent; flex: 1; padding: 4px;">
+                                </div>
+                                <select name="status" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="ACTIVE" <%= typeof status !== 'undefined' && status === 'ACTIVE' ? 'selected' : '' %>>Đang hoạt động</option>
+                                    <option value="INACTIVE" <%= typeof status !== 'undefined' && status === 'INACTIVE' ? 'selected' : '' %>>Bị khóa</option>
+                                </select>
+                                <button type="submit" class="btn">Tìm / Lọc</button>
+                            </form>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên</th>
+                                        <th>Mã</th>
+                                        <th>API Key</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% shippingProviders.forEach( function (shippingProvider) { %>
+                                        <tr>
+                                                <td>
+                                                    <div class="user-cell">
+                                                        <div>
+                                                            <div class="user-name">
+                                                                <%= shippingProvider.name %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <%= shippingProvider.code %>
+                                                </td>
+                                                <td>
+                                                    <%= shippingProvider.apiKey %>
+                                                </td>
+                                                <td>
+                                                    <%= new Date(shippingProvider.createdAt).toLocaleString('vi-VN') %>
+                                                </td>
+                                                </td>
+                                                        <% const statusMap={ ACTIVE: 'active' , INACTIVE: 'danger' , };
+                                                            %>
+                                                            <% const statusNameMap={ ACTIVE: 'Hoạt động' ,
+                                                                INACTIVE: 'Bị khóa' , }; %>
+                                                                <td><span
+                                                                        class="badge <%= statusMap[shippingProvider.status] || 'default' %>">
+                                                                        <%= statusNameMap[shippingProvider.status] || shippingProvider.status %>
+                                                                    </span>
+                                                                </td>
+                                                                <td style="">
+                                                                    <a href="/admin/shipping-providers/<%= shippingProvider.id %>"><button
+                                                                            class="btn sm">Chi tiết</button></a>
+                                                                    <% if(shippingProvider.status==='ACTIVE' ) { %>
+                                                                        <form style="display: inline;"
+                                                                            action="/admin/shipping-providers/lock/<%= shippingProvider.id%>"
+                                                                            method="post">
+                                                                            <button
+                                                                                class="btn sm danger-outline">Khóa</button>
+                                                                        </form>
+                                                                        <% } else { %>
+                                                                            <form style="display: inline;"
+                                                                                action="/admin/shipping-providers/active/<%= shippingProvider.id%>"
+                                                                                method="post">
+                                                                                <button class="btn sm green-outline">Mở
+                                                                                    khóa</button>
+                                                                            </form>
+                                                                            <% } %>
+                                                                                <form style="display: inline;"
+                                                                                    action="/admin/shipping-providers/delete/<%= shippingProvider.id%>"
+                                                                                    method="post">
+                                                                                    <button
+                                                                                        class="btn sm danger-outline">Xóa</button>
+                                                                                </form>
+                                                                </td>
+                                        </tr>
+                                        <% }) %>
+
+                                </tbody>
+                            </table>
+                            <div class="pagination">
+                                <span>Trang <%= currentPage %> / <%= totalPages %></span>
+                                <div class="page-btns">
+                                    <!-- Prev -->
+                                    <% if (currentPage> 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">‹</a>
+                                    <% } %>
+                                    
+                                    <% 
+                                        function getPagination(current, total) {
+                                            if (total <= 5) return Array.from({length: total}, (_, i) => i + 1);
+                                            if (current <= 3) return [1, 2, 3, '...', total - 1, total];
+                                            if (current >= total - 2) return [1, 2, '...', total - 2, total - 1, total];
+                                            return [1, 2, '...', current, '...', total - 1, total];
+                                        }
+                                        const pages = getPagination(currentPage, totalPages);
+                                    %>
+
+                                    <% pages.forEach(p => { %>
+                                        <% if (p === '...') { %>
+                                            <span class="page-dots">...</span>
+                                        <% } else { %>
+                                            <a href="?page=<%= p %>&q=<%= typeof q !== 'undefined' ? q : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>"
+                                               class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                                               <%= p %>
+                                            </a>
+                                        <% } %>
+                                    <% }) %>
+
+                                    <!-- Next -->
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">›</a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

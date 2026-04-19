@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <title>PCStore - Cửa hàng máy tính</title>
+    <link rel="stylesheet" href="client/css/style.css">
+    <style>
+        :root {
+            --main-bg: url("/client/images/backweb.webp"
+
+                );
+            --promotion-bg: url({{asset('homepage/assets/images/background_offer_detail.png')
+        }
+        });
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <%- include("../layout/header.ejs") %>
+        </header>
+
+        <nav class="main-nav">
+            <%- include("../layout/navbar.ejs") %>
+        </nav>
+
+        <main>
+            <section class="banner-slideshow">
+                <div class="container">
+                    <div class="banner-container">
+                        <div class="main-banner">
+                            <div class="slide active">
+                                <img src="/client/images/slide1.jpg" alt="">
+                            </div>
+                            <div class="slide">
+                                <img src="/client/images/slide2.jpg" alt="">
+                            </div>
+                            <div class="slide">
+                                <img src="/client/images/slide3.jpg" alt="">
+                            </div>
+                            <div class="slideshow-nav">
+                                <div class="slideshow-dot active" data-slide="0"></div>
+                                <div class="slideshow-dot" data-slide="1"></div>
+                                <div class="slideshow-dot" data-slide="2"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <div class="container">
+                <div class="bottom-banners">
+                    <div class="bottom-banner">
+                        <img src="/client/images/slide3.jpg" alt="">
+                    </div>
+                    <div class="bottom-banner">
+                        <img src="/client/images/slide2.jpg" alt="">
+                    </div>
+                </div>
+
+                <!-- Sale Product -->
+                <section class="products-section sale-product">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="bi bi-lightning-charge-fill"></i> Flash Sale</h2>
+                        <!-- <div class="filter-options">
+                    <a href="#" class="filter-option">Xem thêm khuyến mãi</a>
+                </div> -->
+                    </div>
+                    <div class="product-slider">
+                        <button class="slider-btn prev-btn">❮</button>
+                        <div class="product-container">
+                            <% hotproducts.forEach(function (hotproduct) {%>
+                                <a href="/product/<%= hotproduct.slug%>" style="text-decoration: none;">
+                                    <div class="product-card">
+                                        <div class="bestseller-label">Hot</div>
+                                        <div class="product-image">
+                                            <img src="/client/images/PC00001-1.jpg" alt="PC Gaming">
+                                        </div>
+                                        <h3 class="product-title"><%= hotproduct.name%></h3>
+                                        <div class="product-price"><%= hotproduct.price.toLocaleString('vi-VN')%>đ
+
+                                            <span class="original-price"><%= hotproduct.price.toLocaleString('vi-VN')%>đ</span>
+
+                                        </div>
+                                        <div class="product-stats">
+                                            <span>⭐ Đã bán: 100</span>
+                                        </div>
+                                </a>
+                            <%})%>
+                        </div>
+                    </div>
+                    <button class="slider-btn next-btn">❯</button>
+            </div>
+            </section>
+
+            <!-- Categories -->
+            <h2 style="margin: 30px 0 15px; font-size: 24px; color: #333;">DANH MỤC NỔI BẬT</h2>
+            <div class="categories-grid">
+                <a href="/pc-gaming">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/pcgaming-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">PC GAMING</div>
+                    </div>
+                </a>
+                <a href="/pc-workstation">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/pcdohoa-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">PC ĐỒ HỌA - LÀM VIỆC</div>
+                    </div>
+                </a>
+                <a href="/cpu">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/cpu-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">CPU - Bộ Vi Xử Lý</div>
+                    </div>
+                </a>
+                <a href="/gpu">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/card-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">VGA - Card Màn Hình</div>
+                    </div>
+                </a>
+                <a href="/motherboard">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/mainboard-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">Main - Bo Mạch Chủ</div>
+                    </div>
+                </a>
+                <a href="/monitor">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/manhinh-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">MÀN HÌNH MÁY TÍNH</div>
+                    </div>
+                </a>
+                <a href="/view/laptop">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/laptop-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">LAPTOP</div>
+                    </div>
+                </a>
+                <a href="/storagedevice">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/tbluutru-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">THIẾT BỊ LƯU TRỮ</div>
+                    </div>
+                </a>
+                <a href="/gear">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/gear-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">PHÍM CHUỘT</div>
+                    </div>
+                </a>
+                <a href="/headset">
+                    <div class="categories-grid-card">
+                        <div class="categories-grid-item">
+                            <img src="/client/images/icons/headphone-icon.png" alt="">
+                        </div>
+                        <div style="font-size: 14px;">TAI NGHE</div>
+                    </div>
+                </a>
+            </div>
+
+
+            <!-- Product -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h2 class="section-title">PC GAMING</h2>
+                    <div class="filter-options">
+                        <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+                    </div>
+                </div>
+                <div class="product-slider">
+                    <button class="slider-btn prev-btn">❮</button>
+                    <div class="product-container">
+                        <a href="/product/{{ $pcgaming -> slug }}" style="text-decoration: none;">
+                            <div class="product-card">
+                                <div class="bestseller-label">Hot</div>
+
+                                <div class="product-image">
+                                    <img src="client/images/PC00001-1.jpg" alt="PC Gaming">
+                                </div>
+                                <h3 class="product-title">PC001</h3>
+                                <div class="product-price">10.000.000đ
+
+                                    <span class="original-price">100.000.000đ</span>
+
+                                </div>
+
+                                <div class="product-stats">
+                                    <span>⭐ Đã bán: 100</span>
+                                </div>
+                        </a>
+                    </div>
+                </div>
+                <button class="slider-btn next-btn">❯</button>
+
+            </section>
+
+        </main>
+
+        <footer>
+            <%- include("../layout/footer.ejs") %>
+        </footer>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <div style="padding:24px; flex:1;">
+
+      <!-- Page header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h2 style="font-size:18px;font-weight:600;">Chi tiết đơn hàng</h2>
+          <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → #DH20260330003</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn outline" style="background:transparent;color:#185FA5;border:1px solid #185FA5;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">⬇ Xuất PDF</button>
+          <button class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
+          <button class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Cập nhật trạng thái</button>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline-card">
+        <div class="timeline-header">
+          <h3>Trạng thái đơn hàng</h3>
+          <span class="order-id"><%= order.code %></span>
+        </div>
+        <div class="timeline">
+          <!-- Step 1: done -->
+          <div class="timeline-step">
+            <div class="step-dot done">✓</div>
+            <div class="step-label done">Đặt hàng</div>
+            <div class="step-time"><%= order.createdAt.toLocaleString('vi-VN') %></div>
+          </div>
+          <!-- Step 2: done -->
+          <div class="timeline-step">
+            <div class="step-dot done">✓</div>
+            <div class="step-label done">Xác nhận</div>
+            <div class="step-time">30/03 14:00</div>
+          </div>
+          <!-- Step 3: done -->
+          <div class="timeline-step">
+            <div class="step-dot done">✓</div>
+            <div class="step-label done">Đóng gói</div>
+            <div class="step-time">30/03 14:00</div>
+          </div>
+          <!-- Step 4: active -->
+          <div class="timeline-step">
+            <div class="step-dot active">🚚</div>
+            <div class="step-label active">Đang giao</div>
+            <div class="step-time">31/03 08:30</div>
+          </div>
+          <!-- Step 5: pending -->
+          <div class="timeline-step">
+            <div class="step-dot pending">⬤</div>
+            <div class="step-label">Hoàn thành</div>
+            <div class="step-time">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-col detail -->
+      <div class="detail-grid">
+
+        <!-- Left: order info + customer -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Order info -->
+          <div class="card">
+            <h3>Thông tin đơn hàng</h3>
+            <div class="info-row">
+              <span class="info-label">Mã đơn hàng</span>
+              <span class="info-value mono">#<%= order.code %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Ngày đặt hàng</span>
+              <span class="info-value"><%= order.createdAt.toLocaleString('vi-VN') %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Trạng thái</span>
+              <span class="info-value"><span class="badge info">Đang giao hàng</span></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Hình thức thanh toán</span>
+              <span class="info-value">Chuyển khoản ngân hàng</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Trạng thái thanh toán</span>
+              <span class="info-value"><span class="badge success">Đã thanh toán</span></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Ghi chú</span>
+              <span class="info-value" style="font-style:italic;color:#5F5E5A;">Giao giờ hành chính</span>
+            </div>
+          </div>
+
+          <!-- Shipping -->
+          <div class="card">
+            <h3>Thông tin giao hàng</h3>
+            <div class="info-row">
+              <span class="info-label">Đơn vị vận chuyển</span>
+              <span class="info-value">Giao hàng nhanh (GHN)</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Mã vận đơn</span>
+              <span class="info-value mono">GHN-2024-88291</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Dự kiến giao</span>
+              <span class="info-value">01/04/2026</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Địa chỉ giao</span>
+              <span class="info-value" style="max-width:220px;text-align:right;">123 Nguyễn Trãi, P. Thượng Đình, Q. Thanh Xuân, Hà Nội</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: customer + summary -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Customer -->
+          <div class="card">
+            <h3>Khách hàng</h3>
+            <div class="customer-row">
+            <% const avatarUrl= order.user.avatar || 'UserAvatar.png' ; %>
+                <div class="user-cell">
+                    <div class="user-avatar" style="background:#eeeeee">
+                        <img class="user-avatar"
+                            src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        
+                    </div>
+                    <div>
+                        <div class="user-name">
+                            <%= order.user.fullName %>
+                        </div>
+                        <div class="user-email">
+                            Khách hàng mới
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Số điện thoại</span>
+              <span class="info-value"><%= order.user.phone %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Email</span>
+              <span class="info-value" style="font-size:12px;"><%= order.user.email %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Tổng đơn đã mua</span>
+              <span class="info-value">12 đơn</span>
+            </div>
+          </div>
+
+          <!-- Payment summary -->
+          <div class="card">
+            <h3>Tổng thanh toán</h3>
+            <div class="info-row">
+              <span class="info-label">Tạm tính</span>
+              <span class="info-value"><%= order.totalAmount %> ₫</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phí vận chuyển</span>
+              <span class="info-value">0 ₫</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Giảm giá</span>
+              <span class="info-value" style="color:#0F6E56;">− 0 ₫</span>
+            </div>
+            <hr class="divider">
+            <div class="info-row">
+              <span class="info-label" style="font-weight:600;color:var(--text);">Tổng cộng</span>
+              <span style="font-size:20px;font-weight:700;color:#0C447C;"><%= order.totalAmount %> ₫</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Product table -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Sản phẩm trong đơn</h3>
+          <span style="font-size:12px;color:#5F5E5A;"> <%= order.orderItems?.length || 0 %> sản phẩm</span>
+        </div>
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>SKU</th>
+              <th style="text-align:center;">Số lượng</th>
+              <th style="text-align:right;">Đơn giá</th>
+              <th style="text-align:right;">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+            <% order.orderItems.forEach(function(item) { %>
+              <td>
+                <div class="user-cell" >
+                    <div class="user-avatar" style="width:80px;height:80px;border-radius:0px">
+                        <img src="/admin/productImages/<%= item.product.image %>" alt="" style="width:100%;height:100%;object-fit:cover">
+                    </div>
+                    <div>
+                        <div style="" class="user-name">
+                            <%= item.product.name %>
+                        </div>
+                        <div class="user-email">
+                            <%= item.product.shortDescription %>
+                        </div>
+                    </div>
+                </div>
+              </td>
+              <td style="font-family:monospace;font-size:12px;color:#5F5E5A;"><%= item.product.sku %></td>
+              <td style="text-align:center;">× <%= item.quantity %></td>
+              <td style="text-align:right;"><%= item.price %> ₫</td>
+              <td style="text-align:right;font-weight:600;"><%= item.quantity * item.price %> ₫</td>
+            </tr>
+            <% }) %>
+            <tr class="total-row">
+              <td colspan="4" style="text-align:right;font-size:12px;color:#5F5E5A;padding-right:16px;">Tổng cộng</td>
+              <td style="text-align:right;font-size:15px;font-weight:700;color:#0C447C;"><%= order.totalAmount %> ₫</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Activity log -->
+      <div class="card" style="margin-bottom:24px;">
+        <h3 style="margin-bottom:14px;">Lịch sử hoạt động</h3>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">31/03 08:30</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#185FA5;margin-top:4px;flex-shrink:0;"></div>
+            <div><span style="color:#185FA5;font-weight:500;">Hệ thống</span> <span style="color:#5F5E5A;">cập nhật trạng thái sang</span> <span style="font-weight:500;">Đang giao hàng</span></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 14:00</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#0F6E56;margin-top:4px;flex-shrink:0;"></div>
+            <div><span style="color:#185FA5;font-weight:500;">Nguyễn Tuấn</span> <span style="color:#5F5E5A;">chuyển sang</span> <span style="font-weight:500;">Đang đóng gói</span></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 09:42</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#0F6E56;margin-top:4px;flex-shrink:0;"></div>
+            <div><span style="color:#185FA5;font-weight:500;">Hệ thống</span> <span style="color:#5F5E5A;">xác nhận đơn hàng tự động</span></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:10px 0;font-size:13px;align-items:flex-start;">
+            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 09:14</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#B4B2A9;margin-top:4px;flex-shrink:0;"></div>
+            <div><span style="color:#185FA5;font-weight:500;">Lê Minh Châu</span> <span style="color:#5F5E5A;">đặt đơn hàng thành công</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- DASHBOARD PAGE -->
+                    <div class="page active" id="page-dashboard">
+                        <div class="page-header">
+                            <div>
+                                <h2>Tổng quan hệ thống</h2>
+                                <div class="breadcrumb">Thứ Hai, 30/03/2026</div>
+                            </div>
+                            <button class="btn primary">Xuất báo cáo</button>
+                        </div>
+
+                        <div class="stat-grid">
+                            <div class="stat-card blue">
+                                <div class="stat-icon blue">👥</div>
+                                <div class="stat-label">Tổng người dùng</div>
+                                <div class="stat-value"><%= usersCount.toLocaleString('vi-VN')%></div>
+                                <div class="stat-change"><span>+<%= usersThisMonth.toLocaleString('vi-VN')%></span> người dùng mới</div>
+                            </div>
+                            <div class="stat-card teal">
+                                <div class="stat-icon teal">📦</div>
+                                <div class="stat-label">Sản phẩm </div>
+                                <div class="stat-value"><%= productsCount.toLocaleString('vi-VN')%></div>
+                                <div class="stat-change"><span>+<%= productsThisMonth.toLocaleString('vi-VN')%></span> sản phẩm mới</div>
+                            </div>
+                            <div class="stat-card amber">
+                                <div class="stat-icon amber">🎁</div>
+                                <div class="stat-label">Khuyến mãi đang chạy</div>
+                                <div class="stat-value">18</div>
+                                <div class="stat-change"><span>6</span> sắp hết hạn</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-icon red">🛒</div>
+                                <div class="stat-label">Đơn hàng hôm nay</div>
+                                <div class="stat-value">347</div>
+                                <div class="stat-change"><span class="down">-3.1%</span> so với hôm qua</div>
+                            </div>
+                        </div>
+
+                        <div class="charts-row">
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Doanh thu 6 tháng gần nhất (triệu VND)</span>
+                                    <span class="card-action">Chi tiết →</span>
+                                </div>
+                                <div class="bar-chart">
+                                    <div class="bar-group">
+                                        <div class="bar" style="height:72px"></div><span class="bar-label">T10</span>
+                                    </div>
+                                    <div class="bar-group">
+                                        <div class="bar" style="height:90px"></div><span class="bar-label">T11</span>
+                                    </div>
+                                    <div class="bar-group">
+                                        <div class="bar" style="height:108px"></div><span class="bar-label">T12</span>
+                                    </div>
+                                    <div class="bar-group">
+                                        <div class="bar" style="height:84px"></div><span class="bar-label">T1</span>
+                                    </div>
+                                    <div class="bar-group">
+                                        <div class="bar" style="height:118px"></div><span class="bar-label">T2</span>
+                                    </div>
+                                    <div class="bar-group">
+                                        <div class="bar highlight" style="height:132px"></div><span
+                                            class="bar-label">T3</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Trạng thái đơn hàng</span>
+                                </div>
+                                <div class="donut-wrap">
+                                    <svg class="donut-svg" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#E6F1FB" stroke-width="16" />
+                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#378ADD" stroke-width="16"
+                                            stroke-dasharray="145 144" stroke-dashoffset="36"
+                                            transform="rotate(-90 60 60)" />
+                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#1D9E75" stroke-width="16"
+                                            stroke-dasharray="72 217" stroke-dashoffset="-109"
+                                            transform="rotate(-90 60 60)" />
+                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#EF9F27" stroke-width="16"
+                                            stroke-dasharray="43 246" stroke-dashoffset="-181"
+                                            transform="rotate(-90 60 60)" />
+                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#E24B4A" stroke-width="16"
+                                            stroke-dasharray="29 260" stroke-dashoffset="-224"
+                                            transform="rotate(-90 60 60)" />
+                                        <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="600"
+                                            fill="#1a1a18">347</text>
+                                        <text x="60" y="70" text-anchor="middle" font-size="10" fill="#5F5E5A">đơn
+                                            hàng</text>
+                                    </svg>
+                                    <div class="donut-legend">
+                                        <div class="legend-item">
+                                            <div class="legend-dot" style="background:#378ADD"></div><span
+                                                class="legend-name">Chờ xử lý</span><span class="legend-val">162
+                                                (47%)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-dot" style="background:#1D9E75"></div><span
+                                                class="legend-name">Đang giao</span><span class="legend-val">80
+                                                (23%)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-dot" style="background:#EF9F27"></div><span
+                                                class="legend-name">Hoàn thành</span><span class="legend-val">72
+                                                (21%)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-dot" style="background:#E24B4A"></div><span
+                                                class="legend-name">Hủy</span><span class="legend-val">33 (9%)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Đơn hàng gần nhất</span>
+                                <span class="card-action" onclick="showPage('orders')">Xem tất cả →</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#DH20260330001</td>
+                                        <td>Nguyễn Văn An</td>
+                                        <td>iPhone 15 Pro Max × 1</td>
+                                        <td>34,990,000 ₫</td>
+                                        <td><span class="badge pending">Chờ xử lý</span></td>
+                                        <td>14:32</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DH20260330002</td>
+                                        <td>Trần Thị Bình</td>
+                                        <td>Samsung Galaxy S25 × 2</td>
+                                        <td>42,000,000 ₫</td>
+                                        <td><span class="badge active">Đang giao</span></td>
+                                        <td>13:15</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DH20260330003</td>
+                                        <td>Lê Minh Châu</td>
+                                        <td>AirPods Pro 3 × 1</td>
+                                        <td>6,490,000 ₫</td>
+                                        <td><span class="badge info">Hoàn thành</span></td>
+                                        <td>11:50</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DH20260330004</td>
+                                        <td>Phạm Hương Giang</td>
+                                        <td>MacBook Air M4 × 1</td>
+                                        <td>28,990,000 ₫</td>
+                                        <td><span class="badge danger">Đã hủy</span></td>
+                                        <td>10:22</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

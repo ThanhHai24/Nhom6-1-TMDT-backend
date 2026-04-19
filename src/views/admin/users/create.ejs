@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(() => {
+            const avatarFile = $("#avatarFile");
+            avatarFile.change(function (e) {
+                const imgURL = URL.createObjectURL(e.target.files[0]);
+
+                $("#avatarPreview").attr("src", imgURL);
+                // $("#avatarPreview").css({
+                //     "display": "block"
+                // });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- ADD USER PAGE -->
+                    <div class="page active" id="page-add-user">
+                        <div class="page-header">
+                            <div>
+                                <h2>Thêm người dùng mới</h2>
+                                <div class="breadcrumb">Hệ quản trị → <span onclick="showPage('users')"
+                                        style="cursor:pointer;color:var(--accent)">Quản lý người dùng</span> → Thêm mới
+                                </div>
+                            </div>
+                            <a href="/admin/users"><button class="btn">← Quay lại</button></a>
+                        </div>
+
+                        <form action="/admin/users/handlecreate" method="POST" onsubmit="submitAddUser(event);"
+                            enctype="multipart/form-data">
+                            <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+
+                                <!-- Left: Main form -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <!-- Thông tin cơ bản -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Thông tin cơ bản</span>
+                                            <span style="font-size:12px;color:var(--text-muted)"><span
+                                                    style="color:#E24B4A">*</span> Bắt
+                                                buộc</span>
+                                        </div>
+
+                                        <div
+                                            style="display:flex;align-items:center;gap:20px;padding:16px;background:var(--bg);border-radius:10px;margin-bottom:20px;">
+                                            <div
+                                                style="width:72px;height:72px;border-radius:50%;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#fff;flex-shrink:0;">
+
+                                                <img id="avatarPreview"
+                                                    style="width:100%;height:100%;border-radius:50%;object-fit:cover;"
+                                                    src="../userImages/UserAvatar.png" alt="">
+                                            </div>
+                                            <div>
+                                                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Ảnh đại
+                                                    diện
+                                                </div>
+                                                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+                                                    PNG,
+                                                    JPG tối đa 2MB.</div>
+                                                <input type="file" name="avatar" id="avatarFile"
+                                                    accept=".jpg, .jpeg, .png" style="display:none;">
+                                                <label class="btn sm" type="button" for="avatarFile">Tải ảnh lên</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Họ và tên đầy đủ <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="fullName" class="form-input" type="text" id="inp-fullname"
+                                                    placeholder="VD: Nguyễn Văn An" oninput="updateAvatar(this.value)">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Tên tài khoản <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="username" class="form-input" type="text" id="inp-username"
+                                                    placeholder="VD: nvanan (không dấu, không khoảng trắng)">
+                                                <span style="font-size:11px;color:var(--text-muted)"
+                                                    id="username-hint"></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Email <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="email" class="form-input" type="email" id="inp-email"
+                                                    placeholder="VD: nvanan@email.com">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Số điện thoại <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="phone" class="form-input" type="tel" id="inp-phone"
+                                                    placeholder="VD: 0901 234 567">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Ngày sinh</label>
+                                                <input name="dob" class="form-input" type="date" id="inp-dob">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Giới tính</label>
+                                                <select name="gender" class="form-input form-select" id="inp-gender">
+                                                    <option value="">-- Chọn giới tính --</option>
+                                                    <option value="Male">Nam</option>
+                                                    <option value="Female">Nữ</option>
+                                                    <option value="Other">Khác</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group full">
+                                                <label class="form-label">Số CCCD / CMND</label>
+                                                <input name="idCard" class="form-input" type="text" id="inp-cccd"
+                                                    placeholder="VD: 001234567890">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bảo mật -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Mật khẩu</span>
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Mật khẩu <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <div style="position:relative;">
+                                                    <input name="password" class="form-input" type="password"
+                                                        id="inp-pw" placeholder="Tối thiểu 8 ký tự"
+                                                        oninput="checkPwStrength()"
+                                                        style="width:100%;padding-right:36px;">
+                                                    <span onclick="togglePw('inp-pw')"
+                                                        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;color:var(--text-muted)">👁</span>
+                                                </div>
+                                                <div id="pw-strength-bar"
+                                                    style="height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden;">
+                                                    <div id="pw-strength-fill"
+                                                        style="height:100%;width:0;border-radius:2px;transition:width 0.3s,background 0.3s;">
+                                                    </div>
+                                                </div>
+                                                <span id="pw-strength-label"
+                                                    style="font-size:11px;color:var(--text-muted)"></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Xác nhận mật khẩu <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <div style="position:relative;">
+                                                    <input class="form-input" type="password" id="inp-pw2"
+                                                        placeholder="Nhập lại mật khẩu" oninput="checkPwMatch()"
+                                                        style="width:100%;padding-right:36px;">
+                                                    <span onclick="togglePw('inp-pw2')"
+                                                        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;color:var(--text-muted)">👁</span>
+                                                </div>
+                                                <span id="pw-match-label" style="font-size:11px;"></span>
+                                            </div>
+                                            <div class="form-group full">
+                                                <label
+                                                    style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+                                                    <input type="checkbox" id="inp-send-email" checked
+                                                        style="width:14px;height:14px;">
+                                                    Gửi thông tin tài khoản qua email sau khi tạo
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Right: Role & Status -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Vai
+                                                trò & Quyền hạn</span>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom:14px;">
+                                            <label class="form-label">Vai trò <span
+                                                    style="color:#E24B4A">*</span></label>
+                                            <select name="role" class="form-input form-select" id="inp-role"
+                                                onchange="updateRoleDesc()">
+                                                <option value="">-- Chọn vai trò --</option>
+                                                <option value="CUSTOMER">Khách hàng</option>
+                                                <option value="MANAGER">Quản lý cửa hàng</option>
+                                                <option value="RECEPTIONIST">Nhân viên lễ tân</option>
+                                                <option value="WAREHOUSE">Nhân viên kho</option>
+                                                <option value="ADMIN">Quản trị viên (Admin)</option>
+                                            </select>
+                                        </div>
+                                        <div id="role-desc"
+                                            style="font-size:12px;color:var(--text-muted);background:var(--bg);border-radius:8px;padding:10px;line-height:1.6;display:none;">
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Trạng
+                                                thái tài khoản</span>
+                                        </div>
+                                        <div style="display:flex;flex-direction:column;gap:8px;">
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--accent);border-radius:8px;cursor:pointer;"
+                                                id="status-active-lbl">
+                                                <input type="radio" name="status" value="active" checked
+                                                    onchange="selectStatus('active')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Hoạt động</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Tài khoản được
+                                                        phép
+                                                        đăng nhập</div>
+                                                </div>
+                                            </label>
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;"
+                                                id="status-inactive-lbl">
+                                                <input type="radio" name="status" value="inactive"
+                                                    onchange="selectStatus('inactive')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Khóa tài khoản</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Không thể đăng
+                                                        nhập
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Ghi
+                                                chú nội bộ</span></div>
+                                        <textarea class="form-input form-textarea" id="inp-note"
+                                            placeholder="Ghi chú về người dùng này (chỉ admin thấy)..."
+                                            style="width:100%;resize:vertical;min-height:90px;"></textarea>
+                                    </div>
+
+                                    <!-- Action buttons -->
+                                    <div style="display:flex;flex-direction:column;gap:8px;">
+                                        <button class="btn primary" type="submit"
+                                            style="width:100%;padding:10px;font-size:14px;">Tạo
+                                            tài khoản</button>
+                                        <a href="/admin/users"><button class="btn" type="button"
+                                                style="width:100%;padding:10px;font-size:14px;">Hủy
+                                                bỏ</button></a>
+                                    </div>
+
+                                    <!-- Validation summary -->
+                                    <div id="form-errors"
+                                        style="display:none;background:var(--red-50);border:1px solid var(--red-200);border-radius:8px;padding:12px;">
+                                        <div
+                                            style="font-size:12px;font-weight:500;color:var(--red-600);margin-bottom:6px;">
+                                            Vui lòng kiểm tra lại:
+                                        </div>
+                                        <ul id="error-list"
+                                            style="font-size:12px;color:var(--red-600);padding-left:16px;line-height:1.8;">
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+        </main>
+        <script>
+            function selectStatus(val) {
+                ['active', 'inactive'].forEach(s => {
+                    const lbl = document.getElementById('status-' + s + '-lbl');
+                    if (lbl) lbl.style.borderColor = s === val ? 'var(--accent)' : 'var(--border)';
+                });
+            }
+            const roleDescs = {
+                customer: 'Người dùng cuối: tìm kiếm sản phẩm, đặt hàng, thanh toán, theo dõi vận chuyển, đánh giá sản phẩm.',
+                store_manager: 'Xem báo cáo doanh thu cửa hàng, quản lý sản phẩm đang bán, chương trình khuyến mãi, quản lý kho.',
+                receptionist: 'Tra cứu sản phẩm, người dùng, đơn hàng. Phê duyệt yêu cầu đặt hàng, hỗ trợ khách hàng.',
+                warehouse: 'Đóng gói đơn hàng, xác nhận đơn hàng, nhập hàng vào kho, bàn giao cho đơn vị vận chuyển.',
+                admin: 'Quyền cao nhất: quản lý toàn bộ hệ thống, người dùng, đơn hàng, kho, khuyến mãi, vận chuyển, báo cáo, sao lưu.'
+            };
+
+            function updateRoleDesc() {
+                const val = document.getElementById('inp-role').value;
+                const el = document.getElementById('role-desc');
+                if (val && roleDescs[val]) {
+                    el.textContent = roleDescs[val];
+                    el.style.display = 'block';
+                } else el.style.display = 'none';
+            }
+
+            function checkPwStrength() {
+                const pw = document.getElementById('inp-pw').value;
+                const fill = document.getElementById('pw-strength-fill');
+                const label = document.getElementById('pw-strength-label');
+                let score = 0;
+                if (pw.length >= 8) score++;
+                if (/[A-Z]/.test(pw)) score++;
+                if (/[0-9]/.test(pw)) score++;
+                if (/[^A-Za-z0-9]/.test(pw)) score++;
+                const levels = [{
+                    w: '0%',
+                    c: '#ccc',
+                    t: ''
+                },
+                {
+                    w: '25%',
+                    c: '#E24B4A',
+                    t: 'Rất yếu'
+                },
+                {
+                    w: '50%',
+                    c: '#EF9F27',
+                    t: 'Yếu'
+                },
+                {
+                    w: '75%',
+                    c: '#378ADD',
+                    t: 'Trung bình'
+                },
+                {
+                    w: '100%',
+                    c: '#1D9E75',
+                    t: 'Mạnh'
+                },
+                ];
+                const lv = levels[score] || levels[0];
+                fill.style.width = lv.w;
+                fill.style.background = lv.c;
+                label.textContent = lv.t;
+                label.style.color = lv.c;
+                checkPwMatch();
+            }
+
+            function checkPwMatch() {
+                const pw = document.getElementById('inp-pw').value;
+                const pw2 = document.getElementById('inp-pw2').value;
+                const lbl = document.getElementById('pw-match-label');
+                if (!pw2) {
+                    lbl.textContent = '';
+                    return;
+                }
+                if (pw === pw2) {
+                    lbl.textContent = 'Mật khẩu khớp ✓';
+                    lbl.style.color = '#1D9E75';
+                } else {
+                    lbl.textContent = 'Mật khẩu không khớp';
+                    lbl.style.color = '#E24B4A';
+                }
+            }
+
+            function togglePw(id) {
+                const el = document.getElementById(id);
+                el.type = el.type === 'password' ? 'text' : 'password';
+            }
+
+            function submitAddUser() {
+                const errors = [];
+                const fullname = document.getElementById('inp-fullname').value.trim();
+                const username = document.getElementById('inp-username').value.trim();
+                const email = document.getElementById('inp-email').value.trim();
+                const phone = document.getElementById('inp-phone').value.trim();
+                const role = document.getElementById('inp-role').value;
+                const pw = document.getElementById('inp-pw').value;
+                const pw2 = document.getElementById('inp-pw2').value;
+
+                if (!fullname) errors.push('Họ và tên không được để trống');
+                if (!username) errors.push('Tên tài khoản không được để trống');
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email không hợp lệ');
+                if (!phone) errors.push('Số điện thoại không được để trống');
+                if (!role) errors.push('Vui lòng chọn vai trò cho người dùng');
+                if (!pw || pw.length < 8) errors.push('Mật khẩu phải có ít nhất 8 ký tự');
+                if (pw !== pw2) errors.push('Mật khẩu xác nhận không khớp');
+
+                const errBox = document.getElementById('form-errors');
+                const errList = document.getElementById('error-list');
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+                    errBox.style.display = 'block';
+                    errBox.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    return;
+                }
+                errBox.style.display = 'none';
+
+                const btn = event.submitter;
+                btn.textContent = 'Đang tạo...';
+                btn.disabled = true;
+
+                // setTimeout(() => {
+                //     btn.textContent = 'Tạo tài khoản';
+                //     btn.disabled = false;
+                //     showSuccessToast('Tạo tài khoản thành công cho ' + fullname + '!');
+                // }, 1200);
+            }
+        </script>
+
+</body>
+
+</html>

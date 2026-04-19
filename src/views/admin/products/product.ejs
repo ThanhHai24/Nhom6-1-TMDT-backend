@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- PRODUCTS PAGE -->
+                    <div class="page active" id="page-products">
+                        <div class="page-header">
+                            <div>
+                                <h2>Danh mục sản phẩm</h2>
+                                <div class="breadcrumb">Hệ quản trị → Danh mục sản phẩm</div>
+                            </div>
+                            <div style="display:flex;gap:8px">
+                                <button class="btn">Nhập Excel</button>
+                                <a style="text-decoration: none;" href="/admin/products/create" class="btn primary">+ Thêm sản phẩm</a>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="toolbar">
+                                <div class="search-box"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+                                        stroke="#888" stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg><input type="text" placeholder="Tìm sản phẩm..."></div>
+                                <select class="filter-select">
+                                    <option>Tất cả danh mục</option>
+                                    <option>Điện thoại</option>
+                                    <option>Máy tính xách tay</option>
+                                    <option>Tai nghe</option>
+                                    <option>Phụ kiện</option>
+                                </select>
+                                <select class="filter-select">
+                                    <option>Tất cả trạng thái</option>
+                                    <option>Đang bán</option>
+                                    <option>Hết hàng</option>
+                                    <option>Ngưng bán</option>
+                                </select>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>SKU</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá bán</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% products.forEach( function (product) { %>
+                                        <%
+                                            let stockLevel = 'high';
+
+                                            if (product.stock === 0) {
+                                                stockLevel = 'low';
+                                            } else if (product.stock <= product.lowStockThreshold) {
+                                                stockLevel = 'low';
+                                            } else if (product.stock <= product.lowStockThreshold * 5) {
+                                                stockLevel = 'mid';
+                                            }
+                                        %>
+                                        <%
+                                            const status =
+                                                product.status === 'INACTIVE'
+                                                    ? 'Ngừng bán'
+                                                    : product.stock === 0
+                                                    ? 'Hết hàng'
+                                                    : product.stock <= product.lowStockThreshold
+                                                    ? 'Sắp hết'
+                                                    : 'Đang bán';
+                                        %>
+                                        <% const stockPercent = (product.stock / (product.lowStockThreshold*10)) * 100; %>
+                                        <%
+                                            const statusbadge =
+                                                product.stock <= 0
+                                                    ? 'danger'
+                                                    : product.status === 'INACTIVE'
+                                                    ? 'inactive'
+                                                    : product.stock < product.lowStockThreshold
+                                                    ? 'pending'
+                                                    : 'active';
+                                        %>
+                                        <tr>
+                                            <td style="max-width: 250px;">
+                                                <div class="user-cell" >
+                                                    <div class="user-avatar" style="width:80px;height:80px;border-radius:0px">
+                                                        <img src="/admin/productImages/<%= product.image %>" alt="" style="width:100%;height:100%;object-fit:cover">
+                                                    </div>
+                                                    <div>
+                                                        <div style="" class="user-name">
+                                                            <%= product.name %>
+                                                        </div>
+                                                        <div class="user-email">
+                                                            <%= product.shortDescription %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="font-family:monospace;font-size:12px">
+                                                <%= product.sku %>
+                                            </td>
+                                            <td>
+                                                <%= product.category?.name %>
+                                            </td>
+                                            <td>
+                                                <%= new Intl.NumberFormat('vi-VN').format(product.price) %>₫
+                                            </td>
+                                            <td>
+                                                <div class="stock-level">
+                                                    <div class="stock-bar">
+                                                        <div class="stock-fill <%= stockLevel %>" style="width:<%= stockPercent %>%"></div>
+                                                    </div><span class="stock-num">
+                                                        <%= product.stock %>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            
+                                            <td><span class="badge <%= statusbadge %>"><%= status %></span></td>
+                                            <td style="">
+                                                                    <a href="/admin/products/<%= product.id %>"><button
+                                                                            class="btn sm">Chi tiết</button></a>
+                                                                    <% if(product.status==='ACTIVE' ) { %>
+                                                                        <form style="display: inline;"
+                                                                            action="/admin/products/lock/<%= product.id%>"
+                                                                            method="post">
+                                                                            <button
+                                                                                class="btn sm danger-outline">Ngừng bán</button>
+                                                                        </form>
+                                                                        <% } else { %>
+                                                                            <form style="display: inline;"
+                                                                                action="/admin/products/active/<%= product.id%>"
+                                                                                method="post">
+                                                                                <button class="btn sm green-outline">Mở bán</button>
+                                                                            </form>
+                                                                            <% } %>
+                                                                                <form style="display: inline;"
+                                                                                    action="/admin/products/delete/<%= product.id%>"
+                                                                                    method="post">
+                                                                                    <button
+                                                                                        class="btn sm danger-outline">Xóa</button>
+                                                                                </form>
+                                                                </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <title>PCStore - Cửa hàng máy tính</title>
+    <link rel="stylesheet" href="client/css/style.css">
+    <style>
+        :root {
+            --main-bg: url("/client/images/backweb.webp"
+
+                );
+            --promotion-bg: url({{asset('homepage/assets/images/background_offer_detail.png')
+        }
+        });
+        }
+    </style>
+    <style>
+    .auth-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(30, 80, 220, 0.12);
+            width: 100%;
+            max-width: 460px;
+            overflow: hidden;
+        }
+        .auth-card-header {
+            background: linear-gradient(135deg, #2E9BFB 0%, #1D52E7 100%);
+            padding: 32px 36px 28px;
+            text-align: center;
+            color: white;
+        }
+        .auth-card-header .icon-wrap {
+            width: 64px; height: 64px; background: rgba(255,255,255,0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .auth-card-header .icon-wrap i { font-size: 32px; color: white; }
+        .auth-card-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+        .auth-card-header p { font-size: 14px; opacity: 0.88; }
+ 
+        .auth-card-body { padding: 36px; }
+ 
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 7px; }
+        .input-wrap { position: relative; }
+        .input-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #999; font-size: 18px; }
+        .input-wrap input {
+            width: 100%; padding: 13px 14px 13px 42px;
+            border: 1.5px solid #dde3f0; border-radius: 8px;
+            font-size: 15px; color: #222; background: #fafbff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-wrap input:focus { outline: none; border-color: #2E9BFB; box-shadow: 0 0 0 3px rgba(46,155,251,0.12); background: white; }
+        .input-wrap .toggle-pw { left: auto; right: 14px; cursor: pointer; color: #aaa; }
+        .input-wrap .toggle-pw:hover { color: #2E9BFB; }
+ 
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 14px; }
+        .remember-me { display: flex; align-items: center; gap: 7px; color: #555; cursor: pointer; }
+        .remember-me input[type="checkbox"] { accent-color: #1D52E7; width: 16px; height: 16px; cursor: pointer; }
+        .forgot-link { color: #1D52E7; font-weight: 600; }
+        .forgot-link:hover { text-decoration: underline; }
+ 
+        .btn-primary {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #2E9BFB 0%, #1D52E7 100%);
+            color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(29,82,231,0.25); }
+ 
+        .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: #aaa; font-size: 13px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
+ 
+        .btn-social {
+            width: 100%; padding: 12px;
+            background: white; color: #333;
+            border: 1.5px solid #dde3f0; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .btn-social:hover { border-color: #2E9BFB; box-shadow: 0 2px 8px rgba(46,155,251,0.1); }
+        .btn-social i { font-size: 20px; }
+        .btn-google i { color: #EA4335; }
+ 
+        .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: #666; }
+        .auth-footer a { color: #1D52E7; font-weight: 700; }
+        .auth-footer a:hover { text-decoration: underline; }
+ 
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: none; }
+        .alert-error { background: #fff0f0; border: 1px solid #ffcdd2; color: #c62828; }</style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <%- include("../layout/header.ejs") %>
+        </header>
+
+        <nav class="main-nav">
+            <%- include("../layout/navbar.ejs") %>
+        </nav>
+
+        <main>
+            <div class="auth-card" style="margin: 0 auto; margin-top: 20px;">
+                <div class="auth-card-header">
+                    <div class="icon-wrap"><i class="ri-account-circle-fill"></i></div>
+                    <h1>Đăng Nhập</h1>
+                    <p>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục</p>
+                </div>
+                <div class="auth-card-body">
+                    <div class="alert alert-error" id="loginError">
+                        <i class="ri-error-warning-line"></i> Email hoặc mật khẩu không đúng. Vui lòng thử lại.
+                    </div>
+    
+                    <form action="/login" method="POST" id="loginForm">
+                        <div class="form-group">
+                            <label for="email">Email / Số điện thoại</label>
+                            <div class="input-wrap">
+                                <i class="ri-mail-line"></i>
+                                <input type="text" id="email" name="email" placeholder="Nhập email hoặc số điện thoại" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Mật khẩu</label>
+                            <div class="input-wrap">
+                                <i class="ri-lock-line"></i>
+                                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+                                <i class="ri-eye-off-line toggle-pw" id="togglePw" onclick="togglePassword()"></i>
+                            </div>
+                        </div>
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" name="remember"> Ghi nhớ đăng nhập
+                            </label>
+                            <a href="forgot-password.html" class="forgot-link">Quên mật khẩu?</a>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="ri-login-circle-line"></i> Đăng Nhập
+                        </button>
+                    </form>
+    
+                    <div class="divider">hoặc đăng nhập với</div>
+                    <button class="btn-social btn-google" onclick="alert('Đăng nhập Google')">
+                        <i class="bi bi-google"></i> Tiếp tục với Google
+                    </button>
+    
+                    <div class="auth-footer">
+                        Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer>
+            <%- include("../layout/footer.ejs") %>
+        </footer>
+    </div>
+
+</body>
+<script>
+function togglePassword() {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('togglePw');
+    if (pw.type === 'password') { pw.type = 'text'; icon.className = 'ri-eye-line toggle-pw'; }
+    else { pw.type = 'password'; icon.className = 'ri-eye-off-line toggle-pw'; }
+}
+</script>
+</html>

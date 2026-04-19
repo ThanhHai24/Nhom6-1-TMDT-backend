@@ -1,0 +1,137 @@
+<!-- SIDEBAR -->
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">SH</div>
+        <div>
+            <div class="logo-text">ShopAdmin</div>
+            <div class="logo-sub">Hệ quản trị hệ thống</div>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Tổng quan</div>
+        <a class="nav-item <%= currentUrl === '/admin/dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+            <svg class=" nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="1" width="6" height="6" rx="1.5" />
+                <rect x="9" y="1" width="6" height="6" rx="1.5" />
+                <rect x="1" y="9" width="6" height="6" rx="1.5" />
+                <rect x="9" y="9" width="6" height="6" rx="1.5" />
+            </svg>
+            Dashboard
+        </a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Quản lý</div>
+        <a class="nav-item <%= currentUrl === '/admin/users' ? 'active' : '' %>" href="/admin/users">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="8" cy="5" r="3" />
+                <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" />
+            </svg>
+            Người dùng
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/categories' ? 'active' : '' %>" href="/admin/categories">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path
+                    d="M1 3.5A1.5 1.5 0 012.5 2H6l1.5 2H14a1 1 0 011 1v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12V3.5z" />
+                <path d="M4 9v3M4 9h4M8 9v3" stroke-linecap="round" />
+            </svg>
+            Danh mục
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/products' ? 'active' : '' %>" href="/admin/products">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 3h12l-1 9H3L2 3z" />
+                <path d="M6 3V2a2 2 0 014 0v1" />
+            </svg>
+            Sản phẩm
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/brands' ? 'active' : '' %>" href="/admin/brands">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 7h.01M3 11l8-8h6v6l-8 8-6-6z" />
+            </svg>
+            Thương hiệu
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/suppliers' ? 'active' : '' %>" href="/admin/suppliers">
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 21V8l7 4V8l7 4V3l4 2v16H3z" />
+            </svg>
+            Nhà cung cấp
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 3h10l-1.5 8H4.5L3 3z" />
+                <circle cx="6" cy="13.5" r="1" />
+                <circle cx="11" cy="13.5" r="1" />
+            </svg>
+            Đơn hàng
+            <span class="nav-badge">12</span>
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/warehouse' ? 'active' : '' %>" href="/admin/warehouse">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 7l7-5 7 5v8H1V7z" />
+                <rect x="5" y="9" width="6" height="6" />
+            </svg>
+            Quản lý kho
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/promotion' ? 'active' : '' %>" href="/admin/promotion">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 8l3-5h6l3 5-6 7-6-7z" />
+                <path d="M5 3l3 5 3-5" />
+            </svg>
+            Khuyến mãi
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/shipping-providers' ? 'active' : '' %>" href="/admin/shipping-providers">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 9h10V3H1v6z" />
+                <path d="M11 5h3l1 4v2h-4V5z" />
+                <circle cx="4" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+            </svg>
+            Đơn vị vận chuyển
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/shipping' ? 'active' : '' %>" href="/admin/shipping">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 9h10V3H1v6z" />
+                <path d="M11 5h3l1 4v2h-4V5z" />
+                <circle cx="4" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+            </svg>
+            Vận chuyển
+        </a>
+        <a class="nav-item <%= currentUrl === '/admin/notification' ? 'active' : '' %>" href="/admin/notification">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M8 1a5 5 0 015 5c0 3 1 4 1.5 5h-13C2 10 3 9 3 6a5 5 0 015-5z" />
+                <path d="M6.5 13a1.5 1.5 0 003 0" />
+            </svg>
+            Thông báo
+            <span class="nav-badge">5</span>
+        </a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Hệ thống</div>
+        <a class="nav-item <%= currentUrl === '/admin/history' ? 'active' : '' %>" href="/admin/history">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="8" cy="8" r="6" />
+                <path d="M8 5v3l2 2" />
+            </svg>
+            Lịch sử tác động
+        </a>
+        <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 11V5l5-3 5 3v6l-5 3-5-3z" />
+                <path d="M7 14V8l5-3" />
+            </svg>
+            Sao lưu dữ liệu
+        </div>
+        <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="8" cy="8" r="2.5" />
+                <path d="M13.5 8a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" stroke-dasharray="2 2" />
+            </svg>
+            Cài đặt hệ thống
+        </div>
+    </div>
+</nav>

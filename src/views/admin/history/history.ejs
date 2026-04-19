@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                    <!-- ACTIVITY PAGE -->
+                    <div class="page active" id="page-activity">
+                        <div class="page-header">
+                            <div>
+                                <h2>Lịch sử tác động hệ thống</h2>
+                                <div class="breadcrumb">Hệ quản trị → Lịch sử tác động</div>
+                            </div>
+                            <button class="btn">Xuất log</button>
+                        </div>
+                        <div class="card">
+                            <div class="toolbar">
+                                <div class="search-box"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+                                        stroke="#888" stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="M11 11l3 3" />
+                                    </svg><input type="text" placeholder="Tìm theo người dùng, hành động..."></div>
+                                <select class="filter-select">
+                                    <option>Hôm nay</option>
+                                    <option>7 ngày qua</option>
+                                    <option>30 ngày qua</option>
+                                </select>
+                                <select class="filter-select">
+                                    <option>Tất cả hành động</option>
+                                    <option>Đăng nhập</option>
+                                    <option>Thêm sản phẩm</option>
+                                    <option>Xóa người dùng</option>
+                                    <option>Phê duyệt đơn</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="log-item"><span class="log-time">14:32 — 30/03</span>
+                                    <div><span class="log-user">admin@system</span> <span class="log-action">đã phê
+                                            duyệt đơn
+                                            hàng</span> <span class="log-target">#DH20260330001</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">13:50 — 30/03</span>
+                                    <div><span class="log-user">quan.ly@shop</span> <span class="log-action">thêm sản
+                                            phẩm
+                                            mới:</span> <span class="log-target">Samsung Galaxy S25 Ultra</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">13:15 — 30/03</span>
+                                    <div><span class="log-user">admin@system</span> <span class="log-action">khóa tài
+                                            khoản
+                                            người dùng:</span> <span class="log-target">Phạm Hương Giang (ID:
+                                            4821)</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">12:30 — 30/03</span>
+                                    <div><span class="log-user">le.tan@shop</span> <span class="log-action">đăng nhập
+                                            vào hệ
+                                            thống từ IP</span> <span class="log-target">14.224.xxx.xxx</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">11:44 — 30/03</span>
+                                    <div><span class="log-user">admin@system</span> <span class="log-action">tạo chương
+                                            trình
+                                            khuyến mãi:</span> <span class="log-target">FLASH30 — Giảm 30%</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">10:20 — 30/03</span>
+                                    <div><span class="log-user">kho.01@shop</span> <span class="log-action">nhập kho 200
+                                            sản
+                                            phẩm:</span> <span class="log-target">iPhone 15 Pro Max 256GB</span></div>
+                                </div>
+                                <div class="log-item"><span class="log-time">09:15 — 30/03</span>
+                                    <div><span class="log-user">quan.ly@shop</span> <span class="log-action">cập nhật
+                                            giá sản
+                                            phẩm:</span> <span class="log-target">MacBook Air M4 → 28,990,000 ₫</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pagination"><span>Hiển thị 1–7 / 2,841 bản ghi</span>
+                                <div class="page-btns">
+                                    <div class="page-btn">‹</div>
+                                    <div class="page-btn active">1</div>
+                                    <div class="page-btn">2</div>
+                                    <div class="page-btn">3</div>
+                                    <div class="page-btn">›</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+</body>
+
+</html>
