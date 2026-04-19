@@ -1,173 +1,92 @@
-# 🖥️ PC Store - Node.js E-commerce Website
+# 🖥️ PC Store - Backend E-commerce System
+
+<p align="center">
+  Một hệ thống backend mạnh mẽ và hoàn chỉnh cho website thương mại điện tử chuyên cung cấp thiết bị công nghệ: PC, Laptop, Linh kiện và Thiết bị ngoại vi.
+</p>
 
 ## 📌 Giới thiệu
 
-**PC Store** là một website thương mại điện tử chuyên bán:
+**PC Store Backend** được xây dựng dựa trên kiến trúc MVC, cung cấp các RESTful APIs và giao diện Server-side rendering (EJS) phục vụ cho việc quản lý, vận hành một cửa hàng máy tính trực tuyến. Hệ thống giải quyết các bài toán cốt lõi trong TMĐT từ việc quản lý hệ thống phân cấp danh mục phức tạp, kho hàng, cho tới giỏ hàng, đặt hàng và quá trình giao nhận hàng hóa.
 
-* Máy tính (PC, Laptop)
-* Linh kiện máy tính (CPU, GPU, RAM,...)
-* Thiết bị ngoại vi (màn hình, chuột, bàn phím,...)
+## 🚀 Tính năng nổi bật
 
-Dự án được xây dựng bằng **Node.js + Express + Prisma + MySQL** theo kiến trúc MVC, hướng đến việc học tập và phát triển hệ thống thực tế.
+### 🔐 Phân quyền & Bảo mật (Role-based Access Control)
+- Hệ thống quản lý đa vai trò linh hoạt: `ADMIN`, `MANAGER`, `RECEPTIONIST`, `WAREHOUSE`, và `CUSTOMER`.
+- Bảo mật xác thực bằng **JWT (JSON Web Token)** kết hợp với thuật toán **bcrypt** để băm mật khẩu, đảm bảo an toàn tối đa cho dữ liệu người dùng.
 
----
+### 🛍️ Quản lý Sản phẩm & Kho hàng
+- **Sản phẩm (Products):** Quản lý chi tiết thông tin, giá nhập (cost), giá bán (price), quản lý mức tồn kho thấp (low stock threshold), và các nhãn dán nổi bật (Hot, New, Featured).
+- **Phân loại chuyên sâu:** Hỗ trợ Danh mục đa cấp (Category cấp cha/cấp con), cùng với thông tin Thực thể Thương hiệu (Brand) và Nhà cung cấp (Supplier).
 
-## 🚀 Công nghệ sử dụng
+### 🛒 Quản lý Đơn hàng & Thanh toán
+- Quy trình vòng đời đơn hàng khép kín qua các trạng thái: `PENDING` ➡️ `CONFIRMED` ➡️ `PROCESSING` ➡️ `SHIPPED` ➡️ `DELIVERED`. Theo dõi sát sao tình trạng đổi trả (`RETURNED`) hay huỷ đơn (`CANCELLED`).
+- Tích hợp đối tác vận chuyển (Shipping Providers), hỗ trợ nhà vận tải lưu mã vận đơn (Tracking Number) và kết quả đối soát.
+- Hỗ trợ hiển thị nhiều phương thức thanh toán: COD, Chuyển khoản ngân hàng, VNPAY, MOMO.
 
-### 🔧 Backend
+### 🎁 Công cụ Marketing & Chăm sóc khách hàng
+- Quản lý và theo dõi thông tin đánh giá / bình luận từ người dùng đối với các sản phẩm (Reviews).
+- Hỗ trợ xây dựng chiến dịch Khuyến mãi (Promotions) & Mã giảm giá (Coupons).
+- Tính năng Danh sách sản phẩm yếu thích (Wishlist) dành cho khách hàng lưu trữ ngắn hạn mong muốn mua sắm.
 
-* Node.js
-* Express.js
-* Prisma ORM
-* MySQL
+## 🛠️ Công nghệ sử dụng
 
-### 🎨 Frontend
+- **Môi trường & Ngôn ngữ gốc:** Node.js, Express.js cơ sở, viết hoàn toàn bằng **TypeScript**.
+- **Cơ sở dữ liệu:** MySQL tích hợp cùng **Prisma ORM** cho khả năng truy vấn dễ dàng, có type-safety mạnh mẽ.
+- **Template Engine:** EJS (Sử dụng cho các trang quản trị web admin dashboard, view detail, form email,...).
+- **Công cụ hỗ trợ thêm:** `dotenv` (quản trị biến môi trường), `multer` (upload hình ảnh/files), `uuid`, `nodemon`.
 
-* EJS (Template Engine)
+## 📂 Cơ sở dữ liệu (Database Schema Core)
 
-### 🛠️ Công cụ khác
+Hệ thống được thiết kế với sự gắn kết Relational DB cao:
+- **Ngữ cảnh User Account**: `User`, `Role`
+- **Ngữ cảnh Product & Inventory**: `Category`, `Brand`, `Supplier`, `Product`, `Review`, `Wishlist`
+- **Ngữ cảnh Sales & Orders**: `Order`, `OrderItem`
+- **Ngữ cảnh Logistics**: `ShippingProvider`, `ShippingOrder`
+- **Ngữ cảnh Payments & Marketing**: `Promotion`, `Coupon`, `Payment`, `BankAccount`
 
-* Nodemon (auto reload)
-* TypeScript
-* dotenv (quản lý biến môi trường)
-* bcrypt (mã hóa mật khẩu)
-* multer (upload file)
-* uuid (tạo ID)
+## ⚙️ Hướng dẫn cài đặt (Installation)
 
----
+### 1. Yêu cầu hệ thống (Prerequisites)
+- [Node.js](https://nodejs.org/en) (Phiên bản v18+ trở lên).
+- Hệ quản trị [MySQL Server](https://dev.mysql.com/downloads/mysql/).
 
-## 📂 Cấu trúc thư mục
-
-```
-src/
-│── controllers/     # Xử lý logic
-│── models/          # Định nghĩa dữ liệu
-│── routes/          # Định tuyến
-│── views/           # Giao diện EJS
-│── middlewares/     # Middleware
-│── utils/           # Helper functions
-│── config/          # Cấu hình (DB, env,...)
-│── app.ts           # Entry point
-```
-
----
-
-## ⚙️ Cài đặt & chạy dự án
-
-### 1. Clone repo
-
+### 2. Clone mã nguồn & Cài đặt thư viện
 ```bash
 git clone https://github.com/ThanhHai24/Nhom6-1-TMDT-backend.git
-cd ECOM-PCSTORE-NodeJS
-```
-
----
-
-### 2. Cài đặt dependencies
-
-```bash
+cd Nhom6-1-TMDT-backend
 npm install
 ```
 
----
+### 3. Cấu hình biến môi trường (.env)
+Tạo tệp tin `.env` nằm tại thư mục gốc của dự án, và nhập các cấu hình tương tự như dưới để phù hợp với thông tin kết nối Db tại máy tính của bạn:
+```bash
+# Sửa lại user, password, port, và db_name cho khớp với CSDL cục bộ của bạn
+DATABASE_URL="mysql://root:password123@localhost:3306/pcstore"
 
-### 3. Cấu hình môi trường
+# Key bảo mật cho JSON Web Token
+JWT_SECRET="your_jwt_secret_key_here"
 
-Tạo file `.env`:
-
-```env
-DATABASE_URL=""
-PORT=
+# Cổng localhost chạy ứng dụng
+PORT=3000
 ```
 
----
-
-### 4. Setup database (Prisma)
-
+### 4. Khởi tạo Cơ sở dữ liệu bằng Prisma ORM
+Chạy lệnh migration để Prisma tự làm việc với MySQL và khởi tạo toàn bộ cấu trúc các bảng:
 ```bash
-npx prisma migrate dev
+npx prisma migrate dev --name init
 npx prisma generate
 ```
 
----
-
-### 5. Chạy project
-
-#### 👉 Dev mode
-
+### 5. Khởi chạy Ứng dụng
+Để chạy web ở mode Development (Reload liên tục khi lưu file):
 ```bash
 npm run dev
 ```
-
-#### 👉 Debug mode
-
-```bash
-npm run start:debug
-```
-
----
-
-## 🌿 Git Workflow
-
-Dự án sử dụng mô hình branch:
-
-* `main`: Production
-* `develop`: Development
-* `feature/*`: Tính năng riêng
-
-Ví dụ:
-
-* `feature/auth`
-* `feature/product`
-* `feature/cart`
-
----
-
-## ✨ Tính năng chính
-
-* 🔐 Xác thực người dùng (đăng ký / đăng nhập)
-* 🛒 Giỏ hàng
-* 📦 Quản lý sản phẩm
-* 🏷️ Danh mục sản phẩm
-* 📸 Upload hình ảnh sản phẩm
-* 👨‍💼 Admin dashboard (đang phát triển)
-
----
-
-## 📸 Demo (đang cập nhật)
-
-> Thêm ảnh giao diện tại đây
-
----
-
-## 📌 Hướng phát triển
-
-* Thanh toán online (VNPay, MoMo)
-* Tích hợp chatbot AI tư vấn sản phẩm
-* Hệ thống đánh giá & bình luận
-* Tối ưu SEO & hiệu năng
+Lúc này bạn sẽ có thể tương tác với backend tải thử tại `http://localhost:3000`.
 
 ---
 
 ## 👨‍💻 Tác giả
 
-* **Thanh Hải**
-* GitHub: https://github.com/ThanhHai24
-
----
-
-## 📄 License
-
-ISC License
-
----
-
-## ⭐ Ghi chú
-
-Dự án được thực hiện phục vụ:
-
-* Học tập
-* Thực tập cơ sở
-* Portfolio cá nhân
-
-Nếu thấy hữu ích, hãy ⭐ repo nhé!
+**Thanh Hải**
+- Trang cá nhân GitHub: [https://github.com/ThanhHai24](https://github.com/ThanhHai24)
