@@ -320,3 +320,12 @@ model BankAccount {
 
   @@map("bank_accounts")
 }
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
+  
+  @@map("sessions")
+}

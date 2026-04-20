@@ -199,6 +199,11 @@
                 <p>Đăng ký ngay để nhận nhiều ưu đãi hấp dẫn từ PCStore</p>
             </div>
             <div class="auth-card-body">
+                <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-error" style="display: block; margin-bottom: 20px;">
+                    <i class="ri-error-warning-line"></i> <%= error %>
+                </div>
+                <% } %>
                 <form action="/register" method="POST" id="registerForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -267,7 +272,7 @@
                 </button>
  
                 <div class="auth-footer">
-                    Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a>
+                    Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
                 </div>
             </div>
         </div>

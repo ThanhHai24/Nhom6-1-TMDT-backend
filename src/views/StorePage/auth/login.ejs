@@ -117,9 +117,11 @@
                     <p>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục</p>
                 </div>
                 <div class="auth-card-body">
-                    <div class="alert alert-error" id="loginError">
-                        <i class="ri-error-warning-line"></i> Email hoặc mật khẩu không đúng. Vui lòng thử lại.
+                    <% if (typeof message !== 'undefined' && message) { %>
+                    <div class="alert alert-error" id="loginError" style="display: block;">
+                        <i class="ri-error-warning-line"></i> <%= message %>
                     </div>
+                    <% } %>
     
                     <form action="/login" method="POST" id="loginForm">
                         <div class="form-group">
@@ -154,7 +156,7 @@
                     </button>
     
                     <div class="auth-footer">
-                        Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+                        Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
                     </div>
                 </div>
             </div>

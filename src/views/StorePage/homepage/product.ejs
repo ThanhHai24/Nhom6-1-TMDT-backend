@@ -132,7 +132,7 @@
                             <!-- Quantity & Actions -->
                             <form action="/cart/add" method="POST" id="addToCartForm">
                                 <div class="quantity-section">
-                                    <input type="hidden" name="product_id" value="{{ $product -> id }}">
+                                    <input type="hidden" name="product_id" value="<%= product.id %>">
                                     <span class="quantity-label">Số lượng:</span>
                                     <div class="quantity-control">
                                         <a class="quantity-btn" onclick="changeQuantity(-1)">-</a>
@@ -951,9 +951,15 @@
 
         const form = document.getElementById("addToCartForm");
         const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
         try {
-            const res = await axios.post("/cart/add", formData);
+            const res = await axios.post("/cart/add", data);
+            
+            if(res.data && res.data.cartCount) {
+                const badge = document.querySelector('.cart-count');
+                if(badge) badge.textContent = res.data.cartCount;
+            }
 
             alert("✅ Đã thêm vào giỏ hàng!");
         } catch (err) {
