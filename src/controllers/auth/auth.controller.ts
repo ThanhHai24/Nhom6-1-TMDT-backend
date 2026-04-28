@@ -56,10 +56,24 @@ const postRegister = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 const postLogin = (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate("local", {
-        successRedirect: "/", 
-        failureRedirect: "/login",
-        failureMessage: true // Requires express-session to store flash messages in req.session.messages
+    passport.authenticate("local", (err: any, user: any, info: any) => {
+        if (err) { return next(err); }
+        if (!user) {
+            const sessionAny = req.session as any;
+            if (sessionAny) {
+                sessionAny.messages = [info?.message || "Login failed"];
+            }
+            return res.redirect("/login");
+        }
+        req.logIn(user, (err) => {
+            if (err) { return next(err); }
+            
+            // Redirect staff to admin dashboard, customers to homepage
+            if (["ADMIN", "MANAGER", "RECEPTIONIST", "WAREHOUSE"].includes(user.role)) {
+                return res.redirect("/admin/dashboard");
+            }
+            return res.redirect("/");
+        });
     })(req, res, next);
 };
 
