@@ -96,7 +96,7 @@
                                                     class="badge <%= category.status === 'ACTIVE' ? 'active' : 'inactive' %>">
                                                     <%= category.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
                                                 </span></td>
-                                            <td style="display:flex;gap:6px;padding-top:10px">
+                                            <td style="gap:6px;padding-top:10px">
                                                 <a href="/admin/categories/parent/edit/<%= category.id %>"><button
                                                         class="btn sm">Sửa</button></a>
                                                 <button class="btn sm danger-outline">Xóa</button>
@@ -194,7 +194,7 @@
                                                     class="badge <%= child.status === 'ACTIVE' ? 'active' : 'inactive' %>">
                                                     <%= child.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
                                                 </span></td>
-                                            <td style="display:flex;gap:6px;padding-top:10px">
+                                            <td style="gap:6px;padding-top:10px">
                                                 <a href="/admin/categories/child/edit/<%= child.id %>"><button
                                                         class="btn sm">Sửa</button></a>
                                                 <button class="btn sm danger-outline">Xóa</button>

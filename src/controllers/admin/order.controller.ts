@@ -1,6 +1,6 @@
 import { prisma } from "config/client";
 import { Request, Response } from "express";
-import { getAllOrders, getCancelledOrdersCount, getConfirmedOrdersCount, getDeliveredOrdersCount, getOrderById, getOrderCount, getPendingOrdersCount, getProcessingOrdersCount, getReturnedOrdersCount, getShippedOrdersCount } from "services/admin/order.service";
+import { getAllOrders, getCancelledOrdersCount, getConfirmedOrdersCount, getDeliveredOrdersCount, getOrderById, getOrderCount, getPendingOrdersCount, getProcessingOrdersCount, getReturnedOrdersCount, getShippedOrdersCount, updateOrderStatus } from "services/admin/order.service";
 
 const getOrders = async (req: Request, res: Response) => {
     const ordercount = await getOrderCount();
@@ -82,4 +82,13 @@ const getOrderDetailPage = async (req: Request, res: Response) => {
     res.render("admin/orders/detail", { order });
 }
 
-export { getOrders, getOrderDetailPage }
+const PostUpdateOrderStatus = async (req: Request, res: Response) => {
+    const orderId = req.params.id as string;
+    const status = req.body.status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED";
+    const user = req.user as any;
+    const userId = user && user.id ? BigInt(user.id) : undefined;
+    await updateOrderStatus(orderId, status, userId);
+    res.redirect("/admin/orders");
+}
+
+export { getOrders, getOrderDetailPage, PostUpdateOrderStatus }

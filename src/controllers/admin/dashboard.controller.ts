@@ -1,32 +1,86 @@
 import { Request, Response } from "express";
-import { getProductsCount, getProductThisMonthCount, getUserCount, getUserThisMonthCount } from "services/admin/dashboard.services";
+import {
+    getUserCount, getUserThisMonthCount,
+    getProductsCount, getProductThisMonthCount,
+    getRevenueThisMonth, getMonthlyRevenueThisYear, getRevenueThisYear,
+    getOrdersCountThisYear, getOrderStatusStats, getMonthlyOrdersThisYear,
+    getTopSellingProducts, getSlowMovingProducts,
+    getActivePromotions, getRecentOrders,
+} from "services/admin/dashboard.services";
+
 const getDashboardPage = async (req: Request, res: Response) => {
-    const usersCount = await getUserCount();
-    const usersThisMonth = await getUserThisMonthCount();
-    const productsCount = await getProductsCount();
-    const productsThisMonth = await getProductThisMonthCount();
+    const [
+        usersCount,
+        usersThisMonth,
+        productsCount,
+        productsThisMonth,
+        revenueThisMonth,
+        revenueThisYear,
+        monthlyRevenue,
+        ordersThisYear,
+        orderStatusStats,
+        monthlyOrders,
+        topProducts,
+        slowMoving,
+        activePromotions,
+        recentOrders,
+    ] = await Promise.all([
+        getUserCount(),
+        getUserThisMonthCount(),
+        getProductsCount(),
+        getProductThisMonthCount(),
+        getRevenueThisMonth(),
+        getRevenueThisYear(),
+        getMonthlyRevenueThisYear(),
+        getOrdersCountThisYear(),
+        getOrderStatusStats(),
+        getMonthlyOrdersThisYear(),
+        getTopSellingProducts(8),
+        getSlowMovingProducts(8),
+        getActivePromotions(),
+        getRecentOrders(8),
+    ]);
+
+    // Ngày hiện tại cho header
+    const now = new Date();
+    const dayNames = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    const currentDate = `${dayNames[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+    const currentYear = now.getFullYear();
+
     res.render("admin/dashboard/dashboard", {
-        usersCount: usersCount,
-        usersThisMonth: usersThisMonth,
-        productsCount: productsCount,
-        productsThisMonth: productsThisMonth
+        usersCount,
+        usersThisMonth,
+        productsCount,
+        productsThisMonth,
+        revenueThisMonth,
+        revenueThisYear,
+        monthlyRevenue: JSON.stringify(monthlyRevenue),
+        ordersThisYear,
+        orderStatusStats: JSON.stringify(orderStatusStats),
+        monthlyOrders: JSON.stringify(monthlyOrders),
+        topProducts: JSON.stringify(topProducts),
+        slowMoving,
+        activePromotions,
+        recentOrders,
+        currentDate,
+        currentYear,
     });
-}
+};
 
 const getWarehousePage = async (req: Request, res: Response) => {
     res.render("admin/warehouse/warehouse");
-}
+};
 
 const getPromotionPage = async (req: Request, res: Response) => {
     res.render("admin/promotion/promotion");
-}
+};
 
 const getNotificationPage = async (req: Request, res: Response) => {
     res.render("admin/notification/notification");
-}
+};
 
 const getHistoryPage = async (req: Request, res: Response) => {
     res.render("admin/history/history");
-}
+};
 
-export { getDashboardPage, getWarehousePage, getPromotionPage, getNotificationPage, getHistoryPage }
+export { getDashboardPage, getWarehousePage, getPromotionPage, getNotificationPage, getHistoryPage };

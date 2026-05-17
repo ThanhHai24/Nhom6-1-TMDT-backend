@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng #<%= order.code %> - PCStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/client/css/style.css">
+    <style>
+        :root {
+            --accent: #1a75ff;
+            --accent-dark: #0056b3;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --surface: #ffffff;
+            --bg-page: #f0f4f8;
+            --border: #e5e7eb;
+            --radius: 14px;
+            --red: #e53935;
+        }
+
+        body { background: var(--bg-page); color: var(--text-main); }
+
+        .detail-page {
+            max-width: 1400px;
+            margin: 28px auto 70px;
+            padding: 0 16px;
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--accent); }
+        .breadcrumb strong { color: var(--text-main); }
+
+        /* ===== PAGE TITLE BAR ===== */
+        .page-titlebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .page-title-left h1 {
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .page-title-left h1 span { color: var(--accent); }
+        .page-title-left p {
+            font-size: 13px !important;
+            color: var(--text-muted);
+            padding: 0 !important;
+            margin: 4px 0 0 !important;
+            line-height: 1.4 !important;
+        }
+
+        /* ===== STATUS BADGE ===== */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-badge.PENDING    { background:#fff3cd; color:#856404; }
+        .status-badge.CONFIRMED  { background:#cff4fc; color:#055160; }
+        .status-badge.PROCESSING { background:#e0cffc; color:#4a0e8f; }
+        .status-badge.SHIPPED    { background:#d1ecf1; color:#0c5460; }
+        .status-badge.DELIVERED  { background:#d4edda; color:#155724; }
+        .status-badge.CANCELLED  { background:#f8d7da; color:#721c24; }
+        .status-badge.RETURNED   { background:#fde8d8; color:#a04000; }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .card-head i { color: var(--accent); font-size: 18px; }
+        .card-body { padding: 20px; }
+
+        /* ===== INFO GRID ===== */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 28px;
+        }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+        .info-item label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .info-item span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* ===== PRODUCT TABLE ===== */
+        .product-table { width: 100%; border-collapse: collapse; }
+        .product-table th {
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: .5px;
+            padding: 0 0 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .product-table th:last-child { text-align: right; }
+        .product-table td { padding: 14px 0; border-bottom: 1px dashed var(--border); vertical-align: middle; }
+        .product-table tr:last-child td { border-bottom: none; }
+
+        .prod-img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8f9fa;
+            padding: 4px;
+        }
+        .prod-img-placeholder {
+            width: 58px;
+            height: 58px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 22px;
+        }
+        .prod-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+        .prod-sub  { font-size: 12px; color: var(--text-muted); }
+
+        .price-cell { font-weight: 700; font-size: 15px; color: var(--red); text-align: right; }
+
+        /* ===== TOTAL SUMMARY ===== */
+        .total-summary { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 16px; border-top: 2px solid var(--border); }
+        .total-row { display: flex; gap: 60px; font-size: 14px; }
+        .total-row .lbl { color: var(--text-muted); }
+        .total-row .val { font-weight: 600; min-width: 120px; text-align: right; }
+        .total-row.grand .lbl { font-weight: 700; font-size: 16px; color: var(--text-main); }
+        .total-row.grand .val { font-weight: 800; font-size: 20px; color: var(--red); }
+
+        /* ===== STATUS TIMELINE ===== */
+        .timeline { display: flex; flex-direction: column; gap: 0; }
+        .timeline-item { display: flex; gap: 16px; position: relative; }
+        .timeline-item:not(:last-child) .tl-line { position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--border); }
+        .tl-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 1;
+            border: 2px solid var(--border);
+            background: #fff;
+            color: var(--text-muted);
+        }
+        .tl-dot.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .tl-dot.cancelled { background: var(--red); border-color: var(--red); color: #fff; }
+        .tl-content { padding-bottom: 24px; }
+        .tl-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .tl-date  { font-size: 12px; color: var(--text-muted); }
+        .tl-notes { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-style: italic; }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 22px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-back   { background: #f3f4f6; color: var(--text-main); }
+        .btn-back:hover { background: #e5e7eb; }
+        .btn-cancel { background: #fff0f0; color: var(--red); border: 1.5px solid var(--red); }
+        .btn-cancel:hover { background: #fde8e8; transform: translateY(-1px); }
+        .btn-cancel:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        /* ===== CANCEL MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn .2s;
+        }
+        .modal-overlay.open { display: flex; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 28px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2);
+            animation: slideUp .25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+        .modal-icon { font-size: 52px; margin-bottom: 14px; }
+        .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .modal-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal-no  { padding: 10px 24px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-modal-yes { padding: 10px 24px; border-radius: 8px; border: none; background: var(--red); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+        .btn-modal-yes:hover { opacity: .85; }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 99999;
+            box-shadow: 0 8px 28px rgba(0,0,0,.2);
+            animation: slideRight .3s ease;
+        }
+        @keyframes slideRight { from { transform: translateX(80px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+        .toast.show { display: flex; }
+        .toast.success { background: #155724; }
+        .toast.error   { background: #721c24; }
+    </style>
+</head>
+<body>
+    <header><%- include("../layout/header.ejs") %></header>
+    <nav class="main-nav"><%- include("../layout/navbar.ejs") %></nav>
+
+    <%
+        const statusLabel = {
+            PENDING:    'Chờ xác nhận',
+            CONFIRMED:  'Đã xác nhận',
+            PROCESSING: 'Đang xử lý',
+            SHIPPED:    'Đang giao hàng',
+            DELIVERED:  'Đã giao thành công',
+            CANCELLED:  'Đã hủy',
+            RETURNED:   'Trả hàng'
+        }[order.status] || order.status;
+
+        const paymentLabel = {
+            COD: 'Thanh toán khi nhận hàng (COD)',
+            BANK_TRANSFER: 'Chuyển khoản ngân hàng',
+            VNPAY: 'VNPay',
+            MOMO: 'MoMo'
+        }[order.paymentMethod] || order.paymentMethod;
+
+        const timelineMap = {
+            PENDING:    { icon: 'ri-time-line',           label: 'Đặt hàng' },
+            CONFIRMED:  { icon: 'ri-checkbox-circle-line',label: 'Xác nhận' },
+            PROCESSING: { icon: 'ri-box-3-line',          label: 'Đang xử lý' },
+            SHIPPED:    { icon: 'ri-truck-line',          label: 'Đang giao' },
+            DELIVERED:  { icon: 'ri-gift-line',           label: 'Giao thành công' },
+            CANCELLED:  { icon: 'ri-close-circle-line',   label: 'Đã hủy' },
+            RETURNED:   { icon: 'ri-arrow-go-back-line',  label: 'Trả hàng' },
+        };
+    %>
+
+    <div class="detail-page">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a> &rsaquo;
+            <a href="/orders">Đơn hàng của tôi</a> &rsaquo;
+
+        </div>
+
+        <!-- Title bar -->
+        <div class="page-titlebar">
+            <div class="page-title-left">
+                <h3>Đơn hàng <span>#<%= order.code %></span></h3>
+                <p>Ngày đặt: <%= new Date(order.createdAt).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></p>
+            </div>
+            <div class="status-badge <%= order.status %>">
+                </i> <%= statusLabel %>
+            </div>
+        </div>
+
+        <!-- Row 1: Info + Timeline -->
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+
+            <!-- Order Info -->
+            <div class="card">
+                <div class="card-head"><i class="ri-file-list-3-line"></i> Thông tin đơn hàng</div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Mã đơn hàng</label>
+                            <span>#<%= order.code %></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Trạng thái</label>
+                            <span class="status-badge <%= order.status %>" style="padding:4px 10px; font-size:12px;">
+                                <%= statusLabel %>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <label>Người nhận</label>
+                            <span><%= order.customerName %></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Số điện thoại</label>
+                            <span><%= order.customerPhone %></span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Địa chỉ nhận hàng</label>
+                            <span><i class="ri-map-pin-line" style="color:var(--red)"></i> <%= order.shippingAddress %></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phương thức thanh toán</label>
+                            <span><%= paymentLabel %></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Trạng thái thanh toán</label>
+                            <span style="color:<%= order.paymentStatus === 'PAID' ? '#155724' : '#856404' %>">
+                                <% if (order.paymentStatus === 'PAID') { %>
+                                ✔ Đã thanh toán
+                                <% } else if (order.paymentStatus === 'FAILED') { %>
+                                ✖ Thanh toán thất bại
+                                <% } else { %>
+                                Chưa thanh toán
+                                <% } %>
+                            </span>
+                        </div>
+                        <% if (order.notes) { %>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Ghi chú</label>
+                            <span><%= order.notes %></span>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="card">
+                <div class="card-head"><i class="ri-history-line"></i> Lịch sử trạng thái</div>
+                <div class="card-body">
+                    <% if (order.statusHistory && order.statusHistory.length > 0) { %>
+                    <div class="timeline">
+                        <% order.statusHistory.forEach(function(h, idx) { %>
+                        <% const isCancelled = h.status === 'CANCELLED'; %>
+                        <div class="timeline-item">
+                            <div class="tl-line"></div>
+                            <div class="tl-dot <%= isCancelled ? 'cancelled' : 'done' %>">
+                                <i class="<%= (timelineMap[h.status] || {icon:'ri-circle-line'}).icon %>"></i>
+                            </div>
+                            <div class="tl-content">
+                                <div class="tl-title"><%= (timelineMap[h.status] || {label: h.status}).label %></div>
+                                <div class="tl-date">
+                                    <%= new Date(h.createdAt).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+                                </div>
+                                <% if (h.notes) { %>
+                                <div class="tl-notes"><%= h.notes %></div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <% } else { %>
+                    <p style="color:var(--text-muted);font-size:13px;padding:0!important;margin:0!important;">Chưa có lịch sử cập nhật.</p>
+                    <% } %>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Row 2: Products -->
+        <div class="card">
+            <div class="card-head"><i class="ri-shopping-bag-line"></i> Sản phẩm trong đơn (<%= order.orderItems.length %>)</div>
+            <div class="card-body" style="padding-top:12px;">
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th style="width:70px;"></th>
+                            <th>Sản phẩm</th>
+                            <th style="min-width:80px;">Đơn giá</th>
+                            <th style="min-width:60px; text-align:center;">SL</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% order.orderItems.forEach(function(item) { %>
+                        <tr>
+                            <td>
+                                <% if (item.product && item.product.image) { %>
+                                <img class="prod-img"
+                                     src="/admin/productImages/<%= item.product.image %>"
+                                     alt="<%= item.product.name %>">
+                                <% } else { %>
+                                <div class="prod-img-placeholder"><i class="ri-image-line"></i></div>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (item.product) { %>
+                                <div class="prod-name">
+                                    <a href="/product/<%= item.product.slug %>" style="color:inherit;text-decoration:none;">
+                                        <%= item.product.name %>
+                                    </a>
+                                </div>
+                                <div class="prod-sub">SKU: <%= item.product.sku %></div>
+                                <% } else { %>
+                                <div class="prod-name" style="color:var(--text-muted);">Sản phẩm không còn tồn tại</div>
+                                <% } %>
+                            </td>
+                            <td style="font-size:14px;color:var(--text-main);font-weight:600;">
+                                <%= Number(item.price).toLocaleString('vi-VN') %>đ
+                            </td>
+                            <td style="text-align:center;font-size:14px;font-weight:600;">
+                                x<%= item.quantity %>
+                            </td>
+                            <td class="price-cell">
+                                <%= Number(item.price * item.quantity).toLocaleString('vi-VN') %>đ
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+
+                <!-- Total summary -->
+                <div class="total-summary">
+                    <div class="total-row">
+                        <span class="lbl">Tạm tính</span>
+                        <span class="val">
+                            <%= Number(order.totalAmount).toLocaleString('vi-VN') %>đ
+                        </span>
+                    </div>
+                    <div class="total-row">
+                        <span class="lbl">Phí vận chuyển</span>
+                        <span class="val" style="color:<%= order.shippingFee > 0 ? 'inherit' : '#155724' %>">
+                            <% if (order.shippingFee > 0) { %>
+                            <%= Number(order.shippingFee).toLocaleString('vi-VN') %>đ
+                            <% } else { %>
+                            Miễn phí
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="total-row grand">
+                        <span class="lbl">Tổng cộng</span>
+                        <span class="val"><%= Number(order.totalAmount + order.shippingFee).toLocaleString('vi-VN') %>đ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+            <a href="/orders" class="btn btn-back"><i class="ri-arrow-left-line"></i> Quay lại</a>
+            <% if (order.status === 'PENDING') { %>
+            <button class="btn btn-cancel" id="btn-cancel-order" onclick="openCancelModal()">
+                <i class="ri-close-circle-line"></i> Hủy đơn hàng
+            </button>
+            <% } %>
+        </div>
+
+    </div><!-- /.detail-page -->
+
+    <footer><%- include("../layout/footer.ejs") %></footer>
+
+    <!-- ===== CANCEL CONFIRM MODAL ===== -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-box">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-title">Xác nhận hủy đơn hàng?</div>
+            <div class="modal-desc">
+                Bạn có chắc muốn hủy đơn hàng <br>
+                <strong>#<%= order.code %></strong>?<br>
+                Hành động này <strong>không thể hoàn tác</strong>.
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal-no" onclick="closeCancelModal()">Không, giữ lại</button>
+                <button class="btn-modal-yes" id="btn-confirm-cancel" onclick="confirmCancel()">Có, hủy đơn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== Modal =====
+        function openCancelModal()  { document.getElementById('cancelModal').classList.add('open'); }
+        function closeCancelModal() { document.getElementById('cancelModal').classList.remove('open'); }
+
+        // Close modal when clicking overlay
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCancelModal();
+        });
+
+        // ===== Toast =====
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = (type === 'success' ? '✔ ' : '✖ ') + msg;
+            t.className = 'toast show ' + type;
+            setTimeout(() => { t.className = 'toast'; }, 3500);
+        }
+
+        // ===== Cancel order =====
+        async function confirmCancel() {
+            const yesBtn = document.getElementById('btn-confirm-cancel');
+            yesBtn.disabled = true;
+            yesBtn.textContent = 'Đang hủy...';
+
+            try {
+                const res = await fetch('/orders/<%= order.code %>/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                closeCancelModal();
+
+                if (data.success) {
+                    showToast('Đơn hàng đã được hủy thành công!', 'success');
+                    // Disable cancel button and update badge after short delay
+                    setTimeout(() => { location.reload(); }, 1500);
+                } else {
+                    showToast(data.message || 'Không thể hủy đơn hàng.', 'error');
+                    yesBtn.disabled = false;
+                    yesBtn.textContent = 'Có, hủy đơn';
+                }
+            } catch (err) {
+                closeCancelModal();
+                showToast('Lỗi kết nối. Vui lòng thử lại.', 'error');
+                yesBtn.disabled = false;
+                yesBtn.textContent = 'Có, hủy đơn';
+            }
+        }
+    </script>
+</body>
+</html>

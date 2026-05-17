@@ -37,7 +37,7 @@ const getAllProducts = async function () {
     });
 }
 
-const HandleCreateProduct = async function (name: string, slug: string, sku: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string) {
+const HandleCreateProduct = async function (name: string, slug: string, sku: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any) {
     await prisma.product.create({
         data: {
             name,
@@ -57,6 +57,7 @@ const HandleCreateProduct = async function (name: string, slug: string, sku: str
             categoryId: BigInt(category),
             brandId: BigInt(brand),
             supplierId: BigInt(supplier),
+            specifications: specifications ? specifications : null,
         },
     });
 
@@ -98,7 +99,7 @@ const getProductById = async (id: String) => {
     });
 }
 
-const HandleUpdateProduct = async function (id: string, name: string, slug: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string) {
+const HandleUpdateProduct = async function (id: string, name: string, slug: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any) {
     await prisma.product.update({
         where: {
             id: +id
@@ -120,6 +121,7 @@ const HandleUpdateProduct = async function (id: string, name: string, slug: stri
             categoryId: category ? BigInt(category) : undefined,
             brandId: brand ? BigInt(brand) : undefined,
             supplierId: supplier ? BigInt(supplier) : undefined,
+            specifications: specifications ? specifications : undefined,
         },
     });
 }

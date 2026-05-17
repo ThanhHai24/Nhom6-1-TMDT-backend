@@ -85,7 +85,7 @@
                                                     id="inp-category" disabled>
                                                     <option value="">-- Chọn danh mục --</option>
                                                     <% categories.forEach( function (category) { %>
-                                                        <option value="<%= category.id %>" <%= String(category.id) === String(product?.categoryId) ? 'selected' : '' %>>
+                                                        <option value="<%= category.id %>" data-name="<%= category.name.toLowerCase() %>" data-slug="<%= category.slug %>" <%= String(category.id) === String(product?.categoryId) ? 'selected' : '' %>>
                                                             <%= category.name %>
                                                         </option>
                                                         <% }) %>
@@ -251,15 +251,43 @@
                                                 số</button>
                                         </div>
                                         <div id="spec-list" style="display:flex;flex-direction:column;gap:10px;">
-                                            <div class="spec-row"
-                                                style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
-                                                <input type="text" name="specKey[]" class="form-input"
-                                                    placeholder="VD: CPU, RAM, Màn hình...">
-                                                <input type="text" name="specValue[]" class="form-input"
-                                                    placeholder="VD: Apple M4, 16GB, 6.7 inch...">
-                                                <button type="button" class="btn sm danger-outline"
-                                                    onclick="removeSpec(this)">✕</button>
-                                            </div>
+                                            <% if (product?.specifications && product.specifications.length > 0) { %>
+                                                <% product.specifications.forEach(function(spec) { %>
+                                                        <div class="spec-row"
+                                                            style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                                            <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)" data-selected="<%= spec.key %>">
+                                                                <option value="">-- Chọn thông số --</option>
+                                                            </select>
+                                                            <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled value="<%= spec.key %>">
+                                                            
+                                                            <input type="text" name="specValue[]" class="form-input spec-value-text"
+                                                                placeholder="VD: Apple M4, 16GB, 6.7 inch..." value="<%= spec.value %>">
+                                                            <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled data-selected="<%= spec.value %>">
+                                                                <option value="">-- Chọn sản phẩm --</option>
+                                                            </select>
+
+                                                            <button type="button" class="btn sm danger-outline"
+                                                                onclick="removeSpec(this)">✕</button>
+                                                        </div>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <div class="spec-row"
+                                                    style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
+                                                        <option value="">-- Chọn thông số --</option>
+                                                    </select>
+                                                    <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
+                                                    
+                                                    <input type="text" name="specValue[]" class="form-input spec-value-text"
+                                                        placeholder="VD: Apple M4, 16GB, 6.7 inch...">
+                                                    <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+                                                        <option value="">-- Chọn sản phẩm --</option>
+                                                    </select>
+
+                                                    <button type="button" class="btn sm danger-outline"
+                                                        onclick="removeSpec(this)">✕</button>
+                                                </div>
+                                            <% } %>
                                         </div>
                                     </div>
 
@@ -402,6 +430,140 @@
                     } catch(e){}
                 } %>
             });
+
+            const allStoreProducts = <%- JSON.stringify((allProducts || []).map(p => ({ id: Number(p.id), name: p.name, categorySlug: p.category?.slug || '', categoryName: p.category?.name || '' }))) %>;
+
+            const specTemplates = {
+                pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt", "Quạt tản nhiệt", "Màn hình"],
+                cpu: ["Socket", "Số nhân", "Số luồng", "Xung nhịp cơ bản", "Xung nhịp tối đa", "Bộ nhớ đệm (Cache)", "TDP", "Thế hệ"],
+                mainboard: ["Socket", "Chipset", "Chuẩn kích thước", "Số khe RAM", "Dung lượng RAM tối đa", "Loại RAM hỗ trợ", "Cổng lưu trữ", "Cổng kết nối I/O"],
+                ram: ["Loại RAM", "Dung lượng", "Tốc độ (Bus)", "Độ trễ (CAS)", "Điện áp", "Tản nhiệt"],
+                vga: ["Chip đồ họa", "Dung lượng VRAM", "Loại VRAM", "Cổng giao tiếp", "Nguồn đề xuất", "Kích thước"],
+                psu: ["Công suất", "Chuẩn hiệu suất", "Kích thước nguồn", "Kiểu dây", "Nguồn đầu vào"],
+                case: ["Hỗ trợ Mainboard", "Chất liệu", "Kích thước", "Chiều dài VGA tối đa", "Tản nhiệt CPU tối đa", "Sẵn quạt"],
+                cooler: ["Loại tản nhiệt", "Socket hỗ trợ", "Kích thước quạt", "Tốc độ quạt", "Độ ồn", "Đèn LED"],
+                storage: ["Loại ổ cứng", "Dung lượng", "Chuẩn giao tiếp", "Tốc độ đọc", "Tốc độ ghi", "Kích thước"],
+                monitor: ["Kích thước màn hình", "Độ phân giải", "Tấm nền", "Tần số quét", "Thời gian phản hồi", "Cổng kết nối"],
+                default: ["Thương hiệu", "Bảo hành", "Màu sắc", "Trọng lượng", "Kích thước", "Chất liệu"]
+            };
+
+            function getCategoryKey() {
+                const select = document.getElementById('inp-category');
+                const option = select.options[select.selectedIndex];
+                if (!option || !option.value) return 'default';
+                const slug = option.getAttribute('data-slug') || '';
+                const name = option.getAttribute('data-name') || '';
+                
+                if (slug.includes('pc') || name.includes('pc') || name.includes('máy tính bộ') || name.includes('build')) return 'pc';
+                if (slug.includes('cpu') || name.includes('cpu') || name.includes('vi xử lý')) return 'cpu';
+                if (slug.includes('main') || name.includes('main') || name.includes('bo mạch')) return 'mainboard';
+                if (slug.includes('ram') || name.includes('ram') || name.includes('bộ nhớ trong')) return 'ram';
+                if (slug.includes('vga') || name.includes('card') || name.includes('đồ họa')) return 'vga';
+                if (slug.includes('psu') || name.includes('nguồn')) return 'psu';
+                if (slug.includes('case') || name.includes('vỏ')) return 'case';
+                if (slug.includes('cooler') || slug.includes('tan-nhiet') || name.includes('tản nhiệt')) return 'cooler';
+                if (slug.includes('ssd') || slug.includes('hdd') || name.includes('ổ cứng')) return 'storage';
+                if (slug.includes('man-hinh') || name.includes('màn hình')) return 'monitor';
+                return 'default';
+            }
+
+            function updateSpecDropdowns() {
+                const key = getCategoryKey();
+                const specs = specTemplates[key] || specTemplates['default'];
+                const selects = document.querySelectorAll('.spec-key-select');
+                
+                selects.forEach(select => {
+                    let currentValue = select.getAttribute('data-selected') || select.value;
+                    select.removeAttribute('data-selected'); // Clear it so subsequent changes use select.value
+                    
+                    let isCustom = currentValue && !specs.includes(currentValue);
+                    
+                    let html = '<option value="">-- Chọn thông số --</option>';
+                    specs.forEach(s => {
+                        html += `<option value="${s}" ${currentValue === s ? 'selected' : ''}>${s}</option>`;
+                    });
+                    html += `<option value="custom" ${isCustom ? 'selected' : ''}>Khác (Tùy chỉnh...)</option>`;
+                    select.innerHTML = html;
+                    
+                    if (isCustom) {
+                        select.value = 'custom';
+                    }
+                    handleSpecKeyChange(select, true);
+                });
+            }
+
+            function handleSpecKeyChange(select, init = false) {
+                const row = select.closest('.spec-row');
+                const customInput = row.querySelector('.spec-key-custom');
+                if (select.value === 'custom') {
+                    select.style.display = 'none';
+                    select.disabled = true;
+                    customInput.style.display = 'block';
+                    customInput.disabled = false;
+                    customInput.name = 'specKey[]'; 
+                    select.name = ''; 
+                    if(!init) customInput.focus();
+                } else {
+                    select.style.display = 'block';
+                    select.disabled = false;
+                    customInput.style.display = 'none';
+                    customInput.disabled = true;
+                    customInput.name = 'specKeyCustom[]'; 
+                    select.name = 'specKey[]';
+                }
+
+                // Handle PC category logic
+                const key = getCategoryKey();
+                const textVal = row.querySelector('.spec-value-text');
+                const selectVal = row.querySelector('.spec-value-select');
+                
+                if (key === 'pc' && select.value !== 'custom') {
+                    textVal.style.display = 'none';
+                    textVal.disabled = true;
+                    textVal.name = '';
+                    
+                    selectVal.style.display = 'block';
+                    selectVal.disabled = false;
+                    selectVal.name = 'specValue[]';
+                    
+                    const compType = (select.value || '').toLowerCase();
+                    let filtered = allStoreProducts.filter(p => {
+                        let cName = p.categoryName.toLowerCase();
+                        let cSlug = p.categorySlug.toLowerCase();
+                        if (compType === 'cpu' && (cSlug.includes('cpu') || cName.includes('cpu') || cName.includes('vi xử lý'))) return true;
+                        if (compType === 'mainboard' && (cSlug.includes('main') || cName.includes('main') || cName.includes('bo mạch'))) return true;
+                        if (compType === 'ram' && (cSlug.includes('ram') || cName.includes('ram') || cName.includes('bộ nhớ trong'))) return true;
+                        if (compType === 'vga' && (cSlug.includes('vga') || cName.includes('card') || cName.includes('đồ họa'))) return true;
+                        if (compType === 'ssd' && (cSlug.includes('ssd') || cName.includes('ssd'))) return true;
+                        if (compType === 'hdd' && (cSlug.includes('hdd') || cName.includes('hdd'))) return true;
+                        if ((compType.includes('nguồn') || compType === 'psu') && (cSlug.includes('psu') || cName.includes('nguồn'))) return true;
+                        if ((compType.includes('case') || compType.includes('vỏ')) && (cSlug.includes('case') || cName.includes('vỏ'))) return true;
+                        if ((compType.includes('tản nhiệt') || compType === 'cooler') && (cSlug.includes('cooler') || cSlug.includes('tan-nhiet') || cName.includes('tản nhiệt'))) return true;
+                        if (compType.includes('màn hình') && (cSlug.includes('man-hinh') || cName.includes('màn hình'))) return true;
+                        return false;
+                    });
+                    
+                    let currentValId = selectVal.getAttribute('data-selected') || selectVal.value;
+                    let html = '<option value="">-- Chọn sản phẩm --</option>';
+                    filtered.forEach(p => {
+                        html += `<option value="${p.id}" ${currentValId == p.id ? 'selected' : ''}>${p.name}</option>`;
+                    });
+                    selectVal.innerHTML = html;
+                    selectVal.removeAttribute('data-selected');
+                } else {
+                    textVal.style.display = 'block';
+                    textVal.disabled = false;
+                    textVal.name = 'specValue[]';
+                    
+                    selectVal.style.display = 'none';
+                    selectVal.disabled = true;
+                    selectVal.name = '';
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                updateSpecDropdowns();
+            });
             /* =============================================
                ẢNH BÌA – chỉ 1 ảnh
             ============================================= */
@@ -511,12 +673,33 @@
                 const row = document.createElement('div');
                 row.className = 'spec-row';
                 row.style = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
+                
+                const key = getCategoryKey();
+                const specs = specTemplates[key] || specTemplates['default'];
+                let optionsHtml = '<option value="">-- Chọn thông số --</option>';
+                specs.forEach(s => optionsHtml += `<option value="${s}">${s}</option>`);
+                optionsHtml += `<option value="custom">Khác (Tùy chỉnh...)</option>`;
+
                 row.innerHTML = `
-                    <input type="text" name="specKey[]" class="form-input" placeholder="VD: CPU, RAM, Màn hình...">
-                    <input type="text" name="specValue[]" class="form-input" placeholder="VD: Apple M4, 16GB, 6.7 inch...">
+                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
+                        ${optionsHtml}
+                    </select>
+                    <input type="text" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
+                    
+                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Giá trị (VD: Apple M4, 16GB...)">
+                    <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+                        <option value="">-- Chọn sản phẩm --</option>
+                    </select>
+
                     <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
                 `;
                 list.appendChild(row);
+                
+                // Triger event handler to setup the initial UI correctly for PC vs Normal
+                const selectEl = row.querySelector('.spec-key-select');
+                if (selectEl) {
+                    handleSpecKeyChange(selectEl);
+                }
             }
 
             function removeSpec(btn) {

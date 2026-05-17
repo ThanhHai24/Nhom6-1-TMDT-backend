@@ -7,8 +7,8 @@
             </button>
         </div>
         <div class="search-bar">
-            <form action="/search" method="post">
-                <input type="text" name="search" id="search" placeholder="Bạn cần tìm gì?">
+            <form action="/search" method="get">
+                <input type="text" name="searchTerm" id="search" placeholder="Bạn cần tìm gì?" value="<%= typeof searchTerm !== 'undefined' ? searchTerm : '' %>">
                 <button type="submit"><i class="ri-search-line"></i></button>
             </form>
         </div>
@@ -27,13 +27,31 @@
             </a>
             <a href="/cart" class="nav-icon" style="position: relative;">
                 <i class="ri-shopping-cart-2-fill"></i>
-                <span class="cart-count" style="color: red">0</span>
+                <span class="cart-count" style="color: red"><%= locals.cartCount || 0 %></span>
                 <span>Giỏ Hàng</span>
             </a>
-            <a href="#" class="nav-icon">
-                <i class="ri-account-circle-fill"></i>
-                <span>Tài Khoản</span>
-            </a>
+            <% if (locals.user) { %>
+                <div class="nav-icon dropdown">
+                    <i class="ri-account-circle-fill"></i>
+                    <span><%= user.username %></span>
+
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="/profile">Thông tin tài khoản</a>
+                        <a class="dropdown-item" href="/orders">Đơn hàng</a>
+                        <a class="dropdown-item" href="/logout">Đăng xuất</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-icon dropdown">
+                    <i class="ri-account-circle-fill"></i>
+                    <span>Tài Khoản</span>
+
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="/login">Đăng nhập</a>
+                        <a class="dropdown-item" href="/register">Đăng ký</a>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>

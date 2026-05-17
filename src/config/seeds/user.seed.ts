@@ -1,4 +1,10 @@
 import { prisma } from "config/client";
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
+
+const hashPassword = async (plainText: string) => {
+    return await bcrypt.hash(plainText, saltRounds);
+}
 
 const seedUsers = async () => {
     const count = await prisma.user.count();
@@ -6,6 +12,8 @@ const seedUsers = async () => {
         console.log("[Seed] Users: already seeded, skipping.");
         return;
     }
+
+    const defaultPassword = await hashPassword("123456");
 
     await prisma.user.createMany({
         data: [
@@ -18,7 +26,7 @@ const seedUsers = async () => {
                 idCard: "",
                 dob: new Date("1990-01-01"),
                 gender: "Male",
-                password: "123456", // TODO: hash password
+                password: defaultPassword,
                 role: "ADMIN",
                 status: "ACTIVE",
             },
@@ -31,7 +39,7 @@ const seedUsers = async () => {
                 idCard: "",
                 dob: new Date("1990-01-01"),
                 gender: "Male",
-                password: "123456",
+                password: defaultPassword,
                 role: "CUSTOMER",
                 status: "ACTIVE",
             },
@@ -44,7 +52,7 @@ const seedUsers = async () => {
                 idCard: "",
                 dob: new Date("1990-01-01"),
                 gender: "Male",
-                password: "123456",
+                password: defaultPassword,
                 role: "MANAGER",
                 status: "ACTIVE",
             },
@@ -57,7 +65,7 @@ const seedUsers = async () => {
                 idCard: "",
                 dob: new Date("1990-01-01"),
                 gender: "Male",
-                password: "123456",
+                password: defaultPassword,
                 role: "RECEPTIONIST",
                 status: "ACTIVE",
             },
@@ -70,7 +78,7 @@ const seedUsers = async () => {
                 idCard: "",
                 dob: new Date("1990-01-01"),
                 gender: "Male",
-                password: "123456",
+                password: defaultPassword,
                 role: "WAREHOUSE",
                 status: "ACTIVE",
             },

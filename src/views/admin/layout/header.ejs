@@ -15,6 +15,95 @@
             </svg>
             <span class="notif-dot"></span>
         </button>
-        <div class="avatar">AD</div>
+
+        <!-- Avatar + Dropdown -->
+        <div class="avatar-wrap" id="avatarWrap">
+            <% const adminUser = locals.user; %>
+            <% if (adminUser && adminUser.avatar) { %>
+                <img class="avatar avatar-img" src="/admin/userImages/<%= adminUser.avatar %>" alt="avatar">
+            <% } else { %>
+                <div class="avatar">
+                    <%= adminUser ? adminUser.fullName?.charAt(0).toUpperCase() : 'A' %>
+                </div>
+            <% } %>
+
+            <div class="avatar-dropdown" id="avatarDropdown">
+                <a href="/logout" class="avatar-dropdown-item logout-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M10 2h3a1 1 0 011 1v10a1 1 0 01-1 1h-3"/>
+                        <path d="M7 11l3-3-3-3"/>
+                        <path d="M10 8H2"/>
+                    </svg>
+                    Đăng xuất
+                </a>
+            </div>
+        </div>
     </div>
 </header>
+
+<style>
+.avatar-wrap {
+    position: relative;
+    cursor: pointer;
+}
+
+.avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--blue-200);
+}
+
+.avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    min-width: 140px;
+    z-index: 200;
+    overflow: hidden;
+    animation: dropFade .15s ease;
+}
+
+.avatar-dropdown.open { display: block; }
+
+@keyframes dropFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.avatar-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    text-decoration: none;
+    transition: background .15s;
+}
+
+.avatar-dropdown-item:hover { background: var(--bg); }
+
+.logout-item { color: #dc2626; }
+.logout-item:hover { background: #fff5f5; }
+</style>
+
+<script>
+(function () {
+    const wrap = document.getElementById('avatarWrap');
+    const drop = document.getElementById('avatarDropdown');
+    wrap.addEventListener('click', function (e) {
+        e.stopPropagation();
+        drop.classList.toggle('open');
+    });
+    document.addEventListener('click', function () {
+        drop.classList.remove('open');
+    });
+})();
+</script>

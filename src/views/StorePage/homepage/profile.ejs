@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <title>PCStore - Cửa hàng máy tính</title>
+    <link rel="stylesheet" href="client/css/style.css">
+    <style>
+        :root {
+            --main-bg: url("/client/images/backweb.webp");
+            --promotion-bg: url({{asset('homepage/assets/images/background_offer_detail.png')}});
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --accent: #1a75ff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --bg: #f8f9fa;
+            --border: #333333;
+        }
+
+        .content-grid {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        .main-form-wrapper {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px !important;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .card-action {
+            font-size: 12px;
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid lightgray;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            background-color: var(--surface);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26, 117, 255, 0.15);
+        }
+
+        .form-input:disabled {
+            background-color: #f0f0f0;
+            color: #888;
+            cursor: not-allowed;
+            border-color: var(--border);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn.sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            color: var(--text-main);
+        }
+
+        .btn.sm:hover {
+            background-color: var(--bg);
+            border-color: #ccc;
+        }
+
+        .btn.primary {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 6px rgba(26, 117, 255, 0.2);
+            width: 100%;
+        }
+
+        .btn.primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(26, 117, 255, 0.3);
+        }
+
+        /* ===== Avatar Upload ===== */
+        .avatar-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 20px 16px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            cursor: pointer;
+            overflow: hidden;
+            border: 3px solid #e0e0e0;
+            transition: border-color 0.3s ease;
+        }
+
+        .avatar-wrapper:hover {
+            border-color: var(--accent);
+        }
+
+        .avatar-wrapper:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: filter 0.3s ease;
+        }
+
+        .avatar-wrapper:hover .avatar-img {
+            filter: brightness(0.65);
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .avatar-overlay i {
+            font-size: 22px;
+        }
+
+        .avatar-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .avatar-info-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .avatar-info-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .avatar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .btn-remove-avatar {
+            color: #E24B4A !important;
+            border-color: #E24B4A !important;
+        }
+
+        .btn-remove-avatar:hover {
+            background-color: #fff0f0 !important;
+        }
+
+        .avatar-filename {
+            font-size: 12px;
+            color: var(--accent);
+            font-style: italic;
+            margin-top: 2px;
+            min-height: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full {
+                grid-column: span 1;
+            }
+            .content-grid {
+                padding: 0 15px;
+            }
+            .avatar-upload-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <%- include("../layout/header.ejs") %>
+        </header>
+
+        <nav class="main-nav">
+            <%- include("../layout/navbar.ejs") %>
+        </nav>
+
+        <main>
+            <div class="container">
+                <div class="content" style="width: 80%; margin: 0 auto;">
+                    <form action="/updateProfile" method="POST" onsubmit="submitAddUser(event);" enctype="multipart/form-data">
+                        
+
+                            <!-- Left: Main form -->
+                            <div class="">
+
+                                <!-- Thông tin cơ bản -->
+                                <div class="card" style="background-color:white">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Thông tin cơ bản</span>
+                                            <span style="font-size:12px;color:var(--text-muted)"><span
+                                                    style="color:#E24B4A">*</span> Bắt
+                                                buộc</span>
+                                        </div>
+
+                                        <div class="avatar-upload-row">
+                                            <% const avatarUrl=user.avatar || 'UserAvatar.png' ; %>
+                                            
+                                            <!-- Avatar clickable preview -->
+                                            <div class="avatar-wrapper" onclick="document.getElementById('avatarFile').click()" title="Nhấn để đổi ảnh">
+                                                <img id="avatarPreview"
+                                                    src="/admin/userImages/<%= avatarUrl %>"
+                                                    alt="Ảnh đại diện"
+                                                    class="avatar-img">
+                                                <div class="avatar-overlay">
+                                                    <i class="ri-camera-line"></i>
+                                                    <span>Đổi ảnh</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Upload info -->
+                                            <div class="avatar-info">
+                                                <div class="avatar-info-title">Ảnh đại diện</div>
+                                                <div class="avatar-info-hint">PNG, JPG tối đa 3MB. Nhấn vào ảnh hoặc nút bên dưới để chọn.</div>
+                                                <input type="file" name="avatar" id="avatarFile"
+                                                    accept=".jpg,.jpeg,.png" style="display:none;"
+                                                    onchange="previewAvatar(this)">
+                                                <div class="avatar-actions">
+                                                    <label class="btn sm" for="avatarFile">
+                                                        <i class="ri-upload-2-line"></i> Tải ảnh lên
+                                                    </label>
+                                                    <button type="button" class="btn sm btn-remove-avatar" onclick="removeAvatar()">
+                                                        <i class="ri-delete-bin-line"></i> Xóa ảnh
+                                                    </button>
+                                                </div>
+                                                <div id="avatar-filename" class="avatar-filename"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Họ và tên đầy đủ <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="fullName" class="form-input" type="text" id="inp-fullname"
+                                                    placeholder="VD: Nguyễn Văn An" oninput="updateAvatar(this.value)"
+                                                    value="<%- user.fullName %>">
+                                                <input style="display: none;" name="id" type="text"
+                                                    value="<%= user.id%>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Tên tài khoản <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="username" class="form-input" type="text" id="inp-username"
+                                                    placeholder="VD: nvanan (không dấu, không khoảng trắng)"
+                                                    value="<%- user.username %>" disabled>
+                                                <span style="font-size:11px;color:var(--text-muted)"
+                                                    id="username-hint"></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Email <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="email" class="form-input" type="email" id="inp-email"
+                                                    placeholder="VD: nvanan@email.com" value="<%- user.email %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Số điện thoại <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="phone" class="form-input" type="tel" id="inp-phone"
+                                                    placeholder="VD: 0901 234 567" value="<%- user.phone %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Ngày sinh</label>
+                                                <input name="dob" class="form-input" type="date" id="inp-dob"
+                                                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Giới tính</label>
+                                                <select name="gender" class="form-input form-select" id="inp-gender">
+                                                    <option value="">-- Chọn giới tính --</option>
+                                                    <option value="Male" <% if (user.gender==='Male' ) { %>selected<% }
+                                                            %>>Nam
+                                                    </option>
+                                                    <option value="Female" <% if (user.gender==='Female' ) { %>selected
+                                                        <% } %>>
+                                                            Nữ
+                                                    </option>
+                                                    <option value="Other" <% if (user.gender==='Other' ) { %>selected<%
+                                                            } %>>
+                                                            Khác</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group full">
+                                                <label class="form-label">Số CCCD / CMND</label>
+                                                <input name="idCard" class="form-input" type="text" id="inp-cccd"
+                                                    placeholder="VD: 001234567890" value="<%- user.idCard %>">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <!-- Action buttons -->
+                                <div style="display:flex; flex-direction:column; gap:8px; background-color:#2366EF; border-radius:10px;">
+                                    <button class="btn primary btn-submit-update" type="submit">Cập nhật</button>
+                                </div>
+
+                            </div>
+                        
+
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <%- include("../layout/footer.ejs") %>
+        </footer>
+    </div>
+    <script>
+            function selectStatus(val) {
+                ['active', 'inactive'].forEach(s => {
+                    const lbl = document.getElementById('status-' + s + '-lbl');
+                    if (lbl) lbl.style.borderColor = s === val ? 'var(--accent)' : 'var(--border)';
+                });
+            }
+            const roleDescs = {
+                customer: 'Người dùng cuối: tìm kiếm sản phẩm, đặt hàng, thanh toán, theo dõi vận chuyển, đánh giá sản phẩm.',
+                store_manager: 'Xem báo cáo doanh thu cửa hàng, quản lý sản phẩm đang bán, chương trình khuyến mãi, quản lý kho.',
+                receptionist: 'Tra cứu sản phẩm, người dùng, đơn hàng. Phê duyệt yêu cầu đặt hàng, hỗ trợ khách hàng.',
+                warehouse: 'Đóng gói đơn hàng, xác nhận đơn hàng, nhập hàng vào kho, bàn giao cho đơn vị vận chuyển.',
+                admin: 'Quyền cao nhất: quản lý toàn bộ hệ thống, người dùng, đơn hàng, kho, khuyến mãi, vận chuyển, báo cáo, sao lưu.'
+            };
+
+            function updateRoleDesc() {
+                const val = document.getElementById('inp-role').value;
+                const el = document.getElementById('role-desc');
+                if (val && roleDescs[val]) {
+                    el.textContent = roleDescs[val];
+                    el.style.display = 'block';
+                } else el.style.display = 'none';
+            }
+
+            function checkPwStrength() {
+                const pw = document.getElementById('inp-pw').value;
+                const fill = document.getElementById('pw-strength-fill');
+                const label = document.getElementById('pw-strength-label');
+                let score = 0;
+                if (pw.length >= 8) score++;
+                if (/[A-Z]/.test(pw)) score++;
+                if (/[0-9]/.test(pw)) score++;
+                if (/[^A-Za-z0-9]/.test(pw)) score++;
+                const levels = [{
+                    w: '0%',
+                    c: '#ccc',
+                    t: ''
+                },
+                {
+                    w: '25%',
+                    c: '#E24B4A',
+                    t: 'Rất yếu'
+                },
+                {
+                    w: '50%',
+                    c: '#EF9F27',
+                    t: 'Yếu'
+                },
+                {
+                    w: '75%',
+                    c: '#378ADD',
+                    t: 'Trung bình'
+                },
+                {
+                    w: '100%',
+                    c: '#1D9E75',
+                    t: 'Mạnh'
+                },
+                ];
+                const lv = levels[score] || levels[0];
+                fill.style.width = lv.w;
+                fill.style.background = lv.c;
+                label.textContent = lv.t;
+                label.style.color = lv.c;
+                checkPwMatch();
+            }
+
+            function checkPwMatch() {
+                const pw = document.getElementById('inp-pw').value;
+                const pw2 = document.getElementById('inp-pw2').value;
+                const lbl = document.getElementById('pw-match-label');
+                if (!pw2) {
+                    lbl.textContent = '';
+                    return;
+                }
+                if (pw === pw2) {
+                    lbl.textContent = 'Mật khẩu khớp ✓';
+                    lbl.style.color = '#1D9E75';
+                } else {
+                    lbl.textContent = 'Mật khẩu không khớp';
+                    lbl.style.color = '#E24B4A';
+                }
+            }
+
+            function togglePw(id) {
+                const el = document.getElementById(id);
+                el.type = el.type === 'password' ? 'text' : 'password';
+            }
+
+            // ===== Avatar preview =====
+            function previewAvatar(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                // Validate size (3MB)
+                if (file.size > 3 * 1024 * 1024) {
+                    alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 3MB.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Show filename
+                const nameEl = document.getElementById('avatar-filename');
+                if (nameEl) nameEl.textContent = '📎 ' + file.name;
+            }
+
+            function removeAvatar() {
+                const input = document.getElementById('avatarFile');
+                input.value = '';
+                // Reset to original avatar from server
+                document.getElementById('avatarPreview').src = '/admin/userImages/<%= avatarUrl %>';
+                const nameEl = document.getElementById('avatar-filename');
+                if (nameEl) nameEl.textContent = '';
+            }
+
+            // ===== Form submit =====
+            function submitAddUser(event) {
+                const errors = [];
+                const fullname = document.getElementById('inp-fullname').value.trim();
+                const email = document.getElementById('inp-email').value.trim();
+                const phone = document.getElementById('inp-phone').value.trim();
+
+                if (!fullname) errors.push('Họ và tên không được để trống');
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email không hợp lệ');
+                if (!phone) errors.push('Số điện thoại không được để trống');
+
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    alert(errors.join('\n'));
+                    return;
+                }
+
+                const btn = event.submitter;
+                if (btn) {
+                    btn.textContent = 'Đang lưu...';
+                    btn.disabled = true;
+                }
+            }
+        </script>
+</body>
+</html>

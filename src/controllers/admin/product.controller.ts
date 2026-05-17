@@ -16,10 +16,12 @@ const getCreateProductPage = async (req: Request, res: Response) => {
     const brands = await getAllBrands();
     const suppliers = await getAllSuppliers();
     const categories = await getCategories();
+    const allProducts = await getAllProducts();
     res.render("admin/products/create", {
         brands: brands,
         suppliers: suppliers,
         categories: categories,
+        allProducts: allProducts,
     });
 }
 
@@ -30,6 +32,26 @@ const PostCreateProduct = async (req: Request, res: Response) => {
         isHot, isNew, isFeatured
     } = req.body;
 
+    const specKeys = req.body.specKey || req.body['specKey[]'] || [];
+    const specValues = req.body.specValue || req.body['specValue[]'] || [];
+    
+    let specifications: any = null;
+    if (specKeys.length > 0) {
+        specifications = [];
+        if (Array.isArray(specKeys)) {
+            for (let i = 0; i < specKeys.length; i++) {
+                if (specKeys[i] && specValues[i]) {
+                    specifications.push({ key: specKeys[i], value: specValues[i] });
+                }
+            }
+        } else if (typeof specKeys === 'string') {
+            if (specKeys && specValues) {
+                specifications.push({ key: specKeys, value: specValues });
+            }
+        }
+        if (specifications.length === 0) specifications = null;
+    }
+
     const sku = await generateSKUWithDB(prisma, category);
     const slug = autoGenerateSlug(name);
 
@@ -38,7 +60,7 @@ const PostCreateProduct = async (req: Request, res: Response) => {
     const coverImage = uploadedFiles?.['image']?.[0];
     const productImages = uploadedFiles?.['images'] ?? [];
 
-    await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage?.filename, productImages.map((img) => img.filename), isHot, isNew, isFeatured, category, brand, supplier);
+    await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage?.filename, productImages.map((img) => img.filename), isHot, isNew, isFeatured, category, brand, supplier, specifications);
     res.redirect("/admin/products");
 }
 
@@ -60,16 +82,38 @@ const getProductDetailPage = async (req: Request, res: Response) => {
     const brands = await getAllBrands();
     const suppliers = await getAllSuppliers();
     const categories = await getCategories();
+    const allProducts = await getAllProducts();
     res.render("admin/products/detail", {
         product: product,
         brands: brands,
         suppliers: suppliers,
         categories: categories,
+        allProducts: allProducts,
     });
 }
 
 const PostUpdateProduct = async (req: Request, res: Response) => {
     const { id, name, category, cost, price, stock, lowStockThreshold, brand, supplier, shortDescription, description, isHot, isNew, isFeatured, existingCover, existingImages } = req.body;
+    
+    const specKeys = req.body.specKey || req.body['specKey[]'] || [];
+    const specValues = req.body.specValue || req.body['specValue[]'] || [];
+    
+    let specifications: any = null;
+    if (specKeys.length > 0) {
+        specifications = [];
+        if (Array.isArray(specKeys)) {
+            for (let i = 0; i < specKeys.length; i++) {
+                if (specKeys[i] && specValues[i]) {
+                    specifications.push({ key: specKeys[i], value: specValues[i] });
+                }
+            }
+        } else if (typeof specKeys === 'string') {
+            if (specKeys && specValues) {
+                specifications.push({ key: specKeys, value: specValues });
+            }
+        }
+        if (specifications.length === 0) specifications = null;
+    }
     const slug = autoGenerateSlug(name);
     const uploadedFiles = req.files as { [fieldname: string]: Express.Multer.File[] };
     const coverImage = uploadedFiles?.['image']?.[0];
@@ -84,7 +128,7 @@ const PostUpdateProduct = async (req: Request, res: Response) => {
     }
     finalImages.push(...productImages.map(img => img.filename));
 
-    await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot, isNew, isFeatured, category, brand, supplier);
+    await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot, isNew, isFeatured, category, brand, supplier, specifications);
     res.redirect("/admin/products");
 }
 export { getProductsPage, getCreateProductPage, PostCreateProduct, PostActiveProduct, PostLockProduct, getProductDetailPage, PostUpdateProduct }

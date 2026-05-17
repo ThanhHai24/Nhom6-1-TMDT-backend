@@ -51,9 +51,74 @@ const getOrderById = async (id: string) => {
                     provider: true
                 }
             },
-            user: true
+            user: true,
+            statusHistory: {
+                orderBy: {
+                    createdAt: 'asc'
+                },
+                include: {
+                    changedBy: true
+                }
+            }
         }
     });
 }
 
-export { getAllOrders, getOrderCount, getPendingOrdersCount, getConfirmedOrdersCount, getProcessingOrdersCount, getShippedOrdersCount, getDeliveredOrdersCount, getCancelledOrdersCount, getReturnedOrdersCount, getOrderById }
+const updateOrderStatus = async (id: string, status: string, userId?: bigint) => {
+    if (status === 'SHIPPED') {
+        // Find or create a virtual provider
+        let provider = await prisma.shippingProvider.findFirst({
+            where: { code: 'VIRTUAL' }
+        });
+        
+        if (!provider) {
+            provider = await prisma.shippingProvider.create({
+                data: {
+                    name: 'Vận chuyển Ảo (Mock)',
+                    code: 'VIRTUAL',
+                    apiKey: 'N/A'
+                }
+            });
+        }
+
+        // Check if a shipping order already exists
+        const existingShipping = await prisma.shippingOrder.findFirst({
+            where: { orderId: +id }
+        });
+
+        if (!existingShipping) {
+            const currentOrder = await prisma.order.findUnique({
+                where: { id: +id },
+                select: { shippingFee: true }
+            });
+
+            await prisma.shippingOrder.create({
+                data: {
+                    orderId: +id,
+                    providerId: provider.id,
+                    trackingNumber: `MOCK-${Date.now()}`,
+                    shippingCost: currentOrder?.shippingFee || 0,
+                    estimatedDeliveryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // +3 days
+                    status: 'IN_TRANSIT'
+                }
+            });
+        }
+    }
+
+    return await prisma.$transaction([
+        prisma.order.update({
+            where: { id: +id },
+            data: { status: status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED" }
+        }),
+        prisma.orderStatusHistory.create({
+            data: {
+                orderId: +id,
+                status: status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED",
+                notes: 'Trạng thái được cập nhật',
+                changedById: userId
+            }
+        })
+    ]);
+}
+
+export { getAllOrders, getOrderCount, getPendingOrdersCount, getConfirmedOrdersCount, getProcessingOrdersCount, getShippedOrdersCount, getDeliveredOrdersCount, getCancelledOrdersCount, getReturnedOrdersCount, getOrderById, updateOrderStatus }

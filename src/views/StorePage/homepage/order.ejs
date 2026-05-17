@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng của tôi - PCStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/client/css/style.css">
+    <style>
+        :root {
+            --accent: #1a75ff;
+            --accent-dark: #0056b3;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --surface: #ffffff;
+            --bg-page: #f0f4f8;
+            --border: #e5e7eb;
+            --radius: 14px;
+        }
+
+        body { background: var(--bg-page); color: var(--text-main); }
+
+        /* ===== PAGE LAYOUT ===== */
+        .orders-page {
+            max-width: 1400px;
+            margin: 32px auto 60px;
+            padding: 0 16px;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .page-header-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #6c63ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .page-header p {
+            font-size: 13px !important;
+            color: var(--text-muted);
+            padding: 0 !important;
+            margin: 0 !important;
+            line-height: 1.4 !important;
+        }
+
+        /* ===== FILTER TABS ===== */
+        .status-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: var(--surface);
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            box-shadow: 0 1px 6px rgba(0,0,0,.06);
+        }
+        .tab-btn {
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ===== ORDER CARD ===== */
+        .order-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.25s;
+        }
+        .order-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); }
+
+        /* Card header */
+        .order-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .order-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .order-code {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+        .order-code span { color: var(--accent); }
+        .order-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .status-badge.PENDING     { background: #fff3cd; color: #856404; }
+        .status-badge.CONFIRMED   { background: #cff4fc; color: #055160; }
+        .status-badge.PROCESSING  { background: #e0cffc; color: #4a0e8f; }
+        .status-badge.SHIPPED     { background: #d1ecf1; color: #0c5460; }
+        .status-badge.DELIVERED   { background: #d4edda; color: #155724; }
+        .status-badge.CANCELLED   { background: #f8d7da; color: #721c24; }
+        .status-badge.RETURNED    { background: #fde8d8; color: #a04000; }
+
+        /* Card body – product list */
+        .order-items { padding: 16px 20px; }
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-item-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 4px;
+        }
+        .order-item-info { flex: 1; min-width: 0; }
+        .order-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .order-item-qty {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .order-item-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #e53935;
+            flex-shrink: 0;
+        }
+
+        /* More items indicator */
+        .more-items-hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 6px 0 0;
+            font-style: italic;
+        }
+
+        /* Card footer */
+        .order-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: #fafbfc;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .order-total-block { display: flex; flex-direction: column; gap: 2px; }
+        .order-total-label { font-size: 12px; color: var(--text-muted); }
+        .order-total-amount {
+            font-size: 20px;
+            font-weight: 800;
+            color: #e53935;
+        }
+        .order-shipping-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .order-actions { display: flex; gap: 10px; }
+        .btn-order {
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-order.outline {
+            background: transparent;
+            border: 1.5px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-order.outline:hover { background: #e8f0fe; }
+        .btn-order.solid {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-order.solid:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .btn-order.danger-outline {
+            background: transparent;
+            border: 1.5px solid #e53935;
+            color: #e53935;
+        }
+        .btn-order.danger-outline:hover { background: #fff0f0; }
+
+        /* ===== PAYMENT BADGE ===== */
+        .payment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            color: var(--text-muted);
+        }
+        .payment-badge.PAID { background: #d4edda; color: #155724; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        }
+        .empty-state-icon { font-size: 72px; margin-bottom: 18px; display: block; opacity: 0.35; }
+        .empty-state h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .empty-state p { font-size: 14px !important; color: var(--text-muted); padding: 0 !important; margin-bottom: 24px !important; line-height: 1.5 !important; }
+        .btn-shop {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-shop:hover { background: var(--accent-dark); transform: translateY(-2px); }
+
+        /* ===== HIDDEN ORDER (filter) ===== */
+        .order-card.hidden { display: none; }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .page-btn:hover:not(.active):not(.disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .page-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 700;
+        }
+        .page-btn.disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .order-card-header { flex-direction: column; align-items: flex-start; }
+            .order-card-footer { flex-direction: column; align-items: flex-start; }
+            .order-actions { width: 100%; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <header><%- include("../layout/header.ejs") %></header>
+    <nav class="main-nav"><%- include("../layout/navbar.ejs") %></nav>
+
+    <div class="orders-page">
+
+        <!-- Page Header -->
+        
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a> &gt; <a href="/orders">Đơn hàng của tôi</a>
+        </div>
+        
+
+        <!-- Status Filter Tabs (server-side) -->
+        <div class="status-tabs">
+            <%
+                const tabs = [
+                    { key: 'ALL',        label: 'Tất cả' },
+                    { key: 'PENDING',    label: 'Chờ xác nhận' },
+                    { key: 'CONFIRMED',  label: 'Đã xác nhận' },
+                    { key: 'PROCESSING', label: 'Đang xử lý' },
+                    { key: 'SHIPPED',    label: 'Đang giao' },
+                    { key: 'DELIVERED',  label: 'Đã nhận' },
+                    { key: 'CANCELLED',  label: 'Đã hủy' },
+                ];
+            %>
+            <% tabs.forEach(function(tab) { %>
+            <a href="/orders?status=<%= tab.key %>&page=1"
+               class="tab-btn <%= currentStatus === tab.key ? 'active' : '' %>">
+                <%= tab.label %>
+                <% if (tab.key === 'ALL') { %>(<%= totalOrders %>)<% } %>
+            </a>
+            <% }); %>
+        </div>
+
+        <!-- Order List -->
+        <% if (orders && orders.length > 0) { %>
+
+            <% orders.forEach(function(order) { %>
+            <%
+                const statusLabel = {
+                    PENDING:    'Chờ xác nhận',
+                    CONFIRMED:  'Đã xác nhận',
+                    PROCESSING: 'Đang xử lý',
+                    SHIPPED:    'Đang giao',
+                    DELIVERED:  'Đã giao thành công',
+                    CANCELLED:  'Đã hủy',
+                    RETURNED:   'Trả hàng'
+                }[order.status] || order.status;
+
+                const paymentLabel = {
+                    COD: 'Thanh toán khi nhận hàng',
+                    BANK_TRANSFER: 'Chuyển khoản',
+                    VNPAY: 'VNPay',
+                    MOMO: 'MoMo'
+                }[order.paymentMethod] || order.paymentMethod;
+
+                const previewItems = order.orderItems.slice(0, 2);
+                const extraCount  = order.orderItems.length - previewItems.length;
+            %>
+            <div class="order-card" data-status="<%= order.status %>">
+
+                <!-- Card Header -->
+                <div class="order-card-header">
+                    <div class="order-meta">
+                        <div class="order-code">Đơn hàng <span>#<%= order.code %></span></div>
+                        <div class="order-date">
+                            <i class="ri-calendar-line"></i>
+                            <%= new Date(order.createdAt).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
+                        </div>
+                        <div class="payment-badge <%= order.paymentStatus %>">
+                            <%= paymentLabel %> &middot; <%= order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' %>
+                        </div>
+                    </div>
+                    <div class="status-badge <%= order.status %>">
+                        <%- statusLabel %>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                <div class="order-items">
+                    <% previewItems.forEach(function(item) { %>
+                    <div class="order-item">
+                        <% if (item.product && item.product.image) { %>
+                        <img class="order-item-img"
+                             src="/admin/productImages/<%= item.product.image %>"
+                             alt="<%= item.product.name %>">
+                        <% } else { %>
+                        <div class="order-item-img" style="display:flex;align-items:center;justify-content:center;color:#bbb;">
+                            <i class="ri-image-line" style="font-size:24px;"></i>
+                        </div>
+                        <% } %>
+                        <div class="order-item-info">
+                            <div class="order-item-name"><%= item.product ? item.product.name : 'Sản phẩm không tồn tại' %></div>
+                            <div class="order-item-qty">Số lượng: <strong><%= item.quantity %></strong></div>
+                        </div>
+                        <div class="order-item-price"><%= Number(item.price * item.quantity).toLocaleString('vi-VN') %>đ</div>
+                    </div>
+                    <% }); %>
+
+                    <% if (extraCount > 0) { %>
+                    <div class="more-items-hint">+ <%= extraCount %> sản phẩm khác trong đơn hàng này</div>
+                    <% } %>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="order-card-footer">
+                    <div class="order-total-block">
+                        <div class="order-total-label">
+                            Tổng tiền (<%= order.orderItems.length %> sản phẩm)
+                            <% if (order.shippingFee > 0) { %>
+                            · Phí ship: <%= Number(order.shippingFee).toLocaleString('vi-VN') %>đ
+                            <% } else { %>
+                            · Miễn phí vận chuyển
+                            <% } %>
+                        </div>
+                        <div class="order-total-amount"><%= Number(order.totalAmount).toLocaleString('vi-VN') %>đ</div>
+                    </div>
+                    <div class="order-actions">
+                        <% if (order.status === 'PENDING') { %>
+                        <button class="btn-order danger-outline" onclick="cancelOrder('<%= order.code %>')">
+                            <i class="ri-close-circle-line"></i> Hủy đơn
+                        </button>
+                        <% } %>
+                        <% if (order.status === 'DELIVERED') { %>
+                        <button class="btn-order outline">
+                            <i class="ri-star-line"></i> Đánh giá
+                        </button>
+                        <% } %>
+                        <a href="/orders/<%= order.code %>" class="btn-order solid">
+                            <i class="ri-eye-line"></i> Chi tiết
+                        </a>
+                    </div>
+                </div>
+
+            </div><!-- /.order-card -->
+            <% }); %>
+
+        <% } else { %>
+        <!-- Empty State -->
+        <div class="empty-state">
+            <% if (currentStatus !== 'ALL') { %>
+            <span class="empty-state-icon">🔍</span>
+            <h2>Không có đơn hàng</h2>
+            <p>Không tìm thấy đơn hàng nào ở trạng thái này.</p>
+            <a href="/orders" class="btn-shop"><i class="ri-arrow-left-line"></i> Xem tất cả đơn hàng</a>
+            <% } else { %>
+            <span class="empty-state-icon">🛍️</span>
+            <h2>Bạn chưa có đơn hàng nào</h2>
+            <p>Khám phá hàng ngàn sản phẩm công nghệ chính hãng và đặt hàng ngay hôm nay!</p>
+            <a href="/" class="btn-shop"><i class="ri-store-2-line"></i> Mua sắm ngay</a>
+            <% } %>
+        </div>
+        <% } %>
+
+        <!-- ===== PAGINATION ===== -->
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+            <!-- Prev -->
+            <% if (currentPage > 1) { %>
+            <a href="/orders?status=<%= currentStatus %>&page=<%= currentPage - 1 %>" class="page-btn">
+                <i class="ri-arrow-left-s-line"></i>
+            </a>
+            <% } else { %>
+            <span class="page-btn disabled"><i class="ri-arrow-left-s-line"></i></span>
+            <% } %>
+
+            <!-- Page numbers -->
+            <% for (let p = 1; p <= totalPages; p++) { %>
+            <%   const delta = 2; %>
+            <%   if (p === 1 || p === totalPages || (p >= currentPage - delta && p <= currentPage + delta)) { %>
+            <a href="/orders?status=<%= currentStatus %>&page=<%= p %>"
+               class="page-btn <%= currentPage === p ? 'active' : '' %>">
+                <%= p %>
+            </a>
+            <%   } else if (p === currentPage - delta - 1 || p === currentPage + delta + 1) { %>
+            <span class="page-btn disabled" style="border:none;min-width:24px;">…</span>
+            <%   } %>
+            <% } %>
+
+            <!-- Next -->
+            <% if (currentPage < totalPages) { %>
+            <a href="/orders?status=<%= currentStatus %>&page=<%= currentPage + 1 %>" class="page-btn">
+                <i class="ri-arrow-right-s-line"></i>
+            </a>
+            <% } else { %>
+            <span class="page-btn disabled"><i class="ri-arrow-right-s-line"></i></span>
+            <% } %>
+        </div>
+        <div class="pagination-info">
+            Trang <strong><%= currentPage %></strong> / <strong><%= totalPages %></strong>
+            &nbsp;&middot;&nbsp; Tổng <strong><%= totalOrders %></strong> đơn hàng
+        </div>
+        <% } %>
+
+    </div><!-- /.orders-page -->
+
+    <footer><%- include("../layout/footer.ejs") %></footer>
+
+    <script>
+        // ===== Cancel order (from list page) =====
+        function cancelOrder(code) {
+            if (!confirm('Bạn có chắc muốn hủy đơn hàng #' + code + '?')) return;
+            fetch('/orders/' + code + '/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { location.reload(); }
+                    else { alert(data.message || 'Không thể hủy đơn hàng.'); }
+                })
+                .catch(() => alert('Lỗi kết nối. Vui lòng thử lại.'));
+        }
+    </script>
+</body>
+</html>

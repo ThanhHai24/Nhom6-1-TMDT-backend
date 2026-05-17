@@ -35,7 +35,10 @@ model User {
   status    Status    @default(ACTIVE)
   createdAt DateTime  @default(now())
 
-  orders Order[]
+  orders   Order[]
+  reviews  Review[]
+  wishlist Wishlist?
+  statusChanges OrderStatusHistory[]
 
   @@map("users")
 }
@@ -104,6 +107,7 @@ model Product {
   isHot             Boolean  @default(false)
   isNew             Boolean  @default(false)
   isFeatured        Boolean  @default(false)
+  specifications    Json?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -116,7 +120,9 @@ model Product {
   supplierId BigInt
   supplier   Supplier @relation(fields: [supplierId], references: [id])
 
-  orderItems OrderItem[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
 
   @@map("products")
 }
@@ -153,6 +159,7 @@ model Order {
   customerName    String        @db.VarChar(150)
   customerPhone   String        @db.VarChar(20)
   shippingAddress String        @db.VarChar(255)
+  shippingFee     Int           @default(0) @db.Int
   totalAmount     Int           @db.Int
   status          OrderStatus   @default(PENDING)
   paymentMethod   PaymentMethod @default(COD)
@@ -163,8 +170,23 @@ model Order {
 
   orderItems     OrderItem[]
   shippingOrders ShippingOrder[]
+  payments       Payment[]
+  statusHistory  OrderStatusHistory[]
 
   @@map("orders")
+}
+
+model OrderStatusHistory {
+  id          BigInt      @id @default(autoincrement())
+  orderId     BigInt
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      OrderStatus
+  notes       String?     @db.VarChar(255)
+  changedById BigInt?
+  changedBy   User?       @relation(fields: [changedById], references: [id])
+  createdAt   DateTime    @default(now())
+
+  @@map("order_status_history")
 }
 
 model OrderItem {
@@ -175,6 +197,7 @@ model OrderItem {
   product   Product  @relation(fields: [productId], references: [id])
   quantity  Int      @db.Int
   price     Int      @db.Int
+  specifications Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -221,4 +244,106 @@ model ShippingOrder {
   updatedAt             DateTime         @updatedAt
 
   @@map("shipping_orders")
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+model Promotion {
+  id            BigInt    @id @default(autoincrement())
+  name          String    @db.VarChar(255)
+  type          PromotionType?
+  discountValue Decimal?  @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @db.Decimal(10, 2)
+  startDate     DateTime?
+  endDate       DateTime?
+
+  coupons       Coupon[]
+
+  @@map("promotions")
+}
+
+model Coupon {
+  id            BigInt     @id @default(autoincrement())
+  code          String     @unique @db.VarChar(100)
+  discountValue Decimal?   @db.Decimal(10, 2)
+  usageLimit    Int?
+  status        Boolean?   @default(true)
+  promotionId   BigInt?
+  promotion     Promotion? @relation(fields: [promotionId], references: [id])
+
+  @@map("coupons")
+}
+
+model Review {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt?
+  user      User?    @relation(fields: [userId], references: [id])
+  productId BigInt?
+  product   Product? @relation(fields: [productId], references: [id])
+  rating    Int
+  comment   String?  @db.Text
+
+  @@map("reviews")
+}
+
+model Wishlist {
+  id      BigInt   @id @default(autoincrement())
+  userId  BigInt   @unique
+  user    User     @relation(fields: [userId], references: [id])
+
+  items   WishlistItem[]
+
+  @@map("wishlist")
+}
+
+model WishlistItem {
+  id          BigInt   @id @default(autoincrement())
+  wishlistId  BigInt
+  wishlist    Wishlist @relation(fields: [wishlistId], references: [id])
+  productId   BigInt
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@map("wishlist_items")
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Payment {
+  id                BigInt                   @id @default(autoincrement())
+  orderId           BigInt?
+  order             Order?                   @relation(fields: [orderId], references: [id])
+  paymentMethodId   BigInt?
+  amount            Decimal                  @db.Decimal(10, 2)
+  status            PaymentTransactionStatus @default(PENDING)
+  transactionCode   String?                  @db.VarChar(255)
+  createdAt         DateTime?                @default(now())
+
+  @@map("payments")
+}
+
+model BankAccount {
+  id            BigInt   @id @default(autoincrement())
+  bankName      String   @db.VarChar(100)
+  accountNumber String   @db.VarChar(50)
+  accountName   String   @db.VarChar(255)
+  qrCodeUrl     String?  @db.VarChar(255)
+  status        Boolean? @default(true)
+
+  @@map("bank_accounts")
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
+  
+  @@map("sessions")
 }

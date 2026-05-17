@@ -1,195 +1,375 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Quản Trị - Admin Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Admin Dashboard - PCStore</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+       
+    </style>
 </head>
-
 <body>
+<%- include('../layout/sidebar') -%>
+<main class="main">
+<%- include('../layout/header') -%>
+<div class="content">
 
-    <!-- SIDEBAR -->
-    <%- include('../layout/sidebar') -%>
+<%
+    // ── Helpers in EJS ──
+    const fmtMoney = v => Number(v).toLocaleString('vi-VN');
+    const statusLabel = {
+        PENDING:'Chờ xử lý', CONFIRMED:'Đã xác nhận',
+        PROCESSING:'Đang xử lý', SHIPPED:'Đang giao',
+        DELIVERED:'Đã giao', CANCELLED:'Đã hủy', RETURNED:'Trả hàng'
+    };
+    const fmtDate = d => {
+        const dt = new Date(d);
+        return `${dt.getDate().toString().padStart(2,'0')}/${(dt.getMonth()+1).toString().padStart(2,'0')} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+    };
+%>
 
-        <!-- MAIN -->
-        <main class="main">
-            <!-- HEADER -->
-            <%- include('../layout/header') -%>
+<!-- Page header -->
+<div class="page-header" style="margin-bottom:20px;">
+    <div>
+        <h2>Tổng quan hệ thống</h2>
+        <div class="breadcrumb"><%= currentDate %></div>
+    </div>
+    <a href="/admin/orders" class="btn primary" style="text-decoration:none;">Xem đơn hàng →</a>
+</div>
 
-                <div class="content">
+<!-- ── KPI Cards ── -->
+<div class="db-kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+</svg>
+        </div>
+        <div class="kpi-body">
+            <div class="kpi-label">Tổng người dùng</div>
+            <div class="kpi-value"><%= usersCount.toLocaleString('vi-VN') %></div>
+            <div class="kpi-sub">+<%= usersThisMonth %> người mới tháng này</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+  <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+</svg></div>
+        <div class="kpi-body">
+            <div class="kpi-label">Tổng sản phẩm</div>
+            <div class="kpi-value"><%= productsCount.toLocaleString('vi-VN') %></div>
+            <div class="kpi-sub">+<%= productsThisMonth %> sản phẩm mới tháng này</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
+  <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/>
+</svg></div>
+        <div class="kpi-body">
+            <div class="kpi-label">Doanh thu tháng này</div>
+            <div class="kpi-value" style="font-size:16px;"><%= fmtMoney(revenueThisMonth) %> ₫</div>
+            <div class="kpi-sub neutral">Năm <%= currentYear %>: <%= fmtMoney(revenueThisYear) %> ₫</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16">
+  <path d="M11.354 6.354a.5.5 0 0 0-.708-.708L8 8.293 6.854 7.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
+  <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+</svg></div>
+        <div class="kpi-body">
+            <div class="kpi-label">Đơn hàng năm <%= currentYear %></div>
+            <div class="kpi-value"><%= ordersThisYear.toLocaleString('vi-VN') %></div>
+            <div class="kpi-sub neutral">Tổng đơn trong năm</div>
+        </div>
+    </div>
+</div>
 
-                    <!-- DASHBOARD PAGE -->
-                    <div class="page active" id="page-dashboard">
-                        <div class="page-header">
-                            <div>
-                                <h2>Tổng quan hệ thống</h2>
-                                <div class="breadcrumb">Thứ Hai, 30/03/2026</div>
-                            </div>
-                            <button class="btn primary">Xuất báo cáo</button>
-                        </div>
+<!-- ── Charts Row 1: Revenue line + Order donut ── -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-card-title">
+            Doanh thu theo tháng — <%= currentYear %>
+            <span class="tag">Chỉ đơn đã giao</span>
+        </div>
+        <canvas id="revenueChart" height="120"></canvas>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title">Trạng thái đơn hàng</div>
+        <canvas id="statusChart" height="200"></canvas>
+        <div id="statusLegend" style="margin-top:14px;font-size:12px;"></div>
+    </div>
+</div>
 
-                        <div class="stat-grid">
-                            <div class="stat-card blue">
-                                <div class="stat-icon blue">👥</div>
-                                <div class="stat-label">Tổng người dùng</div>
-                                <div class="stat-value"><%= usersCount.toLocaleString('vi-VN')%></div>
-                                <div class="stat-change"><span>+<%= usersThisMonth.toLocaleString('vi-VN')%></span> người dùng mới</div>
-                            </div>
-                            <div class="stat-card teal">
-                                <div class="stat-icon teal">📦</div>
-                                <div class="stat-label">Sản phẩm </div>
-                                <div class="stat-value"><%= productsCount.toLocaleString('vi-VN')%></div>
-                                <div class="stat-change"><span>+<%= productsThisMonth.toLocaleString('vi-VN')%></span> sản phẩm mới</div>
-                            </div>
-                            <div class="stat-card amber">
-                                <div class="stat-icon amber">🎁</div>
-                                <div class="stat-label">Khuyến mãi đang chạy</div>
-                                <div class="stat-value">18</div>
-                                <div class="stat-change"><span>6</span> sắp hết hạn</div>
-                            </div>
-                            <div class="stat-card red">
-                                <div class="stat-icon red">🛒</div>
-                                <div class="stat-label">Đơn hàng hôm nay</div>
-                                <div class="stat-value">347</div>
-                                <div class="stat-change"><span class="down">-3.1%</span> so với hôm qua</div>
-                            </div>
-                        </div>
+<!-- ── Charts Row 2: Orders bar + Top products bar ── -->
+<div class="charts-grid2">
+    <div class="chart-card">
+        <div class="chart-card-title">Số đơn hàng theo tháng — <%= currentYear %></div>
+        <canvas id="ordersChart" height="160"></canvas>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title">Top sản phẩm bán chạy</div>
+        <canvas id="topProductsChart" height="160"></canvas>
+    </div>
+</div>
 
-                        <div class="charts-row">
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">Doanh thu 6 tháng gần nhất (triệu VND)</span>
-                                    <span class="card-action">Chi tiết →</span>
-                                </div>
-                                <div class="bar-chart">
-                                    <div class="bar-group">
-                                        <div class="bar" style="height:72px"></div><span class="bar-label">T10</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar" style="height:90px"></div><span class="bar-label">T11</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar" style="height:108px"></div><span class="bar-label">T12</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar" style="height:84px"></div><span class="bar-label">T1</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar" style="height:118px"></div><span class="bar-label">T2</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar highlight" style="height:132px"></div><span
-                                            class="bar-label">T3</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">Trạng thái đơn hàng</span>
-                                </div>
-                                <div class="donut-wrap">
-                                    <svg class="donut-svg" viewBox="0 0 120 120">
-                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#E6F1FB" stroke-width="16" />
-                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#378ADD" stroke-width="16"
-                                            stroke-dasharray="145 144" stroke-dashoffset="36"
-                                            transform="rotate(-90 60 60)" />
-                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#1D9E75" stroke-width="16"
-                                            stroke-dasharray="72 217" stroke-dashoffset="-109"
-                                            transform="rotate(-90 60 60)" />
-                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#EF9F27" stroke-width="16"
-                                            stroke-dasharray="43 246" stroke-dashoffset="-181"
-                                            transform="rotate(-90 60 60)" />
-                                        <circle cx="60" cy="60" r="46" fill="none" stroke="#E24B4A" stroke-width="16"
-                                            stroke-dasharray="29 260" stroke-dashoffset="-224"
-                                            transform="rotate(-90 60 60)" />
-                                        <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="600"
-                                            fill="#1a1a18">347</text>
-                                        <text x="60" y="70" text-anchor="middle" font-size="10" fill="#5F5E5A">đơn
-                                            hàng</text>
-                                    </svg>
-                                    <div class="donut-legend">
-                                        <div class="legend-item">
-                                            <div class="legend-dot" style="background:#378ADD"></div><span
-                                                class="legend-name">Chờ xử lý</span><span class="legend-val">162
-                                                (47%)</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-dot" style="background:#1D9E75"></div><span
-                                                class="legend-name">Đang giao</span><span class="legend-val">80
-                                                (23%)</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-dot" style="background:#EF9F27"></div><span
-                                                class="legend-name">Hoàn thành</span><span class="legend-val">72
-                                                (21%)</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-dot" style="background:#E24B4A"></div><span
-                                                class="legend-name">Hủy</span><span class="legend-val">33 (9%)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<!-- ── Top Products Table + Slow Moving ── -->
+<div class="charts-grid2">
+    <div class="full-card" style="margin-bottom:0;">
+        <div class="section-header">
+            <h3>🏆 Top sản phẩm bán chạy năm <%= currentYear %></h3>
+        </div>
+        <table class="top-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th style="text-align:right;">Đã bán</th>
+                    <th style="text-align:right;">Doanh thu</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% const topArr = JSON.parse(topProducts); %>
+            <% if (topArr.length === 0) { %>
+                <tr><td colspan="5" style="text-align:center;color:#aaa;padding:24px;">Chưa có dữ liệu</td></tr>
+            <% } %>
+            <% topArr.forEach((p, i) => { %>
+                <tr>
+                    <td><span class="rank-badge <%= i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n' %>"><%= i+1 %></span></td>
+                    <td><img class="prod-img-sm" src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt=""></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= p.name %></td>
+                    <td style="text-align:right;font-weight:700;color:#059669;"><%= p.totalQty %></td>
+                    <td style="text-align:right;font-weight:600;color:#e53935;"><%= fmtMoney(p.revenue) %>₫</td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+    </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Đơn hàng gần nhất</span>
-                                <span class="card-action" onclick="showPage('orders')">Xem tất cả →</span>
-                            </div>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Mã đơn</th>
-                                        <th>Khách hàng</th>
-                                        <th>Sản phẩm</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thời gian</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#DH20260330001</td>
-                                        <td>Nguyễn Văn An</td>
-                                        <td>iPhone 15 Pro Max × 1</td>
-                                        <td>34,990,000 ₫</td>
-                                        <td><span class="badge pending">Chờ xử lý</span></td>
-                                        <td>14:32</td>
-                                    </tr>
-                                    <tr>
-                                        <td>#DH20260330002</td>
-                                        <td>Trần Thị Bình</td>
-                                        <td>Samsung Galaxy S25 × 2</td>
-                                        <td>42,000,000 ₫</td>
-                                        <td><span class="badge active">Đang giao</span></td>
-                                        <td>13:15</td>
-                                    </tr>
-                                    <tr>
-                                        <td>#DH20260330003</td>
-                                        <td>Lê Minh Châu</td>
-                                        <td>AirPods Pro 3 × 1</td>
-                                        <td>6,490,000 ₫</td>
-                                        <td><span class="badge info">Hoàn thành</span></td>
-                                        <td>11:50</td>
-                                    </tr>
-                                    <tr>
-                                        <td>#DH20260330004</td>
-                                        <td>Phạm Hương Giang</td>
-                                        <td>MacBook Air M4 × 1</td>
-                                        <td>28,990,000 ₫</td>
-                                        <td><span class="badge danger">Đã hủy</span></td>
-                                        <td>10:22</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    <div class="full-card" style="margin-bottom:0;">
+        <div class="section-header">
+            <h3>Sản phẩm tồn kho cao</h3>
+            <a href="/admin/products">Xem tất cả →</a>
+        </div>
+        <% slowMoving.forEach(p => { %>
+        <div class="slow-item">
+            <img class="prod-img-sm" src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt="">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= p.name %></div>
+                <div style="font-size:11px;color:#aaa;"><%= p.sku %> · <%= fmtMoney(p.price) %>₫</div>
+            </div>
+            <div class="slow-stock <%= p.stock > 50 ? 'high' : '' %>"><%= p.stock %> chiếc</div>
+        </div>
+        <% }); %>
+        <% if (slowMoving.length === 0) { %>
+            <p style="color:#aaa;text-align:center;padding:24px 0;font-size:13px;">Không có sản phẩm tồn đọng</p>
+        <% } %>
+    </div>
+</div>
 
+<!-- ── Active Promotions ── -->
+<% if (activePromotions.length > 0) { %>
+<div class="full-card" style="margin-top:24px;">
+    <div class="section-header">
+        <h3>Chương trình khuyến mãi đang áp dụng</h3>
+        <a href="/admin/promotion">Quản lý →</a>
+    </div>
+    <div class="promo-list">
+    <% activePromotions.forEach(promo => { %>
+        <div class="promo-item">
+            <div class="promo-icon">🎫</div>
+            <div>
+                <div class="promo-name"><%= promo.name %></div>
+                <div class="promo-meta">
+                    <%= promo.type === 'PERCENT' ? `Giảm ${promo.discountValue}%` : promo.type === 'FIXED' ? `Giảm ${fmtMoney(promo.discountValue)}₫` : 'Khuyến mãi' %>
+                    <% if (promo.endDate) { %> · Hết hạn: <%= fmtDate(promo.endDate) %><% } %>
                 </div>
-        </main>
-</body>
+            </div>
+            <div class="promo-count"><%= promo.coupons.length %> mã</div>
+        </div>
+    <% }); %>
+    </div>
+</div>
+<% } %>
 
+<!-- ── Recent Orders ── -->
+<div class="full-card" style="margin-top:24px;">
+    <div class="section-header">
+        <h3>🕐 Đơn hàng gần nhất</h3>
+        <a href="/admin/orders">Xem tất cả →</a>
+    </div>
+    <div style="overflow-x:auto;">
+    <table class="recent-table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Sản phẩm</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thời gian</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% recentOrders.forEach(o => { %>
+            <tr>
+                <td><span class="order-code">#<%= o.code %></span></td>
+                <td><%= o.customerName %></td>
+                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    <%= o.orderItems[0]?.product?.name || '—' %>
+                    <% if (o.orderItems.length > 1) { %><span style="color:#aaa;font-size:11px;"> +<%= o.orderItems.length-1 %></span><% } %>
+                </td>
+                <td style="font-weight:600;color:#e53935;white-space:nowrap;"><%= fmtMoney(o.totalAmount) %>₫</td>
+                <td><span class="status-pill s-<%= o.status %>"><%= statusLabel[o.status] || o.status %></span></td>
+                <td style="white-space:nowrap;color:#888;"><%= fmtDate(o.createdAt) %></td>
+                <td><a href="/admin/order/<%= o.id %>" style="font-size:12px;color:#e53935;text-decoration:none;">Chi tiết</a></td>
+            </tr>
+        <% }); %>
+        <% if (recentOrders.length === 0) { %>
+            <tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px;">Chưa có đơn hàng nào</td></tr>
+        <% } %>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+</div><!-- /content -->
+</main>
+
+<script>
+// ── Data from server ──
+const monthlyRevenue = <%- monthlyRevenue %>;
+const orderStatusStats = <%- orderStatusStats %>;
+const monthlyOrders = <%- monthlyOrders %>;
+const topProductsData = <%- topProducts %>;
+const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+// ── 1. Revenue Line Chart ──
+new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+        labels: MONTHS,
+        datasets: [{
+            label: 'Doanh thu (VNĐ)',
+            data: monthlyRevenue,
+            borderColor: '#e53935',
+            backgroundColor: 'rgba(229,57,53,.08)',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#e53935',
+            pointRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ' ' + Number(ctx.parsed.y).toLocaleString('vi-VN') + ' ₫'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: v => (v/1e6).toFixed(0) + 'tr' }
+            }
+        }
+    }
+});
+
+// ── 2. Order Status Donut ──
+(function(){
+    const STATUS_LABELS = {
+        PENDING:'Chờ xử lý', CONFIRMED:'Đã xác nhận', PROCESSING:'Đang xử lý',
+        SHIPPED:'Đang giao', DELIVERED:'Đã giao', CANCELLED:'Đã hủy', RETURNED:'Trả hàng'
+    };
+    const STATUS_COLORS = {
+        PENDING:'#fbbf24', CONFIRMED:'#60a5fa', PROCESSING:'#a78bfa',
+        SHIPPED:'#34d399', DELIVERED:'#10b981', CANCELLED:'#f87171', RETURNED:'#9ca3af'
+    };
+    const keys = Object.keys(orderStatusStats);
+    const vals = keys.map(k => orderStatusStats[k]);
+    const total = vals.reduce((a,b)=>a+b,0);
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: keys.map(k => STATUS_LABELS[k] || k),
+            datasets: [{ data: vals, backgroundColor: keys.map(k=>STATUS_COLORS[k]||'#ccc'), borderWidth: 2, borderColor:'#fff' }]
+        },
+        options: {
+            responsive: true, cutout:'68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} (${total?Math.round(ctx.parsed/total*100):0}%)` } }
+            }
+        }
+    });
+
+    // Custom legend
+    const leg = document.getElementById('statusLegend');
+    leg.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px 12px;';
+    keys.forEach((k,i) => {
+        const pct = total ? Math.round(vals[i]/total*100) : 0;
+        leg.innerHTML += `<div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:${STATUS_COLORS[k]||'#ccc'};"></div>
+            <span style="color:#555;">${STATUS_LABELS[k]||k}: <strong>${vals[i]}</strong> (${pct}%)</span>
+        </div>`;
+    });
+    if (total===0) leg.innerHTML = '<span style="color:#aaa;">Chưa có đơn hàng</span>';
+})();
+
+// ── 3. Monthly Orders Bar ──
+new Chart(document.getElementById('ordersChart'), {
+    type: 'bar',
+    data: {
+        labels: MONTHS,
+        datasets: [{
+            label: 'Số đơn',
+            data: monthlyOrders,
+            backgroundColor: 'rgba(99,102,241,.7)',
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+// ── 4. Top Products Horizontal Bar ──
+(function(){
+    const names = topProductsData.map(p => p.name.length>22 ? p.name.slice(0,22)+'…' : p.name);
+    const qtys  = topProductsData.map(p => p.totalQty);
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: names,
+            datasets: [{
+                label: 'Đã bán',
+                data: qtys,
+                backgroundColor: 'rgba(16,185,129,.75)',
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+    if (topProductsData.length === 0) {
+        document.getElementById('topProductsChart').parentElement.innerHTML +=
+            '<p style="text-align:center;color:#aaa;font-size:13px;margin-top:20px;">Chưa có dữ liệu bán hàng</p>';
+    }
+})();
+</script>
+</body>
 </html>

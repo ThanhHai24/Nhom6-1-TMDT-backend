@@ -23,6 +23,7 @@
 
     <div class="nav-section">
         <div class="nav-label">Quản lý</div>
+        <% if (user && user.role === 'ADMIN') { %>
         <a class="nav-item <%= currentUrl === '/admin/users' ? 'active' : '' %>" href="/admin/users">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <circle cx="8" cy="5" r="3" />
@@ -30,6 +31,8 @@
             </svg>
             Người dùng
         </a>
+        <% } %>
+        <% if (user && ['ADMIN', 'MANAGER', 'WAREHOUSE'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/categories' ? 'active' : '' %>" href="/admin/categories">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path
@@ -59,6 +62,8 @@
             </svg>
             Nhà cung cấp
         </a>
+        <% } %>
+        <% if (user && ['ADMIN', 'MANAGER', 'RECEPTIONIST', 'WAREHOUSE'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M3 3h10l-1.5 8H4.5L3 3z" />
@@ -68,6 +73,8 @@
             Đơn hàng
             <span class="nav-badge">12</span>
         </a>
+        <% } %>
+        <% if (user && ['ADMIN', 'MANAGER', 'WAREHOUSE'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/warehouse' ? 'active' : '' %>" href="/admin/warehouse">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M1 7l7-5 7 5v8H1V7z" />
@@ -91,6 +98,8 @@
             </svg>
             Đơn vị vận chuyển
         </a>
+        <% } %>
+        <% if (user && ['ADMIN', 'MANAGER', 'RECEPTIONIST', 'WAREHOUSE'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/shipping' ? 'active' : '' %>" href="/admin/shipping">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M1 9h10V3H1v6z" />
@@ -100,6 +109,7 @@
             </svg>
             Vận chuyển
         </a>
+        <% } %>
         <a class="nav-item <%= currentUrl === '/admin/notification' ? 'active' : '' %>" href="/admin/notification">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M8 1a5 5 0 015 5c0 3 1 4 1.5 5h-13C2 10 3 9 3 6a5 5 0 015-5z" />
@@ -111,6 +121,7 @@
     </div>
 
     <div class="nav-section">
+        <% if (user && user.role === 'ADMIN') { %>
         <div class="nav-label">Hệ thống</div>
         <a class="nav-item <%= currentUrl === '/admin/history' ? 'active' : '' %>" href="/admin/history">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -133,5 +144,6 @@
             </svg>
             Cài đặt hệ thống
         </div>
+        <% } %>
     </div>
 </nav>

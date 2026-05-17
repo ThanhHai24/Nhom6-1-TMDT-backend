@@ -26,12 +26,32 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
           <h2 style="font-size:18px;font-weight:600;">Chi tiết đơn hàng</h2>
-          <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → #DH20260330003</div>
+          <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → <%= order.code %></div>
         </div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn outline" style="background:transparent;color:#185FA5;border:1px solid #185FA5;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">⬇ Xuất PDF</button>
-          <button class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
-          <button class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Cập nhật trạng thái</button>
+          
+          <% if (order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'RETURNED') { %>
+          <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
+              <input type="hidden" name="status" value="CANCELLED">
+              <button type="submit" class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
+          </form>
+          <% } %>
+
+          <% 
+            let nextStatus = '';
+            let nextStatusLabel = '';
+            if (order.status === 'PENDING') { nextStatus = 'CONFIRMED'; nextStatusLabel = 'Xác nhận đơn hàng'; }
+            else if (order.status === 'CONFIRMED') { nextStatus = 'PROCESSING'; nextStatusLabel = 'Bắt đầu đóng gói'; }
+            else if (order.status === 'PROCESSING') { nextStatus = 'SHIPPED'; nextStatusLabel = 'Giao cho vận chuyển'; }
+            else if (order.status === 'SHIPPED') { nextStatus = 'DELIVERED'; nextStatusLabel = 'Xác nhận đã giao'; }
+          %>
+          <% if (nextStatus) { %>
+          <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
+              <input type="hidden" name="status" value="<%= nextStatus %>">
+              <button type="submit" class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;"><%= nextStatusLabel %></button>
+          </form>
+          <% } %>
         </div>
       </div>
 
@@ -39,39 +59,87 @@
       <div class="timeline-card">
         <div class="timeline-header">
           <h3>Trạng thái đơn hàng</h3>
-          <span class="order-id"><%= order.code %></span>
+          <br>
         </div>
         <div class="timeline">
-          <!-- Step 1: done -->
+          <% 
+            const sequence = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
+            const statusLabels = {
+                'PENDING': 'Đặt hàng',
+                'CONFIRMED': 'Xác nhận',
+                'PROCESSING': 'Đóng gói',
+                'SHIPPED': 'Đang giao',
+                'DELIVERED': 'Hoàn thành',
+                'CANCELLED': 'Đã hủy',
+                'RETURNED': 'Trả hàng'
+            };
+            const statusIcons = {
+                'PENDING': '✓',
+                'CONFIRMED': '✓',
+                'PROCESSING': '✓',
+                'SHIPPED': '🚚',
+                'DELIVERED': '✓',
+                'CANCELLED': '✕',
+                'RETURNED': '✕'
+            };
+            
+            let displaySteps = [...sequence];
+            if (order.status === 'CANCELLED' || order.status === 'RETURNED') {
+                displaySteps = ['PENDING', order.status];
+            }
+            
+            const historyMap = {};
+            if (order.statusHistory) {
+                order.statusHistory.forEach(h => {
+                    historyMap[h.status] = h;
+                });
+            }
+            
+            const currentIndex = displaySteps.indexOf(order.status);
+          %>
+          
+          <% displaySteps.forEach((step, index) => { 
+              const history = historyMap[step];
+              const isCurrent = order.status === step;
+              // If it's a past step in the sequence (even if missing history due to skipping)
+              const isPast = history !== undefined || (currentIndex !== -1 && index <= currentIndex);
+              
+              let dotClass = 'pending';
+              if (isPast) {
+                  if (step === 'CANCELLED' || step === 'RETURNED') dotClass = 'danger';
+                  else if (isCurrent) dotClass = 'active';
+                  else dotClass = 'done';
+              }
+              
+              const icon = statusIcons[step];
+              const label = statusLabels[step];
+
+              let displayTime = '—';
+              let displayUser = null;
+
+              if (history) {
+                  displayTime = new Date(history.createdAt).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                  });
+                  displayUser = history.changedBy ? history.changedBy.fullName : 'Hệ thống';
+              } else if (isPast) {
+                  const fallbackDate = step === 'PENDING' ? order.createdAt : order.updatedAt;
+                  displayTime = new Date(fallbackDate).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                  });
+              }
+          %>
           <div class="timeline-step">
-            <div class="step-dot done">✓</div>
-            <div class="step-label done">Đặt hàng</div>
-            <div class="step-time"><%= order.createdAt.toLocaleString('vi-VN') %></div>
+            <div class="step-dot <%= dotClass %>"><%= dotClass !== 'pending' ? icon : '⬤' %></div>
+            <div class="step-label <%= dotClass %>"><%= label %></div>
+            <div class="step-time"><%= displayTime %></div>
+            <% if (displayUser) { %>
+                <div style="font-size: 11px; color: #185FA5; margin-top: 4px; font-weight: 500;"><%= displayUser %></div>
+            <% } %>
           </div>
-          <!-- Step 2: done -->
-          <div class="timeline-step">
-            <div class="step-dot done">✓</div>
-            <div class="step-label done">Xác nhận</div>
-            <div class="step-time">30/03 14:00</div>
-          </div>
-          <!-- Step 3: done -->
-          <div class="timeline-step">
-            <div class="step-dot done">✓</div>
-            <div class="step-label done">Đóng gói</div>
-            <div class="step-time">30/03 14:00</div>
-          </div>
-          <!-- Step 4: active -->
-          <div class="timeline-step">
-            <div class="step-dot active">🚚</div>
-            <div class="step-label active">Đang giao</div>
-            <div class="step-time">31/03 08:30</div>
-          </div>
-          <!-- Step 5: pending -->
-          <div class="timeline-step">
-            <div class="step-dot pending">⬤</div>
-            <div class="step-label">Hoàn thành</div>
-            <div class="step-time">—</div>
-          </div>
+          <% }); %>
         </div>
       </div>
 
@@ -94,43 +162,62 @@
             </div>
             <div class="info-row">
               <span class="info-label">Trạng thái</span>
-              <span class="info-value"><span class="badge info">Đang giao hàng</span></span>
+              <% const orderBadgeClass = order.status === 'PENDING' ? 'badge info' : order.status === 'DELIVERED' ? 'badge success' : order.status === 'CANCELLED' ? 'badge danger' : 'badge warning'; %>
+              <span class="info-value"><span class="<%= orderBadgeClass %>"><%= order.status %></span></span>
             </div>
             <div class="info-row">
               <span class="info-label">Hình thức thanh toán</span>
-              <span class="info-value">Chuyển khoản ngân hàng</span>
+              <span class="info-value">
+                  <%= 
+                      order.paymentMethod === 'COD' 
+                          ? 'Thanh toán khi nhận hàng' 
+                          : order.paymentMethod === 'BANKING'
+                          ? 'Chuyển khoản ngân hàng'
+                          : order.paymentMethod === 'MOMO'
+                          ? 'Ví MoMo'
+                          : order.paymentMethod
+                  %>
+              </span>
             </div>
             <div class="info-row">
               <span class="info-label">Trạng thái thanh toán</span>
-              <span class="info-value"><span class="badge success">Đã thanh toán</span></span>
+              <% const paymentBadgeClass = order.paymentStatus === 'PAID' ? 'badge success' : 'badge danger'; %>
+              <span class="info-value"><span class="<%= paymentBadgeClass %>"><%= order.paymentStatus %></span></span>
             </div>
             <div class="info-row">
               <span class="info-label">Ghi chú</span>
-              <span class="info-value" style="font-style:italic;color:#5F5E5A;">Giao giờ hành chính</span>
+              <span class="info-value" style="font-style:italic;color:#5F5E5A;"><%= order.notes || "Không có ghi chú" %></span>
             </div>
           </div>
 
           <!-- Shipping -->
+          <% 
+            let shippingOrder = null;
+            if (order.shippingOrders && order.shippingOrders.length > 0) {
+                shippingOrder = order.shippingOrders[0];
+            }
+          %>
+          <% if (order.status !== 'PENDING' && shippingOrder) { %>
           <div class="card">
             <h3>Thông tin giao hàng</h3>
             <div class="info-row">
               <span class="info-label">Đơn vị vận chuyển</span>
-              <span class="info-value">Giao hàng nhanh (GHN)</span>
+              <span class="info-value"><%= shippingOrder.provider ? shippingOrder.provider.name : 'Chưa có' %></span>
             </div>
             <div class="info-row">
               <span class="info-label">Mã vận đơn</span>
-              <span class="info-value mono">GHN-2024-88291</span>
+              <span class="info-value mono"><%= shippingOrder.trackingNumber %></span>
             </div>
             <div class="info-row">
               <span class="info-label">Dự kiến giao</span>
-              <span class="info-value">01/04/2026</span>
+              <span class="info-value"><%= shippingOrder.estimatedDeliveryDate ? new Date(shippingOrder.estimatedDeliveryDate).toLocaleDateString('vi-VN') : 'Đang tính toán' %></span>
             </div>
             <div class="info-row">
               <span class="info-label">Địa chỉ giao</span>
-              <span class="info-value" style="max-width:220px;text-align:right;">123 Nguyễn Trãi, P. Thượng Đình, Q. Thanh Xuân, Hà Nội</span>
+              <span class="info-value" style="max-width:220px;text-align:right;"><%= order.shippingAddress %></span>
             </div>
           </div>
-
+          <% } %>
         </div>
 
         <!-- Right: customer + summary -->
@@ -168,7 +255,7 @@
             </div>
             <div class="info-row">
               <span class="info-label">Tổng đơn đã mua</span>
-              <span class="info-value">12 đơn</span>
+              <span class="info-value"><%= order.orderItems?.length %> đơn</span>
             </div>
           </div>
 
@@ -177,11 +264,11 @@
             <h3>Tổng thanh toán</h3>
             <div class="info-row">
               <span class="info-label">Tạm tính</span>
-              <span class="info-value"><%= order.totalAmount %> ₫</span>
+              <span class="info-value"><%= order.totalAmount.toLocaleString('vi-VN') %> ₫</span>
             </div>
             <div class="info-row">
               <span class="info-label">Phí vận chuyển</span>
-              <span class="info-value">0 ₫</span>
+              <span class="info-value"> <%= order.shippingFee.toLocaleString('vi-VN') %> ₫</span>
             </div>
             <div class="info-row">
               <span class="info-label">Giảm giá</span>
@@ -190,7 +277,7 @@
             <hr class="divider">
             <div class="info-row">
               <span class="info-label" style="font-weight:600;color:var(--text);">Tổng cộng</span>
-              <span style="font-size:20px;font-weight:700;color:#0C447C;"><%= order.totalAmount %> ₫</span>
+              <span style="font-size:20px;font-weight:700;color:#0C447C;"><%= Number(order.totalAmount + order.shippingFee).toLocaleString('vi-VN') %> ₫</span>
             </div>
           </div>
 
@@ -249,26 +336,47 @@
       <div class="card" style="margin-bottom:24px;">
         <h3 style="margin-bottom:14px;">Lịch sử hoạt động</h3>
         <div style="display:flex;flex-direction:column;gap:0;">
-          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
-            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">31/03 08:30</div>
-            <div style="width:8px;height:8px;border-radius:50%;background:#185FA5;margin-top:4px;flex-shrink:0;"></div>
-            <div><span style="color:#185FA5;font-weight:500;">Hệ thống</span> <span style="color:#5F5E5A;">cập nhật trạng thái sang</span> <span style="font-weight:500;">Đang giao hàng</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
-            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 14:00</div>
-            <div style="width:8px;height:8px;border-radius:50%;background:#0F6E56;margin-top:4px;flex-shrink:0;"></div>
-            <div><span style="color:#185FA5;font-weight:500;">Nguyễn Tuấn</span> <span style="color:#5F5E5A;">chuyển sang</span> <span style="font-weight:500;">Đang đóng gói</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
-            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 09:42</div>
-            <div style="width:8px;height:8px;border-radius:50%;background:#0F6E56;margin-top:4px;flex-shrink:0;"></div>
-            <div><span style="color:#185FA5;font-weight:500;">Hệ thống</span> <span style="color:#5F5E5A;">xác nhận đơn hàng tự động</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:10px 0;font-size:13px;align-items:flex-start;">
-            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">30/03 09:14</div>
-            <div style="width:8px;height:8px;border-radius:50%;background:#B4B2A9;margin-top:4px;flex-shrink:0;"></div>
-            <div><span style="color:#185FA5;font-weight:500;">Lê Minh Châu</span> <span style="color:#5F5E5A;">đặt đơn hàng thành công</span></div>
-          </div>
+          <% if (order.statusHistory && order.statusHistory.length > 0) { %>
+            <% [...order.statusHistory].reverse().forEach((history, idx) => { %>
+              <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+                <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
+                  <%= new Date(history.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                </div>
+                <% 
+                  let dotColor = '#0F6E56'; // Default green for successful steps
+                  if (history.status === 'CANCELLED' || history.status === 'RETURNED') dotColor = '#A32D2D';
+                  else if (history.status === 'PENDING') dotColor = '#B4B2A9';
+                  else if (history.status === 'SHIPPED') dotColor = '#185FA5';
+                %>
+                <div style="width:8px;height:8px;border-radius:50%;background:<%= dotColor %>;margin-top:4px;flex-shrink:0;"></div>
+                <div>
+                  <span style="color:#185FA5;font-weight:500;">
+                    <%= history.changedBy ? history.changedBy.fullName : (history.status === 'PENDING' ? order.customerName : 'Hệ thống') %>
+                  </span> 
+                  <span style="color:#5F5E5A;">
+                    <%= history.status === 'PENDING' ? 'tạo đơn hàng mới' : 'đã cập nhật trạng thái thành' %>
+                  </span> 
+                  <span style="font-weight:500;">
+                    <%= statusLabels[history.status] || history.status %>
+                  </span>
+                  <% if (history.notes && history.notes !== 'Đơn hàng được tạo' && history.notes !== 'Trạng thái được cập nhật') { %>
+                    <div style="margin-top:4px; color:#666; font-size: 12px; font-style: italic;">"<%= history.notes %>"</div>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+              <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
+                <%= new Date(order.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+              </div>
+              <div style="width:8px;height:8px;border-radius:50%;background:#B4B2A9;margin-top:4px;flex-shrink:0;"></div>
+              <div>
+                <span style="color:#185FA5;font-weight:500;"><%= order.customerName %></span> 
+                <span style="color:#5F5E5A;">tạo đơn hàng thành công</span>
+              </div>
+            </div>
+          <% } %>
         </div>
       </div>
 
