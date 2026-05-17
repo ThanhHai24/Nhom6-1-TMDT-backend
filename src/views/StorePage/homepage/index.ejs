@@ -263,7 +263,7 @@
 
     <section class="products-section">
         <div class="section-header">
-            <h2 class="section-title">LAPTOP GAMING</h2>
+            <h2 class="section-title">CPU - BỘ VI XỬ LÝ</h2>
             <div class="filter-options">
                 <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
             </div>
@@ -297,10 +297,123 @@
         </div>
 
     </section>
+
+    <section class="products-section">
+        <div class="section-header">
+            <h2 class="section-title">PC</h2>
+            <div class="filter-options">
+                <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+            </div>
+        </div>
+        <div class="product-slider">
+            <button class="slider-btn prev-btn">❮</button>
+            <div class="product-container">
+                <% pcs.forEach(function (pc) {%> 
+                <a href="/product/<%= pc.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
+                    <div class="product-card">
+                        <div class="bestseller-label">Hot</div>
+
+                        <div class="product-image">
+                            <img src="/admin/productImages/<%= pc.image%>" alt="<%= pc.name%>">
+                        </div>
+                        <h3 class="product-title"><%= pc.name%></h3>
+                        <div class="product-price"><%= pc.price.toLocaleString('vi-VN')%>đ
+
+                            <span class="original-price"><%= pc.price.toLocaleString('vi-VN')%>đ</span>
+
+                        </div>
+
+                        <div class="product-stats">
+                            <span>⭐ Đã bán: 100</span>
+                        </div>
+                    </div>
+                </a>
+                <%})%> 
+            </div>
+            <button class="slider-btn next-btn">❯</button>
+        </div>
+
+    </section>
     </div>
     <footer>
         <%- include("../layout/footer.ejs") %>
     </footer>
+
+<script>
+// =============================================
+// PRODUCT SLIDER - Mỗi slider hoạt động độc lập
+// =============================================
+document.addEventListener('DOMContentLoaded', function () {
+    const sliders = document.querySelectorAll('.product-slider');
+
+    sliders.forEach(function (slider) {
+        const container = slider.querySelector('.product-container');
+        const prevBtn   = slider.querySelector('.prev-btn');
+        const nextBtn   = slider.querySelector('.next-btn');
+
+        if (!container || !prevBtn || !nextBtn) return;
+
+        // Tính width của 1 card (bao gồm gap)
+        function getScrollAmount() {
+            const card = container.querySelector('.product-card, a');
+            if (!card) return 220;
+            const style = getComputedStyle(container);
+            const gap   = parseFloat(style.gap) || 10;
+            return card.offsetWidth + gap;
+        }
+
+        nextBtn.addEventListener('click', function () {
+            container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
+        });
+
+        prevBtn.addEventListener('click', function () {
+            container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+        });
+
+        // Ẩn/hiện nút khi scroll đến đầu/cuối
+        function updateButtons() {
+            prevBtn.style.opacity = container.scrollLeft <= 0 ? '0.4' : '1';
+            nextBtn.style.opacity =
+                container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
+                ? '0.4' : '1';
+        }
+        container.addEventListener('scroll', updateButtons);
+        updateButtons();
+    });
+
+    // =============================================
+    // BANNER SLIDESHOW
+    // =============================================
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.slideshow-dot');
+    let current  = 0;
+    let timer;
+
+    function goTo(index) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (index + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+    }
+
+    function startAuto() {
+        timer = setInterval(function () { goTo(current + 1); }, 4000);
+    }
+
+    if (slides.length > 0) {
+        dots.forEach(function (dot, i) {
+            dot.addEventListener('click', function () {
+                clearInterval(timer);
+                goTo(i);
+                startAuto();
+            });
+        });
+        startAuto();
+    }
+});
+</script>
+
 </body>
 
 </html>

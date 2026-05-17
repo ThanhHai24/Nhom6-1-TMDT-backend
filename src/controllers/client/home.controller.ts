@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { getHotProducts, getLaptopProducts, getPCProducts, getProductBySlug, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts } from "services/client/product.services";
+import { getHotProducts, getLaptopProducts, getPCProducts, getProductBySlug, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts, getRelatedProducts } from "services/client/product.services";
 import { updateProfile, getUserOrders, getOrderByCode, cancelOrderByCode } from "services/client/user.services";
 
 // Map slug → display name (khớp với category.seed.ts)
@@ -101,7 +101,17 @@ const getListPage = async (req: Request, res: Response) => {
 const getProductPage = async (req: Request, res: Response) => {
     const slug = req.params.slug as string;
     const product = await getProductBySlug(slug);
-    res.render("StorePage/homepage/product", { product });
+
+    if (!product) {
+        return res.status(404).render('StorePage/homepage/404', { message: 'Không tìm thấy sản phẩm.' });
+    }
+
+    // Lấy sản phẩm cùng danh mục
+    const relatedProducts = product.categoryId
+        ? await getRelatedProducts(product.categoryId, product.id, 10)
+        : [];
+
+    res.render("StorePage/homepage/product", { product, relatedProducts });
 };
 
 const getProfilePage = async (req: Request, res: Response) => {

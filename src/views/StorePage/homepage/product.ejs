@@ -210,48 +210,55 @@
                     </div>
                 </div>
 
-                <section class="products-section">
+                <!-- Sản phẩm tương tự -->
+                <section class="products-section" style="margin-top: 24px;">
                     <div class="section-header">
-                        <h2 class="section-title">SẢN PHẨM LIÊN QUAN</h2>
+                        <h2 class="section-title">SẢN PHẨM TƯƠNG TỰ</h2>
                         <div class="filter-options">
-
+                            <% if (product.category) { %>
+                            <a href="/<%= product.category.slug %>" class="filter-option">Xem tất cả &rarr;</a>
+                            <% } %>
                         </div>
                     </div>
+
+                    <% if (relatedProducts && relatedProducts.length > 0) { %>
                     <div class="product-slider">
                         <button class="slider-btn prev-btn">❮</button>
                         <div class="product-container">
-
-                            <a href="/product/{{ $relatedProduct -> slug }}" style="text-decoration: none;">
+                            <% relatedProducts.forEach(function(rp) { %>
+                            <a href="/product/<%= rp.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                                 <div class="product-card">
-
+                                    <% if (rp.isHot) { %>
                                     <div class="bestseller-label">Hot</div>
-
-
+                                    <% } %>
                                     <div class="product-image">
-                                        <img src="client/images/PC00001-1.jpg" alt="PC Gaming">
+                                        <img src="/admin/productImages/<%= rp.image %>" alt="<%= rp.name %>" loading="lazy">
                                     </div>
-                                    <h3 class="product-title">Related Product</h3>
-                                    <div class="product-price">100.000đ
-
-                                        <span class="original-price">100.000đ</span>
-
+                                    <h3 class="product-title"><%= rp.name %></h3>
+                                    <div class="product-price">
+                                        <%= rp.price.toLocaleString('vi-VN') %>đ
+                                        <% if (rp.originalPrice && rp.originalPrice > rp.price) { %>
+                                        <span class="original-price"><%= rp.originalPrice.toLocaleString('vi-VN') %>đ</span>
+                                        <% } %>
                                     </div>
-
                                     <div class="product-stats">
-                                        <span>⭐ Đã bán: 100</span>
+                                        <span>⭐ Đã bán: <%= rp.sold || 0 %></span>
                                     </div>
+                                </div>
                             </a>
+                            <% }); %>
                         </div>
-
+                        <button class="slider-btn next-btn">❯</button>
                     </div>
-                    <button class="slider-btn next-btn">❯</button>
-            </div>
-            </section>
+                    <% } else { %>
+                    <p style="color: #888; text-align: center; padding: 20px 0;">Không có sản phẩm tương tự.</p>
+                    <% } %>
+                </section>
 
 
-            <%if (product.description) { %>
                 <section class="info-section">
                 <div class="info-container">
+                    
                     <div class="description">
 
                         <h2 class="description-title">Giới thiệu sản phẩm: Product Name</h2>
@@ -261,17 +268,50 @@
                         <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
 
                     </div>
+                    
 
+                    <%
+                        let specs = [];
+                        try {
+                            if (product.specifications) {
+                                specs = typeof product.specifications === 'string'
+                                    ? JSON.parse(product.specifications)
+                                    : product.specifications;
+                            }
+                        } catch(e) {
+                            specs = [];
+                        }
+                    %>
+                    <% if (specs && specs.length > 0) { %>
                     <div class="specs">
                         <h2 class="specs-title">Thông số kỹ thuật</h2>
                         <div class="spec-detail" id="specs-content">
-
+                            <table class="specs-table">
+                                <tbody>
+                                    <% specs.forEach(function(spec) { %>
+                                    <tr class="spec-row">
+                                        <td class="spec-key"><%= spec.key %></td>
+                                        <td class="spec-value">
+                                            <% if (spec.productRef) { %>
+                                                <a href="/product/<%= spec.productRef.slug %>" class="spec-product-link">
+                                                    <i class="bi bi-box-seam"></i>
+                                                    <%= spec.productRef.name %>
+                                                </a>
+                                            <% } else { %>
+                                                <%= spec.value %>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
                         </div>
                         <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
                     </div>
+                    <% } %>
                 </div>
             </section>
-            <% } %>
+            
     </div>
     </main>
 
@@ -356,6 +396,42 @@
             btn.innerText = "Thu gọn";
         }
     }
+
+    // =============================================
+    // RELATED PRODUCTS SLIDER
+    // =============================================
+    (function () {
+        const sliders = document.querySelectorAll('.product-slider');
+        sliders.forEach(function (slider) {
+            const container = slider.querySelector('.product-container');
+            const prevBtn   = slider.querySelector('.prev-btn');
+            const nextBtn   = slider.querySelector('.next-btn');
+            if (!container || !prevBtn || !nextBtn) return;
+
+            function getScrollAmount() {
+                const card = container.querySelector('.product-card, a');
+                if (!card) return 220;
+                const gap = parseFloat(getComputedStyle(container).gap) || 10;
+                return card.offsetWidth + gap;
+            }
+
+            nextBtn.addEventListener('click', function () {
+                container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
+            });
+            prevBtn.addEventListener('click', function () {
+                container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+            });
+
+            function updateBtns() {
+                prevBtn.style.opacity = container.scrollLeft <= 1 ? '0.35' : '1';
+                nextBtn.style.opacity =
+                    container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
+                    ? '0.35' : '1';
+            }
+            container.addEventListener('scroll', updateBtns);
+            updateBtns();
+        });
+    })();
 
 </script>
 </body>

@@ -24,6 +24,10 @@ app.set("views", __dirname + "/views");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Config static files
+app.use(express.static("public"));
+
+
 // middleware to set currentUrl for active link in sidebar
 app.use((req, res, next) => {
     res.locals.currentUrl = req.originalUrl;
@@ -74,8 +78,6 @@ apiRoutes(app);
 
 getConnection();
 
-// Config static files
-app.use(express.static("public"));
 
 
 // seed data

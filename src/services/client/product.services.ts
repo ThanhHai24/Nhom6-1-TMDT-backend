@@ -46,14 +46,56 @@ const getGPUProducts = async function () {
     return products
 }
 
-const getProductBySlug = async function name(slug: string) {
+const getProductBySlug = async function (slug: string) {
     const product = await prisma.product.findUnique({
-        where: {
-            slug: slug
+        where: { slug },
+        include: {
+            category: { select: { id: true, slug: true, name: true } },
+        },
+    });
+
+    if (!product) return null;
+
+    // Nếu là sản phẩm PC, resolve các spec có value là product ID → lấy tên + slug sản phẩm linh kiện
+    const PC_CATEGORY_SLUGS = ['pc', 'pc-gaming', 'pc-van-phong', 'pc-do-hoa'];
+    const isPC = product.category && PC_CATEGORY_SLUGS.includes(product.category.slug);
+
+    if (isPC && product.specifications) {
+        let specs: Array<{ key: string; value: string; productRef?: { name: string; slug: string } | null }> = [];
+        try {
+            specs = typeof product.specifications === 'string'
+                ? JSON.parse(product.specifications)
+                : (product.specifications as any);
+        } catch {
+            specs = [];
         }
-    })
-    return product
+
+        // Tìm tất cả các spec có value là số (product ID)
+        const productIdSpecs = specs.filter(s => /^\d+$/.test(String(s.value)));
+        const uniqueIds = [...new Set(productIdSpecs.map(s => Number(s.value)))];
+
+        if (uniqueIds.length > 0) {
+            const linkedProducts = await prisma.product.findMany({
+                where: { id: { in: uniqueIds.map(BigInt) } },
+                select: { id: true, name: true, slug: true },
+            });
+            const productMap = new Map(linkedProducts.map(p => [Number(p.id), p]));
+
+            specs = specs.map(spec => {
+                const id = Number(spec.value);
+                const ref = productMap.get(id);
+                return ref
+                    ? { ...spec, productRef: { name: ref.name, slug: ref.slug } }
+                    : { ...spec, productRef: null };
+            });
+        }
+
+        return { ...product, specifications: specs };
+    }
+
+    return product;
 }
+
 export interface ProductFilterOptions {
     categorySlug?: string;
     brandIds?: number[];
@@ -190,4 +232,20 @@ const searchProducts = async function (opts: SearchOptions) {
 };
 
 
-export { getHotProducts, getProductBySlug, getLaptopProducts, getPCProducts, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts }
+/**
+ * Lấy danh sách sản phẩm tương tự (cùng danh mục, khác sản phẩm hiện tại)
+ */
+const getRelatedProducts = async function (categoryId: number | bigint, excludeId: number | bigint, limit = 10) {
+    const products = await prisma.product.findMany({
+        where: {
+            categoryId: BigInt(categoryId.toString()),
+            id: { not: BigInt(excludeId.toString()) },
+            status: 'ACTIVE',
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+    });
+    return products;
+};
+
+export { getHotProducts, getProductBySlug, getLaptopProducts, getPCProducts, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts, getRelatedProducts }
