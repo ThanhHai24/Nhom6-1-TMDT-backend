@@ -39,12 +39,14 @@ const getHomePage = async (req: Request, res: Response) => {
     const laptops = await getLaptopProducts();
     const pcs = await getPCProducts();
     const cpus = await getCPUProducts();
+    const gpus = await getGPUProducts();
 
     res.render("StorePage/homepage/index", {
         hotproducts,
         laptops,
         pcs,
         cpus,
+        gpus,
     });
 };
 

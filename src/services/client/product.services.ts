@@ -13,8 +13,14 @@ const getHotProducts = async function () {
 const getLaptopProducts = async function () {
     const products = await prisma.product.findMany({
         where: {
-            categoryId: 6,
-        }
+            OR: [
+                { categoryId: 4 },
+                { categoryId: 18 },
+                { categoryId: 19 },
+                { categoryId: 20 }
+            ]
+        },
+        take:10
     })
     return products
 }
@@ -22,8 +28,9 @@ const getLaptopProducts = async function () {
 const getPCProducts = async function () {
     const products = await prisma.product.findMany({
         where: {
-            categoryId: 5,
-        }
+            categoryId: 1,
+        },
+        take:10
     })
     return products
 }
@@ -40,8 +47,9 @@ const getCPUProducts = async function () {
 const getGPUProducts = async function () {
     const products = await prisma.product.findMany({
         where: {
-            categoryId: 9,
-        }
+            categoryId: 8,
+        },
+        take:10
     })
     return products
 }
@@ -248,4 +256,4 @@ const getRelatedProducts = async function (categoryId: number | bigint, excludeI
     return products;
 };
 
-export { getHotProducts, getProductBySlug, getLaptopProducts, getPCProducts, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts, getRelatedProducts }
+export { getHotProducts, getProductBySlug, getLaptopProducts, getPCProducts, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts, getRelatedProducts }

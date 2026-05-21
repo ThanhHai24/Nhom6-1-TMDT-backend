@@ -19,6 +19,91 @@
 
                 );
         }
+
+        /* ===== CART NOTIFICATION POPUP ===== */
+        #cart-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 99999;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+            padding: 18px 22px 18px 18px;
+            min-width: 320px;
+            max-width: 400px;
+            transform: translateX(calc(100% + 40px));
+            opacity: 0;
+            transition: transform 0.38s cubic-bezier(.45,1.6,.55,1), opacity 0.3s ease;
+            pointer-events: none;
+            border-left: 5px solid #22c55e;
+        }
+        #cart-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #cart-toast.error {
+            border-left-color: #ef4444;
+        }
+        #cart-toast .toast-icon {
+            font-size: 28px;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        #cart-toast .toast-body {
+            flex: 1;
+        }
+        #cart-toast .toast-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+        }
+        #cart-toast .toast-msg {
+            font-size: 13px;
+            color: #555;
+        }
+        #cart-toast .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #aaa;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            margin-top: 2px;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+        #cart-toast .toast-close:hover {
+            color: #333;
+        }
+        #cart-toast .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            border-radius: 0 0 14px 14px;
+            background: #22c55e;
+            transform-origin: left;
+            animation: none;
+        }
+        #cart-toast.show .toast-progress {
+            animation: toastProgress 3s linear forwards;
+        }
+        #cart-toast.error .toast-progress {
+            background: #ef4444;
+        }
+        @keyframes toastProgress {
+            from { transform: scaleX(1); }
+            to   { transform: scaleX(0); }
+        }
     </style>
 </head>
 
@@ -94,7 +179,7 @@
 
                             <div class="warranty-info">
                                 <span class="warranty-badge">Bảo hành:</span>
-                                <span>12t</span>
+                                <span>36 Tháng</span>
                                 <span style="margin-left: 15px;">|</span>
                                 <span style="margin-left: 10px;">Tình trạng:</span>
                                 <span class="stock-status">Còn hàng</span>
@@ -106,8 +191,7 @@
                                     %></div>
 
                                 <span class="original-price"><%= product.originalPrice%></span>
-                                <span class="discount">Tiết kiệm
-                                    <%= product.discount%>đ</span>
+                                
 
                             </div>
 
@@ -261,11 +345,13 @@
                     
                     <div class="description">
 
-                        <h2 class="description-title">Giới thiệu sản phẩm: Product Name</h2>
+                        <h2 class="description-title">Giới thiệu sản phẩm: <%= product.name %></h2>
                         <div class="description-detail" id="description-content">
                             <%- product.description %>
                         </div>
-                        <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
+                        <div style="text-align:center; margin-top: 12px;">
+                            <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
+                        </div>
 
                     </div>
                     
@@ -306,7 +392,9 @@
                                 </tbody>
                             </table>
                         </div>
-                        <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
+                        <div style="text-align:center; margin-top: 12px;">
+                            <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
+                        </div>
                     </div>
                     <% } %>
                 </div>
@@ -318,6 +406,17 @@
     <footer>
         <%- include("../layout/footer.ejs") %>
     </footer>
+    </div>
+
+    <!-- ===== CART TOAST NOTIFICATION ===== -->
+    <div id="cart-toast" role="alert" aria-live="assertive">
+        <span class="toast-icon" id="toast-icon">✅</span>
+        <div class="toast-body">
+            <div class="toast-title" id="toast-title">Thêm vào giỏ hàng thành công!</div>
+            <div class="toast-msg" id="toast-msg">Sản phẩm đã được thêm vào giỏ hàng của bạn.</div>
+        </div>
+        <button class="toast-close" onclick="hideCartToast()" title="Đóng">✕</button>
+        <div class="toast-progress" id="toast-progress"></div>
     </div>
     <script>
     // =========================
@@ -358,6 +457,43 @@
     // ADD TO CART (AJAX)
     // =========================
 
+    // ===== TOAST NOTIFICATION HELPERS =====
+    let toastTimer = null;
+
+    function showCartToast(success, title, msg) {
+        const toast    = document.getElementById('cart-toast');
+        const iconEl   = document.getElementById('toast-icon');
+        const titleEl  = document.getElementById('toast-title');
+        const msgEl    = document.getElementById('toast-msg');
+        const progress = document.getElementById('toast-progress');
+
+        // Reset trạng thái cũ
+        toast.classList.remove('show', 'error');
+        progress.style.animation = 'none';
+        void progress.offsetWidth; // trigger reflow để reset animation
+
+        iconEl.textContent  = success ? '✅' : '❌';
+        titleEl.textContent = title;
+        msgEl.textContent   = msg;
+        if (!success) toast.classList.add('error');
+
+        // Hiện toast
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        // Tự ẩn sau 3 giây
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(hideCartToast, 3000);
+    }
+
+    function hideCartToast() {
+        const toast = document.getElementById('cart-toast');
+        toast.classList.remove('show');
+        clearTimeout(toastTimer);
+    }
+
+    // ===== ADD TO CART (AJAX) =====
     async function addToCart(e) {
         e.preventDefault();
 
@@ -367,16 +503,17 @@
 
         try {
             const res = await axios.post("/cart/add", data);
-            
-            if(res.data && res.data.cartCount) {
+
+            if (res.data && res.data.cartCount) {
                 const badge = document.querySelector('.cart-count');
-                if(badge) badge.textContent = res.data.cartCount;
+                if (badge) badge.textContent = res.data.cartCount;
             }
 
-            alert("✅ Đã thêm vào giỏ hàng!");
+            const qty = data.product_qty || 1;
+            showCartToast(true, 'Thêm vào giỏ hàng thành công!', `Đã thêm ${qty} sản phẩm vào giỏ hàng.`);
         } catch (err) {
             console.error(err);
-            alert("❌ Lỗi thêm giỏ hàng!");
+            showCartToast(false, 'Thêm giỏ hàng thất bại!', 'Vui lòng thử lại hoặc kiểm tra kết nối.');
         }
     }
 

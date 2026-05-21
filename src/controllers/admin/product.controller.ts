@@ -3,12 +3,19 @@ import { Request, Response } from "express";
 import { getAllCategories, getCategories } from "services/admin/category.services";
 import { getAllBrands } from "services/admin/brand.services";
 import { getAllSuppliers } from "services/admin/supplier.services";
-import { autoGenerateSlug, generateSKUWithDB, getAllProducts, getProductById, HandleActiveProduct, HandleCreateProduct, HandleLockProduct, HandleUpdateProduct } from "services/admin/product.services";
+import { autoGenerateSlug, generateSKUWithDB, getAllProducts, getProductsPaginated, getProductById, HandleActiveProduct, HandleCreateProduct, HandleLockProduct, HandleUpdateProduct } from "services/admin/product.services";
 
 const getProductsPage = async (req: Request, res: Response) => {
-    const products = await getAllProducts();
+    const LIMIT = 10;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const { products, totalCount } = await getProductsPaginated(page, LIMIT);
+    const totalPages = Math.ceil(totalCount / LIMIT);
     res.render("admin/products/product", {
-        products: products,
+        products,
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit: LIMIT,
     });
 }
 

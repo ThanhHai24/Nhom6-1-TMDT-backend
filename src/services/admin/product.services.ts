@@ -37,6 +37,24 @@ const getAllProducts = async function () {
     });
 }
 
+const getProductsPaginated = async function (page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const [products, totalCount] = await Promise.all([
+        prisma.product.findMany({
+            skip,
+            take: limit,
+            include: {
+                category: true,
+                brand: true,
+                supplier: true,
+            },
+            orderBy: { id: 'desc' },
+        }),
+        prisma.product.count(),
+    ]);
+    return { products, totalCount };
+}
+
 const HandleCreateProduct = async function (name: string, slug: string, sku: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any) {
     await prisma.product.create({
         data: {
@@ -127,4 +145,4 @@ const HandleUpdateProduct = async function (id: string, name: string, slug: stri
 }
 
 
-export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct }
+export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, getProductsPaginated, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct }

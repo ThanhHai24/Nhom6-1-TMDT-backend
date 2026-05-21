@@ -226,36 +226,60 @@
           <!-- Customer -->
           <div class="card">
             <h3>Khách hàng</h3>
-            <div class="customer-row">
-            <% const avatarUrl= order.user.avatar || 'UserAvatar.png' ; %>
+            <% if (order.user) { %>
+              <%
+                const avatarUrl = order.user.avatar || 'UserAvatar.png';
+              %>
+              <div class="customer-row">
                 <div class="user-cell">
-                    <div class="user-avatar" style="background:#eeeeee">
-                        <img class="user-avatar"
-                            src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        
-                    </div>
-                    <div>
-                        <div class="user-name">
-                            <%= order.user.fullName %>
-                        </div>
-                        <div class="user-email">
-                            Khách hàng mới
-                        </div>
-                    </div>
+                  <div class="user-avatar" style="background:#eeeeee">
+                    <img class="user-avatar"
+                      src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
+                      onerror="this.style.display='none';">
+                  </div>
+                  <div>
+                    <div class="user-name"><%= order.user.fullName %></div>
+                    <div class="user-email" style="color:#0F6E56;font-size:11px;font-weight:500;">Tài khoản thành viên</div>
+                  </div>
                 </div>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Số điện thoại</span>
+                <span class="info-value"><%= order.user.phone || order.customerPhone || '—' %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" style="font-size:12px;"><%= order.user.email %></span>
+              </div>
+            <% } else { %>
+              <!-- Guest order -->
+              <div class="customer-row">
+                <div class="user-cell">
+                  <div class="user-avatar" style="background:#eeeeee; display:flex; align-items:center; justify-content:center; font-size:24px;">
+                    👤
+                  </div>
+                  <div>
+                    <div class="user-name"><%= order.customerName || 'Khách vãng lai' %></div>
+                    <div class="user-email" style="color:#B4B2A9;font-size:11px;font-weight:500;">Khách không đăng nhập</div>
+                  </div>
+                </div>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Số điện thoại</span>
+                <span class="info-value"><%= order.customerPhone || '—' %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" style="font-size:12px;"><%= order.customerEmail || '—' %></span>
+              </div>
+            <% } %>
+            <div class="info-row">
+              <span class="info-label">Địa chỉ nhận hàng</span>
+              <span class="info-value" style="font-size:12px; max-width:220px; text-align:right;"><%= order.shippingAddress || '—' %></span>
             </div>
             <div class="info-row">
-              <span class="info-label">Số điện thoại</span>
-              <span class="info-value"><%= order.user.phone %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Email</span>
-              <span class="info-value" style="font-size:12px;"><%= order.user.email %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Tổng đơn đã mua</span>
-              <span class="info-value"><%= order.orderItems?.length %> đơn</span>
+              <span class="info-label">Số sản phẩm</span>
+              <span class="info-value"><%= order.orderItems?.length %> sản phẩm</span>
             </div>
           </div>
 

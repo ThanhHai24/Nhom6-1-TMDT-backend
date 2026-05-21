@@ -190,11 +190,10 @@ const checkout = async (req: Request, res: Response) => {
         });
     } catch (error) {
         if (error instanceof InsufficientStockError) {
-            // Lỗi hết hàng / race condition → thông báo thân thiện
             console.warn("Stock error during checkout:", error.message);
             return res.render("StorePage/cart/cart", {
                 error_msg: error.message,
-                cart: req.session.cart   // giữ lại giỏ hàng để khách điều chỉnh
+                cart: req.session.cart
             });
         }
 

@@ -189,9 +189,9 @@
     <!-- Product -->
     <section class="products-section">
         <div class="section-header">
-            <h2 class="section-title">PC GAMING</h2>
+            <h2 class="section-title">PC</h2>
             <div class="filter-options">
-                <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+                <a href="/pc" class="filter-option">Xem Tất Cả</a>
             </div>
         </div>
         <div class="product-slider">
@@ -200,7 +200,9 @@
                 <% pcs.forEach(function (pc) {%> 
                 <a href="/product/<%= pc.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                     <div class="product-card">
-                        <div class="bestseller-label">Hot</div>
+                        <% if (pc.isHot == true) { %> 
+                            <div class="bestseller-label">Hot</div>
+                        <% } %>
 
                         <div class="product-image">
                             <img src="/admin/productImages/<%= pc.image%>" alt="<%= pc.name%>">
@@ -226,9 +228,9 @@
 
     <section class="products-section">
         <div class="section-header">
-            <h2 class="section-title">LAPTOP GAMING</h2>
+            <h2 class="section-title">LAPTOP</h2>
             <div class="filter-options">
-                <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+                <a href="/laptop" class="filter-option">Xem Tất Cả</a>
             </div>
         </div>
         <div class="product-slider">
@@ -237,7 +239,9 @@
                 <% laptops.forEach(function (laptop) {%> 
                 <a href="/product/<%= laptop.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                     <div class="product-card">
-                        <div class="bestseller-label">Hot</div>
+                        <% if (laptop.isHot == true) { %> 
+                            <div class="bestseller-label">Hot</div>
+                        <% } %>
 
                         <div class="product-image">
                             <img src="/admin/productImages/<%= laptop.image%>" alt="<%= laptop.name%>">
@@ -265,7 +269,7 @@
         <div class="section-header">
             <h2 class="section-title">CPU - BỘ VI XỬ LÝ</h2>
             <div class="filter-options">
-                <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+                <a href="/cpu-vi-xu-ly" class="filter-option">Xem Tất Cả</a>
             </div>
         </div>
         <div class="product-slider">
@@ -274,7 +278,9 @@
                 <% cpus.forEach(function (cpu) {%> 
                 <a href="/product/<%= cpu.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                     <div class="product-card">
-                        <div class="bestseller-label">Hot</div>
+                        <% if (cpu.isHot == true) { %> 
+                            <div class="bestseller-label">Hot</div>
+                        <% } %>
 
                         <div class="product-image">
                             <img src="/admin/productImages/<%= cpu.image%>" alt="<%= cpu.name%>">
@@ -300,26 +306,28 @@
 
     <section class="products-section">
         <div class="section-header">
-            <h2 class="section-title">PC</h2>
+            <h2 class="section-title">CARD MÀN HÌNH - VGA</h2>
             <div class="filter-options">
-                <a href="/pc-gaming" class="filter-option">Xem Tất Cả</a>
+                <a href="/card-man-hinh-vga" class="filter-option">Xem Tất Cả</a>
             </div>
         </div>
         <div class="product-slider">
             <button class="slider-btn prev-btn">❮</button>
             <div class="product-container">
-                <% pcs.forEach(function (pc) {%> 
-                <a href="/product/<%= pc.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
+                <% gpus.forEach(function (gpu) {%> 
+                <a href="/product/<%= gpu.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                     <div class="product-card">
-                        <div class="bestseller-label">Hot</div>
+                        <% if (gpu.isHot == true) { %> 
+                            <div class="bestseller-label">Hot</div>
+                        <% } %>
 
                         <div class="product-image">
-                            <img src="/admin/productImages/<%= pc.image%>" alt="<%= pc.name%>">
+                            <img src="/admin/productImages/<%= gpu.image%>" alt="<%= gpu.name%>">
                         </div>
-                        <h3 class="product-title"><%= pc.name%></h3>
-                        <div class="product-price"><%= pc.price.toLocaleString('vi-VN')%>đ
+                        <h3 class="product-title"><%= gpu.name%></h3>
+                        <div class="product-price"><%= gpu.price.toLocaleString('vi-VN')%>đ
 
-                            <span class="original-price"><%= pc.price.toLocaleString('vi-VN')%>đ</span>
+                            <span class="original-price"><%= gpu.price.toLocaleString('vi-VN')%>đ</span>
 
                         </div>
 

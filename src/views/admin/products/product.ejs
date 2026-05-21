@@ -163,6 +163,52 @@
                                         <% }) %>
                                 </tbody>
                             </table>
+
+                            <!-- PAGINATION -->
+                            <% if (totalPages > 1) { %>
+                            <div class="pagination-wrap">
+                                <span class="pagination-info">
+                                    Hiển thị <%= (currentPage - 1) * limit + 1 %>–<%= Math.min(currentPage * limit, totalCount) %> / <%= totalCount %> sản phẩm
+                                </span>
+                                <div class="pagination">
+                                    <!-- Prev -->
+                                    <% if (currentPage > 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>" class="page-btn">&#8592;</a>
+                                    <% } else { %>
+                                        <span class="page-btn disabled">&#8592;</span>
+                                    <% } %>
+
+                                    <% 
+                                        let startPage = Math.max(1, currentPage - 2);
+                                        let endPage   = Math.min(totalPages, currentPage + 2);
+                                        if (currentPage <= 3) endPage = Math.min(totalPages, 5);
+                                        if (currentPage >= totalPages - 2) startPage = Math.max(1, totalPages - 4);
+                                    %>
+
+                                    <% if (startPage > 1) { %>
+                                        <a href="?page=1" class="page-btn">1</a>
+                                        <% if (startPage > 2) { %><span class="page-ellipsis">…</span><% } %>
+                                    <% } %>
+
+                                    <% for (let p = startPage; p <= endPage; p++) { %>
+                                        <a href="?page=<%= p %>" class="page-btn <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+                                    <% } %>
+
+                                    <% if (endPage < totalPages) { %>
+                                        <% if (endPage < totalPages - 1) { %><span class="page-ellipsis">…</span><% } %>
+                                        <a href="?page=<%= totalPages %>" class="page-btn"><%= totalPages %></a>
+                                    <% } %>
+
+                                    <!-- Next -->
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>" class="page-btn">&#8594;</a>
+                                    <% } else { %>
+                                        <span class="page-btn disabled">&#8594;</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <% } %>
+
                         </div>
                     </div>
 
