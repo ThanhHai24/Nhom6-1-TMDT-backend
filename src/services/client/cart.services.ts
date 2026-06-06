@@ -71,7 +71,8 @@ export const createOrderTransaction = async (
     shippingAddress: string,
     notes: string,
     userId?: bigint,
-    shippingFee: number = 0
+    shippingFee: number = 0,
+    paymentMethod: string = "COD"
 ) => {
     // Calculate total
     const totalAmount = cartData.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -84,9 +85,9 @@ export const createOrderTransaction = async (
         customerPhone,
         shippingAddress,
         shippingFee,
-        totalAmount,
+        totalAmount: totalAmount + shippingFee,
         status: OrderStatus.PENDING,
-        paymentMethod: PaymentMethod.COD,
+        paymentMethod: (PaymentMethod as any)[paymentMethod] ?? PaymentMethod.COD,
         paymentStatus: PaymentStatus.PENDING,
         notes,
         ...(userId && { userId: userId })

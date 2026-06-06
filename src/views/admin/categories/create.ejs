@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Quản Trị - Thêm danh mục mới</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('../layout/sidebar') -%>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <%- include('../layout/header') -%>
+
+                <div class="content">
+
+                     <!-- ADD Category PAGE -->
+                    <div class="page active" id="page-add-category">
+                        <div class="page-header">
+                            <div>
+                                <h2>Thêm <%= isChild ? 'danh mục con' : 'danh mục cha' %> mới</h2>
+                                <div class="breadcrumb">Hệ quản trị → <a href="/admin/categories" style="color:var(--accent); text-decoration: none;">Quản lý danh mục</a> → Thêm mới
+                                </div>
+                            </div>
+                            <a href="/admin/categories"><button class="btn">← Quay lại</button></a>
+                        </div>
+
+                        <form action="/admin/categories/handlecreate" method="POST" onsubmit="submitAddCategory(event);">
+                            <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+
+                                <!-- Left: Main form -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <!-- Thông tin cơ bản -->
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:20px;">
+                                            <span class="card-title">Thông tin danh mục</span>
+                                            <span style="font-size:12px;color:var(--text-muted)"><span
+                                                    style="color:#E24B4A">*</span> Bắt buộc</span>
+                                        </div>
+
+                                        <div class="form-grid">
+                                            <% if (isChild) { %>
+                                            <div class="form-group full">
+                                                <label class="form-label">Danh mục cha <span style="color:#E24B4A">*</span></label>
+                                                <select name="parentId" class="form-input" id="inp-parent-id" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; background-color: var(--card-bg);">
+                                                    <option value="">-- Chọn danh mục cha --</option>
+                                                    <% parentCategories.forEach(parent => { %>
+                                                        <option value="<%= parent.id %>"><%= parent.name %></option>
+                                                    <% }) %>
+                                                </select>
+                                            </div>
+                                            <% } %>
+
+                                            <div class="form-group full">
+                                                <label class="form-label">Tên danh mục <span
+                                                        style="color:#E24B4A">*</span></label>
+                                                <input name="name" class="form-input" type="text" id="inp-name"
+                                                    placeholder="VD: Máy tính xách tay, PC Gaming...">
+                                            </div>
+
+                                            <div class="form-group full">
+                                                <label class="form-label">Icon đại diện (Emoji hoặc ký tự)</label>
+                                                <input name="icon" class="form-input" type="text" id="inp-icon"
+                                                    placeholder="VD: 📁, 💻, 📱, 🔋..." value="<%= isChild ? '📂' : '📁' %>">
+                                            </div>
+
+                                            <div class="form-group full">
+                                                <label class="form-label">Mô tả</label>
+                                                <textarea name="description" class="form-input form-textarea" id="inp-desc"
+                                                    placeholder="Mô tả chi tiết về danh mục..."
+                                                    style="width:100%;resize:vertical;min-height:120px;"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right: Status -->
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <div class="card">
+                                        <div class="card-header" style="margin-bottom:16px;"><span
+                                                class="card-title">Trạng thái</span>
+                                        </div>
+                                        <div style="display:flex;flex-direction:column;gap:8px;">
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--accent);border-radius:8px;cursor:pointer;"
+                                                id="status-active-lbl">
+                                                <input type="radio" name="status" value="active" checked
+                                                    onchange="selectStatus('active')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Hoạt động</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Danh mục được kích hoạt ngay</div>
+                                                </div>
+                                            </label>
+                                            <label
+                                                style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;"
+                                                id="status-inactive-lbl">
+                                                <input type="radio" name="status" value="inactive"
+                                                    onchange="selectStatus('inactive')"
+                                                    style="accent-color:var(--accent);">
+                                                <div>
+                                                    <div style="font-size:13px;font-weight:500;">Bị Khóa</div>
+                                                    <div style="font-size:11px;color:var(--text-muted);">Danh mục bị ẩn / khóa</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action buttons -->
+                                    <div style="display:flex;flex-direction:column;gap:8px;">
+                                        <button class="btn primary" type="submit"
+                                            style="width:100%;padding:10px;font-size:14px;">Tạo danh mục</button>
+                                        <a href="/admin/categories"><button class="btn" type="button"
+                                                style="width:100%;padding:10px;font-size:14px;">Hủy bỏ</button></a>
+                                    </div>
+
+                                    <!-- Validation summary -->
+                                    <div id="form-errors"
+                                        style="display:none;background:var(--red-50);border:1px solid var(--red-200);border-radius:8px;padding:12px;">
+                                        <div
+                                            style="font-size:12px;font-weight:500;color:var(--red-600);margin-bottom:6px;">
+                                            Vui lòng kiểm tra lại:
+                                        </div>
+                                        <ul id="error-list"
+                                            style="font-size:12px;color:var(--red-600);padding-left:16px;line-height:1.8;">
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </main>
+
+        <script>
+            function selectStatus(val) {
+                ['active', 'inactive'].forEach(s => {
+                    const lbl = document.getElementById('status-' + s + '-lbl');
+                    if (lbl) lbl.style.borderColor = s === val ? 'var(--accent)' : 'var(--border)';
+                });
+            }
+
+            function submitAddCategory(event) {
+                const errors = [];
+                const name = document.getElementById('inp-name').value.trim();
+
+                // If it's a child category, a parent category must be selected
+                const parentSelect = document.getElementById('inp-parent-id');
+                if (parentSelect && !parentSelect.value) {
+                    errors.push('Vui lòng chọn danh mục cha');
+                }
+
+                if (!name) {
+                    errors.push('Tên danh mục không được để trống');
+                }
+
+                const errBox = document.getElementById('form-errors');
+                const errList = document.getElementById('error-list');
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+                    errBox.style.display = 'block';
+                    errBox.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    return;
+                }
+                errBox.style.display = 'none';
+
+                const btn = event.submitter;
+                if(btn) {
+                    btn.textContent = 'Đang tạo...';
+                    setTimeout(() => btn.disabled = true, 50);
+                }
+            }
+        </script>
+</body>
+
+</html>

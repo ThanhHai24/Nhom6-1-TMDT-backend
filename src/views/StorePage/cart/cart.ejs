@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -185,9 +185,30 @@
                 <!-- Payment Method -->
                 <div class="payment-section">
                     <h3 class="section-title">PHƯƠNG THỨC THANH TOÁN</h3>
-                    <div class="payment-option">
-                        <input type="radio" id="cash" name="payment" checked>
-                        <label for="cash">Thanh toán khi nhận hàng</label>
+
+                    <!-- COD -->
+                    <div class="payment-option" id="payment-opt-cod">
+                        <input type="radio" id="cash" name="paymentMethod" value="COD" checked>
+                        <label for="cash" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <span style="font-size:22px;">💵</span>
+                            <span>
+                                <strong>Thanh toán khi nhận hàng (COD)</strong><br>
+                                <small style="color:#888;">Trả tiền mặt khi nhận hàng</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- VNPay -->
+                    <div class="payment-option" id="payment-opt-vnpay" style="margin-top:10px; border:2px solid transparent; border-radius:8px; padding:12px; transition: border-color 0.2s;">
+                        <input type="radio" id="vnpay" name="paymentMethod" value="VNPAY">
+                        <label for="vnpay" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <img src="https://vnpay.vn/s1/statics/img/logo2.svg" alt="VNPay" style="height:28px; object-fit:contain;" onerror="this.style.display='none'">
+                            <span>
+                                <strong>Thanh toán qua VNPay</strong><br>
+                                <small style="color:#888;">Thẻ ATM, Visa, MasterCard, QR Code</small>
+                            </span>
+                            <span style="margin-left:auto; background:#0066cc; color:white; font-size:11px; padding:2px 8px; border-radius:12px;">An toàn &amp; Nhanh</span>
+                        </label>
                     </div>
                 </div>
 
@@ -207,7 +228,7 @@
                         <span id="total" style="color: #ff6b6b;"><%= total.toLocaleString('vi-VN') %> đ</span>
                     </div>
                     <input type="hidden" name="shippingFee" id="shippingFeeInput" value="0">
-                    <button type="submit" class="place-order-btn">ĐẶT HÀNG</button>
+                    <button type="submit" id="place-order-btn" class="place-order-btn">ĐẶT HÀNG</button>
                 </div>
             </form>
         </div>
@@ -273,6 +294,9 @@
             </div>
         </div>
     </footer>
+    <script src="assets/js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script>
         let serverTotal = <%= typeof total !== 'undefined' ? total : 0 %>;
         let currentShippingFee = 0;
@@ -283,7 +307,6 @@
         function toggleCart() {
             const emptyCart = document.getElementById('emptyCart');
             const cartWithItems = document.getElementById('cartWithItems');
-            
             if (isEmptyCart) {
                 emptyCart.style.display = 'none';
                 cartWithItems.style.display = 'block';
@@ -301,10 +324,6 @@
         }
 
         function updateTotal() {
-            // For real cart items, total is calculated by serverTotal + currentShippingFee
-            // Wait, this updateTotal function was primarily for the dummy item UI.
-            // If the dummy item is used, quantity * unitPrice applies. 
-            // We'll accommodate both real cart and dummy cart.
             let baseTotal = serverTotal > 0 ? serverTotal : quantity * unitPrice;
             let finalTotal = baseTotal + currentShippingFee;
             document.getElementById('subtotal').textContent = baseTotal.toLocaleString('vi-VN') + ' đ';
@@ -317,35 +336,53 @@
             }
         }
 
-        document.getElementById('clearCart').addEventListener('click', function() {
-            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?')) {
-                toggleCart();
-            }
-        });
+        document.addEventListener('DOMContentLoaded', async function() {
 
-        // Animation for empty cart icon
-        document.addEventListener('DOMContentLoaded', function() {
+            // ── 1. Payment method UI ──────────────────────────────────────────
+            const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
+            const orderBtn = document.getElementById('place-order-btn');
+
+            function updatePaymentUI() {
+                const selected = document.querySelector('input[name="paymentMethod"]:checked');
+                if (!selected) return;
+
+                document.querySelectorAll('.payment-option').forEach(el => {
+                    el.style.borderColor = 'transparent';
+                    el.style.background = '';
+                });
+
+                const parent = selected.closest('.payment-option');
+                parent.style.borderColor = '#0066cc';
+                parent.style.background = 'rgba(0,102,204,0.04)';
+
+                if (selected.value === 'VNPAY') {
+                    orderBtn.textContent = 'THANH TOÁN QUA VNPAY →';
+                    orderBtn.style.background = 'linear-gradient(135deg, #0052cc, #0099ff)';
+                } else {
+                    orderBtn.textContent = 'ĐẶT HÀNG';
+                    orderBtn.style.background = '';
+                }
+            }
+
+            paymentRadios.forEach(r => r.addEventListener('change', updatePaymentUI));
+            updatePaymentUI();
+
+            // ── 2. Empty cart icon animation ──────────────────────────────────
             const emptyIcon = document.querySelector('.empty-cart-icon');
             if (emptyIcon) {
                 setInterval(() => {
                     emptyIcon.style.transform = 'scale(1.05)';
-                    setTimeout(() => {
-                        emptyIcon.style.transform = 'scale(1)';
-                    }, 200);
+                    setTimeout(() => { emptyIcon.style.transform = 'scale(1)'; }, 200);
                 }, 3000);
             }
-        });
-    </script>
-    <script src="assets/js/scripts.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async function() {
+
+            // ── 3. Tỉnh / Thành phố / Quận / Phường ─────────────────────────
             const citySelect = document.getElementById('city');
             const districtSelect = document.getElementById('district');
             const wardSelect = document.getElementById('ward');
 
-            // Fetch provinces
+            if (!citySelect) return; // giỏ trống, không có form
+
             try {
                 const res = await axios.get('/api/locations/provinces');
                 const provinces = res.data.data;
@@ -423,14 +460,14 @@
                 const selectedWard = wardSelect.options[wardSelect.selectedIndex];
                 const districtId = selectedDistrict.dataset.id;
                 const wardCode = selectedWard.dataset.id;
-                
+
                 if (districtId && wardCode) {
                     try {
                         const res = await axios.post('/api/shipping/fee', {
                             to_district_id: districtId,
                             to_ward_code: wardCode
                         });
-                        
+
                         if (res.data && res.data.data && res.data.data.total) {
                             currentShippingFee = res.data.data.total;
                             document.getElementById('shipping-fee-row').style.display = 'flex';

@@ -12,6 +12,18 @@ const getProvinces = async (req: Request, res: Response) => {
             }
         });
         const data = await response.json();
+
+        // Lọc bỏ tỉnh test / không hợp lệ, sắp xếp theo tên
+        if (data.data && Array.isArray(data.data)) {
+            data.data = data.data
+                .filter((p: any) =>
+                    p.Status === 1 &&
+                    !p.ProvinceName.toLowerCase().includes('test') &&
+                    !p.ProvinceName.toLowerCase().includes('alert')
+                )
+                .sort((a: any, b: any) => a.ProvinceName.localeCompare(b.ProvinceName, 'vi'));
+        }
+
         res.json(data);
     } catch (error) {
         console.error('Error fetching provinces:', error);

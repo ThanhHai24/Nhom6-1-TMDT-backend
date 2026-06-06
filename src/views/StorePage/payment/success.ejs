@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thành công - PCStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/client/css/style.css">
+    <style>
+        body { background: #f5f7fa; }
+        .payment-result-page {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 50px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            animation: fadeInUp 0.5s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity:0; transform: translateY(30px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .result-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c853, #69f0ae);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            font-size: 48px;
+            box-shadow: 0 8px 25px rgba(0,200,83,0.35);
+            animation: pulse 1.5s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 25px rgba(0,200,83,0.35); }
+            50%       { box-shadow: 0 12px 35px rgba(0,200,83,0.55); }
+        }
+        .result-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .result-subtitle {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .order-info {
+            background: #f0fff4;
+            border: 1px solid #b7ebc8;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            color: #444;
+            border-bottom: 1px solid #e0f2e9;
+        }
+        .order-info-row:last-child { border-bottom: none; }
+        .order-info-row strong { color: #1a1a2e; }
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn-primary-action {
+            background: linear-gradient(135deg, #00c853, #00b248);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,200,83,0.4);
+            color: white;
+        }
+        .btn-secondary-action {
+            background: transparent;
+            color: #0066cc;
+            border: 2px solid #0066cc;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-secondary-action:hover {
+            background: #0066cc;
+            color: white;
+        }
+        .vnpay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f0f4ff;
+            border: 1px solid #c7d7ff;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: #0052cc;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <%- include("../layout/header.ejs") %>
+    </header>
+    <nav class="main-nav">
+        <%- include("../layout/navbar.ejs") %>
+    </nav>
+
+    <div class="payment-result-page">
+        <div class="result-card">
+            <div class="result-icon">✓</div>
+
+            <div class="vnpay-badge">
+                <i class="ri-shield-check-line"></i>
+                Thanh toán qua VNPay thành công
+            </div>
+
+            <h1 class="result-title">Đặt hàng thành công!</h1>
+            <p class="result-subtitle">
+                Cảm ơn bạn đã mua hàng tại PCStore.<br>
+                Đơn hàng của bạn đang được xử lý.
+            </p>
+
+            <% if (locals.orderCode) { %>
+            <div class="order-info">
+                <div class="order-info-row">
+                    <span>Mã đơn hàng</span>
+                    <strong>#<%= orderCode %></strong>
+                </div>
+                <% if (locals.txnRef) { %>
+                <div class="order-info-row">
+                    <span>Mã giao dịch</span>
+                    <strong><%= txnRef %></strong>
+                </div>
+                <% } %>
+                <div class="order-info-row">
+                    <span>Phương thức thanh toán</span>
+                    <strong>VNPay</strong>
+                </div>
+                <div class="order-info-row">
+                    <span>Trạng thái thanh toán</span>
+                    <strong style="color:#00c853;">✓ Đã thanh toán</strong>
+                </div>
+            </div>
+            <% } %>
+
+            <div class="result-actions">
+                <a href="/orders" class="btn-primary-action">Xem đơn hàng</a>
+                <a href="/" class="btn-secondary-action">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <%- include("../layout/footer.ejs") %>
+    </footer>
+</body>
+</html>

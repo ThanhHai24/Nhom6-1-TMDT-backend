@@ -1,6 +1,6 @@
 import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
 import { getBrandsByCategoryId } from 'services/admin/brand.services';
-import { getCategoriesPage } from 'controllers/admin/category.controller';
+import { getCategoriesPage, getCreateParentCategoryPage, getCreateChildCategoryPage, PostCreateCategory, getCategoryDetailPage, PostUpdateCategory } from 'controllers/admin/category.controller';
 import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
 import { getOrderDetailPage, getOrders, PostUpdateOrderStatus } from 'controllers/admin/order.controller';
 import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
@@ -41,6 +41,11 @@ const userRoutes = (app: express.Express) => {
     // Category (Catalog roles)
     router.use('/categories', catalogRoles);
     router.get('/categories', getCategoriesPage);
+    router.get('/categories/parent/create', getCreateParentCategoryPage);
+    router.get('/categories/child/create', getCreateChildCategoryPage);
+    router.post('/categories/handlecreate', PostCreateCategory);
+    router.get('/categories/:id', getCategoryDetailPage);
+    router.post('/categories/handleupdate', PostUpdateCategory);
 
     // Product (Catalog roles)
     router.use('/products', catalogRoles);

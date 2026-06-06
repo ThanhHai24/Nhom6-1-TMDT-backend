@@ -97,7 +97,7 @@
                                                     <%= category.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
                                                 </span></td>
                                             <td style="gap:6px;padding-top:10px">
-                                                <a href="/admin/categories/parent/edit/<%= category.id %>"><button
+                                                <a href="/admin/categories</td>/<%= category.id %>"><button
                                                         class="btn sm">Sửa</button></a>
                                                 <button class="btn sm danger-outline">Xóa</button>
                                             </td>
@@ -195,7 +195,7 @@
                                                     <%= child.status==='ACTIVE' ? 'Hoạt động' : 'Ngưng' %>
                                                 </span></td>
                                             <td style="gap:6px;padding-top:10px">
-                                                <a href="/admin/categories/child/edit/<%= child.id %>"><button
+                                                <a href="/admin/categories/<%= child.id %>"><button
                                                         class="btn sm">Sửa</button></a>
                                                 <button class="btn sm danger-outline">Xóa</button>
                                             </td>

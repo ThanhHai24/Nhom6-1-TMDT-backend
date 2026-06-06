@@ -3,6 +3,20 @@ import { prisma } from "config/client";
 import { createOrderTransaction, validateCartStock } from "../../services/client/cart.services";
 import { InsufficientStockError } from "../../types/errors";
 
+const { VNPay, ignoreLogger, ProductCode, VnpLocale } = require("vnpay");
+
+const vnpay = new VNPay({
+    tmnCode: process.env.VNPAY_TMN_CODE || "YY6YND1V",
+    secureSecret: process.env.VNPAY_SECURE_SECRET || "QIG2ALGNX60Y6AGLHUEKPZZVV1L3D45J",
+    vnpayHost: "https://sandbox.vnpayment.vn",
+    testMode: true,
+    HashAlgorithm: "SHA512",
+    loggerFn: ignoreLogger,
+});
+
+const VNPAY_RETURN_URL =
+    process.env.VNPAY_RETURN_URL || "http://localhost:8080/api/check-payment-vnpay";
+
 const getCartPage = async (req: Request, res: Response) => {
     return res.render('StorePage/cart/cart');
 }
@@ -156,7 +170,7 @@ const updateCart = async (req: Request, res: Response) => {
 
 const checkout = async (req: Request, res: Response) => {
     try {
-        const { customerName, customerPhone, address, city, district, ward, notes, shippingFee } = req.body;
+        const { customerName, customerPhone, address, city, district, ward, notes, shippingFee, paymentMethod } = req.body;
         const cart = req.session.cart;
         const user = req.user as any;
 
@@ -171,19 +185,43 @@ const checkout = async (req: Request, res: Response) => {
         const uId = user && user.id ? BigInt(user.id) : undefined;
         const shippingAddress = `${address}, ${ward}, ${district}, ${city}`;
         const fee = parseInt(shippingFee as string, 10) || 0;
+        const selectedPayment = (paymentMethod || "COD") as string;
 
-        await createOrderTransaction(cart, customerName, customerPhone, shippingAddress, notes || "", uId, fee);
+        // Tạo đơn hàng (luôn tạo trước)
+        const order = await createOrderTransaction(
+            cart, customerName, customerPhone, shippingAddress,
+            notes || "", uId, fee, selectedPayment
+        );
 
-        // Clear cart
+        // ── Nếu là VNPay: redirect đến cổng thanh toán ─────────────────────
+        if (selectedPayment === "VNPAY") {
+            const ipAddr =
+                (req.headers["x-forwarded-for"] as string) ||
+                req.socket.remoteAddress ||
+                "127.0.0.1";
+
+            const paymentUrl = await vnpay.buildPaymentUrl({
+                vnp_Amount: order.totalAmount,
+                vnp_IpAddr: ipAddr,
+                vnp_ReturnUrl: VNPAY_RETURN_URL,
+                vnp_TxnRef: order.code,
+                vnp_OrderInfo: `Thanh toan don hang ${order.code}`,
+                vnp_OrderType: ProductCode.Other,
+                vnp_Locale: VnpLocale.VN,
+            });
+
+            // Xoá giỏ hàng
+            req.session.cart = [];
+            return req.session.save(() => res.redirect(paymentUrl));
+        }
+
+        // ── COD / Thanh toán thông thường ───────────────────────────────────
         req.session.cart = [];
 
         req.session.save((err) => {
             if (err) console.error(err);
-
-            // Override locals explicitly so the rendered page immediately picks up the empty state
             res.locals.cart = [];
             res.locals.cartCount = 0;
-
             res.render("StorePage/cart/cart", {
                 success_msg: "Đặt hàng thành công! Chúng tôi sẽ liên hệ xác nhận đơn hàng sớm nhất."
             });
@@ -196,8 +234,6 @@ const checkout = async (req: Request, res: Response) => {
                 cart: req.session.cart
             });
         }
-
-        // Lỗi hệ thống khác
         console.error("Error checking out:", error);
         res.status(500).send("Internal Server Error");
     }

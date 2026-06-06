@@ -4,6 +4,7 @@ import * as authApiController from "../controllers/api/auth.api.controller";
 import * as orderApiController from "../controllers/api/order.api.controller";
 import * as ghnApiController from "../controllers/api/ghn.api.controller";
 import * as vnpayController from "../controllers/api/vnpay.api.controller";
+import * as categoryApiController from "../controllers/api/category.api.controller";
 
 const router = express.Router();
 
@@ -14,6 +15,13 @@ const apiRoutes = (app: express.Express) => {
     router.post('/products', productApiController.createProduct);
     router.put('/products/:id', productApiController.updateProduct);
     router.delete('/products/:id', productApiController.deleteProduct);
+
+    // === Category APIs ===
+    router.get('/categories', categoryApiController.getCategories);
+    router.get('/categories/:id', categoryApiController.getCategoryById);
+    router.post('/categories', categoryApiController.createCategory);
+    router.put('/categories/:id', categoryApiController.updateCategory);
+    router.delete('/categories/:id', categoryApiController.deleteCategory);
 
     // === Auth APIs ===
     router.post('/auth/login', authApiController.login);
@@ -34,9 +42,10 @@ const apiRoutes = (app: express.Express) => {
     router.post('/shipping/fee', ghnApiController.getShippingFee);
     router.post('/shipping/order/create', ghnApiController.createShippingOrder);
 
-    // VNPay
-    router.post('/create-qr', vnpayController.CreateQr);
-    router.get('/check-payment-vnpay', vnpayController.CheckPaymentVnPay);
+    // === VNPay Payment APIs ===
+    router.post('/payment/vnpay/create', vnpayController.CreatePaymentUrl);   // Tạo URL thanh toán
+    router.get('/check-payment-vnpay', vnpayController.CheckPaymentVnPay);    // Return URL (redirect)
+    router.get('/vnpay-ipn', vnpayController.VnpayIpn);                       // IPN server-to-server
 
     app.use("/api", router);
 
