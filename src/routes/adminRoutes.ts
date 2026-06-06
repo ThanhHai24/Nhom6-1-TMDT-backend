@@ -1,4 +1,5 @@
 import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
+import { getBrandsByCategoryId } from 'services/admin/brand.services';
 import { getCategoriesPage } from 'controllers/admin/category.controller';
 import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
 import { getOrderDetailPage, getOrders, PostUpdateOrderStatus } from 'controllers/admin/order.controller';
@@ -110,6 +111,23 @@ const userRoutes = (app: express.Express) => {
     // History (ADMIN only)
     router.use('/history', adminOnly);
     router.get('/history', getHistoryPage);
+
+    // Internal AJAX APIs for admin UI
+    router.get('/api/brands', async (req, res) => {
+        try {
+            const categoryId = req.query.categoryId as string;
+            if (!categoryId) {
+                // Không có categoryId -> trả về tất cả brands
+                const { getAllBrands } = await import('services/admin/brand.services');
+                const brands = await getAllBrands();
+                return res.json(brands.map(b => ({ id: Number(b.id), name: b.name, slug: b.slug })));
+            }
+            const brands = await getBrandsByCategoryId(categoryId);
+            return res.json(brands.map(b => ({ id: Number(b.id), name: b.name, slug: b.slug })));
+        } catch (err) {
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    });
 
     app.use('/admin', router);
 }

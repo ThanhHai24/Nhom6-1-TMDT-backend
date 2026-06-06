@@ -72,17 +72,18 @@
                                                 <select name="brand" class="form-input form-select" id="inp-brand">
                                                     <option value="">-- Chọn Thương hiệu --</option>
                                                     <% brands.forEach( function (brand) { %>
-                                                        <option value="<%= brand.id %>" <%= String(brand.id) === String(product?.brandId) ? 'selected' : '' %>>
+                                                        <option value="<%= brand.id %>" data-id="<%= brand.id %>" <%= String(brand.id) === String(product?.brandId) ? 'selected' : '' %>>
                                                             <%= brand.name %>
                                                         </option>
                                                         <% }) %>
                                                 </select>
+                                                <div id="brand-loading" style="display:none;font-size:11px;color:var(--text-muted);margin-top:4px;">⏳ Đang tải thương hiệu...</div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">Danh mục <span
                                                         style="color:#E24B4A">*</span></label>
                                                 <select name="category" class="form-input form-select"
-                                                    id="inp-category" disabled>
+                                                    id="inp-category" onchange="updateSpecDropdowns(); filterBrandsByCategory();">
                                                     <option value="">-- Chọn danh mục --</option>
                                                     <% categories.forEach( function (category) { %>
                                                         <option value="<%= category.id %>" data-name="<%= category.name.toLowerCase() %>" data-slug="<%= category.slug %>" <%= String(category.id) === String(product?.categoryId) ? 'selected' : '' %>>
@@ -400,8 +401,52 @@
             document.addEventListener("DOMContentLoaded", () => {
                 calcMargin();
                 selectStatus('<%= (product?.status || "ACTIVE").toLowerCase() %>');
-                
-                // Show existing product images in grid
+
+                /* === Filter brands theo category khi load trang === */
+                const _allBrandsData = <%- JSON.stringify((brands || []).map(b => ({ id: Number(b.id), name: b.name }))) %>;
+                const _currentBrandId = '<%= product?.brandId ? Number(product.brandId) : "" %>';
+                const _currentCategoryId = '<%= product?.categoryId ? Number(product.categoryId) : "" %>';
+
+                function renderBrandOptions(brandList, selectedId) {
+                    const sel = document.getElementById('inp-brand');
+                    let html = '<option value="">-- Chọn Thương hiệu --</option>';
+                    brandList.forEach(b => {
+                        const sid = String(b.id);
+                        html += `<option value="${sid}" ${sid === String(selectedId) ? 'selected' : ''}>${b.name}</option>`;
+                    });
+                    sel.innerHTML = html;
+                }
+
+                window.filterBrandsByCategory = async function() {
+                    const categoryId = document.getElementById('inp-category').value;
+                    const loading = document.getElementById('brand-loading');
+                    const currentBrand = document.getElementById('inp-brand').value || _currentBrandId;
+
+                    if (!categoryId) {
+                        renderBrandOptions(_allBrandsData, currentBrand);
+                        return;
+                    }
+
+                    loading.style.display = 'block';
+                    try {
+                        const res = await fetch(`/admin/api/brands?categoryId=${categoryId}`);
+                        const brands = await res.json();
+                        if (brands.length === 0) {
+                            renderBrandOptions(_allBrandsData, currentBrand);
+                        } else {
+                            renderBrandOptions(brands, currentBrand);
+                        }
+                    } catch (e) {
+                        renderBrandOptions(_allBrandsData, currentBrand);
+                    } finally {
+                        loading.style.display = 'none';
+                    }
+                };
+
+                // Filter brands ngay khi load trang
+                if (_currentCategoryId) {
+                    filterBrandsByCategory();
+                }
                 <% if (product?.images) { 
                     try {
                         const imgs = JSON.parse(product.images);

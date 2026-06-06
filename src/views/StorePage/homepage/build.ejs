@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Build PC - Xây dựng cấu hình máy tính | PCStore</title>
+    <link rel="stylesheet" href="/client/css/style.css">
+    <style>
+        /* ===== LAYOUT ===== */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+        .breadcrumb { margin: 12px 0; font-size: 13px; color: #666; }
+        .breadcrumb a { color: #e74c3c; text-decoration: none; }
+        .header { margin-bottom: 16px; }
+        .header h1 { font-size: 20px; font-weight: 700; color: #222; margin: 0 0 4px; }
+        .header p { color: #666; font-size: 14px; margin: 0; }
+
+        /* ===== TABS ===== */
+        .nav-tabs { margin-bottom: 16px; }
+        .tab-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tab-button {
+            padding: 8px 20px; border: 1px solid #ddd; background: #fff;
+            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tab-button.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+        .tab-button:hover:not(.active) { border-color: #e74c3c; color: #e74c3c; }
+
+        /* ===== BUILD CONTAINER ===== */
+        .build-container {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f8f8f8; border: 1px solid #e0e0e0;
+            border-radius: 6px; padding: 12px 16px; margin-bottom: 8px;
+        }
+        .refresh-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; background: #fff; border: 1px solid #ddd;
+            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+        .total-price-bar { font-size: 15px; font-weight: 700; color: #e74c3c; }
+
+        /* ===== COMPONENT LIST ===== */
+        .component-list { border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+        .component-item {
+            display: grid;
+            grid-template-columns: 200px 1fr auto auto;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            min-height: 56px;
+        }
+        .component-item:last-child { border-bottom: none; }
+        .component-number {
+            padding: 10px 12px; font-size: 12px; font-weight: 700;
+            color: #555; background: #fafafa; border-right: 1px solid #f0f0f0;
+            min-height: 56px; display: flex; align-items: center;
+        }
+        .component-selected { padding: 8px 12px; flex: 1; }
+        .choose-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; background: #fff3f3; border: 1px dashed #e74c3c;
+            border-radius: 4px; cursor: pointer; font-size: 13px; color: #e74c3c;
+            font-weight: 600; transition: all 0.2s; white-space: nowrap;
+        }
+        .choose-btn:hover { background: #e74c3c; color: #fff; }
+        .choose-btn span { font-size: 16px; line-height: 1; }
+
+        /* Selected component display */
+        .selected-display { display: flex; align-items: center; gap: 10px; }
+        .component-image { width: 48px; height: 48px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; }
+        .component-info .comp-name { font-size: 13px; font-weight: 600; color: #222; line-height: 1.3; }
+        .component-info .comp-sku { font-size: 11px; color: #999; margin-top: 2px; }
+
+        /* Price column */
+        .build-price { padding: 8px 12px; text-align: right; min-width: 160px; }
+        .price-display { font-size: 14px; font-weight: 700; color: #e74c3c; }
+        .quantity-row { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 4px; font-size: 12px; color: #555; }
+        .quantity-input { width: 50px; padding: 3px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 13px; }
+        .line-total { font-weight: 700; color: #c0392b; font-size: 13px; }
+
+        /* Actions column */
+        .component-actions { padding: 8px 12px; display: flex; gap: 6px; min-width: 80px; }
+        .edit-btn, .delete-btn {
+            width: 30px; height: 30px; border: 1px solid #ddd; background: #fff;
+            border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: all 0.2s;
+        }
+        .edit-btn:hover { border-color: #3498db; color: #3498db; background: #ebf5fb; }
+        .delete-btn:hover { border-color: #e74c3c; color: #e74c3c; background: #fdf2f2; }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-buttons-build {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+        }
+        .action-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;
+            font-size: 13px; font-weight: 700; transition: all 0.2s;
+        }
+        .save-btn { background: #3498db; color: #fff; }
+        .save-btn:hover { background: #2980b9; }
+        .export-btn { background: #27ae60; color: #fff; }
+        .export-btn:hover { background: #229954; }
+        .view-btn { background: #8e44ad; color: #fff; }
+        .view-btn:hover { background: #7d3c98; }
+        .cart-btn { background: #e74c3c; color: #fff; }
+        .cart-btn:hover { background: #c0392b; }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none; position: fixed; z-index: 9999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); overflow: auto;
+        }
+        .modal-content {
+            background: #fff; margin: 40px auto;
+            width: 90%; max-width: 980px; border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; max-height: calc(100vh - 80px);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+        .modal-title { font-size: 18px; font-weight: 700; color: #222; margin: 0; }
+        .close {
+            background: none; border: none; font-size: 24px; cursor: pointer;
+            color: #888; line-height: 1; padding: 0; transition: color 0.2s;
+        }
+        .close:hover { color: #e74c3c; }
+        .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+
+        /* Modal search & sort bar */
+        .modal-toolbar {
+            display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #ddd;
+            border-radius: 4px; font-size: 14px; outline: none; transition: border 0.2s;
+        }
+        .search-box:focus { border-color: #e74c3c; }
+        .sort-select {
+            padding: 9px 12px; border: 1px solid #ddd; border-radius: 4px;
+            font-size: 13px; background: #fff; cursor: pointer; outline: none;
+        }
+
+        /* Product list inside modal */
+        .product-list { display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
+        .product-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border: 1px solid #eee; border-radius: 6px;
+            transition: all 0.2s; background: #fff;
+        }
+        .product-item:hover { border-color: #e74c3c; box-shadow: 0 2px 8px rgba(231,76,60,0.1); }
+        .product-image { width: 72px; height: 72px; flex-shrink: 0; }
+        .product-image img { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; border: 1px solid #f0f0f0; }
+        .product-details { flex: 1; }
+        .product-name { font-size: 14px; font-weight: 600; color: #222; margin-bottom: 4px; line-height: 1.4; }
+        .product-specs { display: flex; flex-wrap: wrap; gap: 6px; }
+        .product-spec { font-size: 12px; color: #888; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; }
+        .product-price-section { text-align: right; flex-shrink: 0; min-width: 140px; }
+        .product-price { font-size: 16px; font-weight: 700; color: #e74c3c; }
+        .add-to-build-btn {
+            display: block; margin-top: 8px; padding: 8px 12px;
+            background: #e74c3c; color: #fff; border: none; border-radius: 4px;
+            font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .add-to-build-btn:hover { background: #c0392b; }
+
+        /* Loading & empty states */
+        .loading-state, .empty-state {
+            text-align: center; padding: 40px; color: #999; font-size: 15px;
+        }
+        .loading-state i { font-size: 32px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: #ddd; }
+
+        /* Pagination in modal */
+        .modal-pagination {
+            display: flex; justify-content: center; gap: 6px; margin-top: 16px; flex-wrap: wrap;
+        }
+        .page-btn {
+            padding: 6px 12px; border: 1px solid #ddd; background: #fff;
+            border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s;
+        }
+        .page-btn.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+        .page-btn:hover:not(.active) { border-color: #e74c3c; color: #e74c3c; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .component-item { grid-template-columns: 1fr; }
+            .component-number { border-right: none; border-bottom: 1px solid #f0f0f0; min-height: auto; }
+            .build-price { text-align: left; }
+            .action-buttons-build { gap: 8px; }
+            .action-btn { padding: 8px 14px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <%- include("../layout/header.ejs") %>
+    </header>
+
+    <nav class="main-nav">
+        <%- include("../layout/navbar.ejs") %>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a> &gt; <a href="#">PC GAMING</a> &gt; Build PC
+        </div>
+        <div class="header">
+            <h1>Build PC - Xây dựng cấu hình máy tính PC giá rẻ chuẩn nhất</h1>
+            <p>Chọn linh kiện xây dựng cấu hình - Tự build PC theo ý muốn</p>
+        </div>
+
+        <!-- Tabs cấu hình -->
+        <div class="nav-tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="0">CẤU HÌNH 1</button>
+                <button class="tab-button" data-tab="1">CẤU HÌNH 2</button>
+                <button class="tab-button" data-tab="2">CẤU HÌNH 3</button>
+                <button class="tab-button" data-tab="3">CẤU HÌNH 4</button>
+                <button class="tab-button" data-tab="4">CẤU HÌNH 5</button>
+            </div>
+        </div>
+
+        <!-- Toolbar tổng -->
+        <div class="build-container">
+            <button class="refresh-btn" id="refreshBtn">
+                <span>↻</span> LÀM MỚI
+            </button>
+            <div class="total-price-bar" id="totalPriceBar">Chi phí dự tính: 0 đ</div>
+        </div>
+
+        <!-- Danh sách linh kiện -->
+        <div class="component-list" id="componentList">
+
+            <!-- CPU -->
+            <div class="component-item" data-slot="cpu">
+                <div class="component-number">1. CPU - BỘ VI XỬ LÝ</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('cpu','cpu-bo-vi-xu-ly')">
+                        <span>+</span> Chọn CPU - Bộ Vi Xử Lý
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Main -->
+            <div class="component-item" data-slot="mainboard">
+                <div class="component-number">2. MAIN - BO MẠCH CHỦ</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('mainboard','mainboard-bo-mach-chu')">
+                        <span>+</span> Chọn Main - Bo Mạch Chủ
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- RAM -->
+            <div class="component-item" data-slot="ram">
+                <div class="component-number">3. RAM - BỘ NHỚ TRONG</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('ram','ram-bo-nho-trong')">
+                        <span>+</span> Chọn RAM - Bộ Nhớ Trong
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- SSD 1 -->
+            <div class="component-item" data-slot="ssd1">
+                <div class="component-number">4. Ổ CỨNG SSD 1</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('ssd1','o-cung-hdd-ssd')">
+                        <span>+</span> Chọn Ổ Cứng SSD 1
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- SSD 2 -->
+            <div class="component-item" data-slot="ssd2">
+                <div class="component-number">5. Ổ CỨNG SSD 2</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('ssd2','o-cung-hdd-ssd')">
+                        <span>+</span> Chọn Ổ Cứng SSD 2
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- VGA -->
+            <div class="component-item" data-slot="vga">
+                <div class="component-number">6. VGA - CARD MÀN HÌNH</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('vga','vga-card-do-hoa')">
+                        <span>+</span> Chọn VGA - Card Màn Hình
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- PSU -->
+            <div class="component-item" data-slot="psu">
+                <div class="component-number">7. PSU - NGUỒN MÁY TÍNH</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('psu','psu-nguon-may-tinh')">
+                        <span>+</span> Chọn PSU - Nguồn Máy Tính
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Case -->
+            <div class="component-item" data-slot="case">
+                <div class="component-number">8. CASE - VỎ MÁY TÍNH</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('case','case-vo-may-tinh')">
+                        <span>+</span> Chọn Case - Vỏ Máy Tính
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Tản nhiệt khí -->
+            <div class="component-item" data-slot="cooling">
+                <div class="component-number">9. TẢN NHIỆT KHÍ</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('cooling','tan-nhiet-pc')">
+                        <span>+</span> Chọn Tản Nhiệt Khí
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Quạt tản nhiệt -->
+            <div class="component-item" data-slot="casefan">
+                <div class="component-number">10. QUẠT TẢN NHIỆT</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('casefan','quat-tan-nhiet')">
+                        <span>+</span> Chọn Quạt Tản Nhiệt
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Monitor -->
+            <div class="component-item" data-slot="monitor">
+                <div class="component-number">11. MONITOR - MÀN HÌNH</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('monitor','man-hinh')">
+                        <span>+</span> Chọn Monitor - Màn Hình
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Bàn phím -->
+            <div class="component-item" data-slot="keyboard">
+                <div class="component-number">12. BÀN PHÍM</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('keyboard','ban-phim')">
+                        <span>+</span> Chọn Bàn Phím
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Chuột -->
+            <div class="component-item" data-slot="mouse">
+                <div class="component-number">13. CHUỘT</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('mouse','chuot')">
+                        <span>+</span> Chọn Chuột
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+            <!-- Tai nghe -->
+            <div class="component-item" data-slot="headphone">
+                <div class="component-number">14. TAI NGHE</div>
+                <div class="component-selected">
+                    <button class="choose-btn" onclick="openModal('headphone','tai-nghe')">
+                        <span>+</span> Chọn Tai Nghe
+                    </button>
+                </div>
+                <div class="build-price"></div>
+                <div class="component-actions"></div>
+            </div>
+
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="action-buttons-build">
+            <button class="action-btn cart-btn" id="cartBtn">
+                <span>🛒</span> THÊM TẤT CẢ VÀO GIỎ HÀNG
+            </button>
+            <button class="action-btn view-btn" id="printBtn">
+                <span>🖨️</span> XEM & IN CẤU HÌNH
+            </button>
+            <button class="action-btn save-btn" id="copyBtn">
+                <span>📋</span> SAO CHÉP CẤU HÌNH
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal chọn linh kiện -->
+    <div id="componentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Chọn linh kiện</h2>
+                <button class="close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Toolbar: search + sort -->
+                <div class="modal-toolbar">
+                    <input type="text" id="modalSearch" class="search-box" placeholder="Tìm kiếm sản phẩm...">
+                    <select id="modalSort" class="sort-select">
+                        <option value="">Mặc định</option>
+                        <option value="price_asc">Giá thấp → cao</option>
+                        <option value="price_desc">Giá cao → thấp</option>
+                        <option value="name_asc">Tên A → Z</option>
+                    </select>
+                </div>
+
+                <!-- Danh sách sản phẩm -->
+                <div class="product-list" id="modalProductList">
+                    <div class="loading-state">
+                        <i class="ri-loader-4-line"></i>
+                        Đang tải sản phẩm...
+                    </div>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="modal-pagination" id="modalPagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <%- include("../layout/footer.ejs") %>
+    </footer>
+
+    <script>
+    // =========================================================
+    // STATE
+    // =========================================================
+    const buildState = {
+        selectedComponents: {}, // { slotKey: { id, name, price, image, sku, qty } }
+        currentSlot: null,      // slot key đang mở modal
+        currentCategory: null,  // category slug đang load
+        currentPage: 1,
+        searchTimer: null,
+    };
+
+    // Map slotKey → label để dùng lại khi reset
+    const SLOT_LABELS = {
+        cpu: 'Chọn CPU - Bộ Vi Xử Lý',
+        mainboard: 'Chọn Main - Bo Mạch Chủ',
+        ram: 'Chọn RAM - Bộ Nhớ Trong',
+        ssd1: 'Chọn Ổ Cứng SSD 1',
+        ssd2: 'Chọn Ổ Cứng SSD 2',
+        vga: 'Chọn VGA - Card Màn Hình',
+        psu: 'Chọn PSU - Nguồn Máy Tính',
+        case: 'Chọn Case - Vỏ Máy Tính',
+        cooling: 'Chọn Tản Nhiệt Khí',
+        casefan: 'Chọn Quạt Tản Nhiệt',
+        monitor: 'Chọn Monitor - Màn Hình',
+        keyboard: 'Chọn Bàn Phím',
+        mouse: 'Chọn Chuột',
+        headphone: 'Chọn Tai Nghe',
+    };
+    const SLOT_CATEGORY = {
+        cpu: 'cpu-bo-vi-xu-ly',
+        mainboard: 'mainboard-bo-mach-chu',
+        ram: 'ram-bo-nho-trong',
+        ssd1: 'o-cung-hdd-ssd',
+        ssd2: 'o-cung-hdd-ssd',
+        vga: 'vga-card-do-hoa',
+        psu: 'psu-nguon-may-tinh',
+        case: 'case-vo-may-tinh',
+        cooling: 'tan-nhiet-pc',
+        casefan: 'quat-tan-nhiet',
+        monitor: 'man-hinh',
+        keyboard: 'ban-phim',
+        mouse: 'chuot',
+        headphone: 'tai-nghe',
+    };
+
+    // =========================================================
+    // OPEN / CLOSE MODAL
+    // =========================================================
+    function openModal(slotKey, categorySlug) {
+        buildState.currentSlot = slotKey;
+        buildState.currentCategory = categorySlug || SLOT_CATEGORY[slotKey] || '';
+        buildState.currentPage = 1;
+
+        // Title
+        document.getElementById('modalTitle').textContent = SLOT_LABELS[slotKey] || 'Chọn linh kiện';
+
+        // Reset search & sort
+        document.getElementById('modalSearch').value = '';
+        document.getElementById('modalSort').value = '';
+
+        // Show modal
+        document.getElementById('componentModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+
+        // Load products
+        loadProducts();
+    }
+
+    function closeModal() {
+        document.getElementById('componentModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        buildState.currentSlot = null;
+    }
+
+    // =========================================================
+    // LOAD PRODUCTS FROM API
+    // =========================================================
+    async function loadProducts(page = 1) {
+        buildState.currentPage = page;
+        const search = document.getElementById('modalSearch').value.trim();
+        const sort = document.getElementById('modalSort').value;
+
+        const listEl = document.getElementById('modalProductList');
+        listEl.innerHTML = `<div class="loading-state"><i class="ri-loader-4-line"></i>Đang tải...</div>`;
+        document.getElementById('modalPagination').innerHTML = '';
+
+        try {
+            const params = new URLSearchParams({
+                category: buildState.currentCategory,
+                page: page,
+                limit: 8,
+            });
+            if (search) params.append('search', search);
+            if (sort) params.append('sort', sort);
+
+            const res = await fetch(`/api/products/by-category?${params}`);
+            if (!res.ok) throw new Error('Lỗi mạng');
+            const data = await res.json();
+
+            renderProducts(data.products);
+            renderPagination(data.currentPage, data.totalPages);
+        } catch (err) {
+            listEl.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i>Không thể tải sản phẩm. Vui lòng thử lại.</div>`;
+        }
+    }
+
+    function renderProducts(products) {
+        const listEl = document.getElementById('modalProductList');
+        if (!products || products.length === 0) {
+            listEl.innerHTML = `<div class="empty-state"><i class="ri-search-line"></i>Không tìm thấy sản phẩm phù hợp.</div>`;
+            return;
+        }
+
+        listEl.innerHTML = products.map(p => {
+            const price = Number(p.price);
+            const priceStr = price.toLocaleString('vi-VN') + '₫';
+            const img = p.image ? `/admin/productImages/${p.image}` : '/client/images/no-image.png';
+            return `
+            <div class="product-item" data-id="${p.id}" data-name="${escHtml(p.name)}" data-price="${price}" data-image="${escHtml(img)}" data-sku="${escHtml(p.sku || '')}">
+                <div class="product-image">
+                    <img src="${escHtml(img)}" alt="${escHtml(p.name)}" onerror="this.src='/client/images/no-image.png'">
+                </div>
+                <div class="product-details">
+                    <div class="product-name">${escHtml(p.name)}</div>
+                    <div class="product-specs">
+                        ${p.sku ? `<span class="product-spec">SKU: ${escHtml(p.sku)}</span>` : ''}
+                        ${p.brand ? `<span class="product-spec">${escHtml(p.brand.name)}</span>` : ''}
+                        <span class="product-spec">${p.stock > 0 ? '✅ Còn hàng' : '❌ Hết hàng'}</span>
+                    </div>
+                </div>
+                <div class="product-price-section">
+                    <div class="product-price">${priceStr}</div>
+                    <button class="add-to-build-btn" onclick="addToConfig('${p.id}','${escHtml(p.name)}',${price},'${escHtml(img)}','${escHtml(p.sku||'')}')">
+                        THÊM VÀO CẤU HÌNH ➤
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderPagination(current, total) {
+        const el = document.getElementById('modalPagination');
+        if (total <= 1) { el.innerHTML = ''; return; }
+
+        let html = '';
+        if (current > 1) html += `<button class="page-btn" onclick="loadProducts(${current-1})">‹</button>`;
+        for (let i = 1; i <= total; i++) {
+            if (i === current) {
+                html += `<button class="page-btn active">${i}</button>`;
+            } else if (i === 1 || i === total || Math.abs(i - current) <= 1) {
+                html += `<button class="page-btn" onclick="loadProducts(${i})">${i}</button>`;
+            } else if (Math.abs(i - current) === 2) {
+                html += `<span style="padding:6px 4px;color:#999">…</span>`;
+            }
+        }
+        if (current < total) html += `<button class="page-btn" onclick="loadProducts(${current+1})">›</button>`;
+        el.innerHTML = html;
+    }
+
+    // =========================================================
+    // ADD TO CONFIG
+    // =========================================================
+    function addToConfig(id, name, price, image, sku) {
+        const slot = buildState.currentSlot;
+        if (!slot) return;
+
+        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1 };
+        renderSlot(slot);
+        updateTotal();
+        closeModal();
+    }
+
+    function renderSlot(slot) {
+        const comp = buildState.selectedComponents[slot];
+        const item = document.querySelector(`.component-item[data-slot="${slot}"]`);
+        if (!item) return;
+
+        const selectedEl = item.querySelector('.component-selected');
+        const priceEl = item.querySelector('.build-price');
+        const actionsEl = item.querySelector('.component-actions');
+
+        if (!comp) {
+            // Reset về trạng thái chưa chọn
+            const catSlug = SLOT_CATEGORY[slot] || slot;
+            selectedEl.innerHTML = `
+                <button class="choose-btn" onclick="openModal('${slot}','${catSlug}')">
+                    <span>+</span> ${SLOT_LABELS[slot] || 'Chọn linh kiện'}
+                </button>`;
+            priceEl.innerHTML = '';
+            actionsEl.innerHTML = '';
+            return;
+        }
+
+        const lineTotal = comp.price * comp.qty;
+
+        selectedEl.innerHTML = `
+            <div class="selected-display">
+                <img src="${escHtml(comp.image)}" alt="" class="component-image" onerror="this.src='/client/images/no-image.png'">
+                <div class="component-info">
+                    <div class="comp-name">${escHtml(comp.name)}</div>
+                    ${comp.sku ? `<div class="comp-sku">SKU: ${escHtml(comp.sku)}</div>` : ''}
+                </div>
+            </div>`;
+
+        priceEl.innerHTML = `
+            <div class="price-display">${Number(comp.price).toLocaleString('vi-VN')}₫</div>
+            <div class="quantity-row">
+                <span>x</span>
+                <input type="number" class="quantity-input" value="${comp.qty}" min="1" max="99"
+                    onchange="updateQty('${slot}', this.value)">
+                <span>=</span>
+                <span class="line-total" id="lineTotal_${slot}">${lineTotal.toLocaleString('vi-VN')}₫</span>
+            </div>`;
+
+        actionsEl.innerHTML = `
+            <button class="edit-btn" title="Đổi linh kiện" onclick="openModal('${slot}','${SLOT_CATEGORY[slot]}')">
+                <i class="ri-edit-fill"></i>
+            </button>
+            <button class="delete-btn" title="Xóa" onclick="removeFromConfig('${slot}')">
+                <i class="ri-delete-bin-line"></i>
+            </button>`;
+    }
+
+    function updateQty(slot, val) {
+        const qty = Math.max(1, Math.min(99, parseInt(val) || 1));
+        if (!buildState.selectedComponents[slot]) return;
+        buildState.selectedComponents[slot].qty = qty;
+        const lineTotal = buildState.selectedComponents[slot].price * qty;
+        const el = document.getElementById(`lineTotal_${slot}`);
+        if (el) el.textContent = lineTotal.toLocaleString('vi-VN') + '₫';
+        updateTotal();
+    }
+
+    function removeFromConfig(slot) {
+        if (!confirm('Bạn có muốn xóa linh kiện này khỏi cấu hình?')) return;
+        delete buildState.selectedComponents[slot];
+        renderSlot(slot);
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let total = 0;
+        for (const slot in buildState.selectedComponents) {
+            const c = buildState.selectedComponents[slot];
+            total += c.price * c.qty;
+        }
+        document.getElementById('totalPriceBar').textContent =
+            `Chi phí dự tính: ${total.toLocaleString('vi-VN')} đ`;
+    }
+
+    // =========================================================
+    // UTIL
+    // =========================================================
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // =========================================================
+    // EVENTS
+    // =========================================================
+    document.getElementById('componentModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Refresh
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        if (!confirm('Bạn có muốn làm mới toàn bộ cấu hình?')) return;
+        buildState.selectedComponents = {};
+        Object.keys(SLOT_LABELS).forEach(slot => renderSlot(slot));
+        updateTotal();
+    });
+
+    // Search with debounce
+    document.getElementById('modalSearch').addEventListener('input', function() {
+        clearTimeout(buildState.searchTimer);
+        buildState.searchTimer = setTimeout(() => loadProducts(1), 350);
+    });
+
+    // Sort
+    document.getElementById('modalSort').addEventListener('change', function() {
+        loadProducts(1);
+    });
+
+    // Add to cart button
+    document.getElementById('cartBtn').addEventListener('click', function() {
+        const items = Object.values(buildState.selectedComponents);
+        if (items.length === 0) {
+            alert('Chưa có linh kiện nào trong cấu hình. Vui lòng chọn ít nhất 1 linh kiện.');
+            return;
+        }
+        // TODO: gọi API thêm từng sản phẩm vào giỏ hàng
+        const names = items.map(c => `• ${c.name} (x${c.qty})`).join('\n');
+        alert(`Đã thêm ${items.length} linh kiện vào giỏ hàng:\n\n${names}`);
+    });
+
+    // Print / xem & in
+    document.getElementById('printBtn').addEventListener('click', function() {
+        const items = Object.values(buildState.selectedComponents);
+        if (items.length === 0) { alert('Chưa có linh kiện nào.'); return; }
+        let total = 0;
+        const rows = Object.keys(buildState.selectedComponents).map(slot => {
+            const c = buildState.selectedComponents[slot];
+            total += c.price * c.qty;
+            return `<tr>
+                <td>${SLOT_LABELS[slot] || slot}</td>
+                <td>${c.name}</td>
+                <td>${c.qty}</td>
+                <td style="text-align:right">${(c.price * c.qty).toLocaleString('vi-VN')}₫</td>
+            </tr>`;
+        }).join('');
+        const html = `<html><head><title>Cấu hình PC</title>
+        <style>body{font-family:Arial,sans-serif;padding:20px}table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #ddd;padding:8px;font-size:13px}th{background:#f5f5f5}
+        .total{font-weight:bold;color:#e74c3c;font-size:16px;text-align:right;margin-top:12px}</style>
+        </head><body>
+        <h2>Cấu hình PC - PCStore</h2>
+        <table><thead><tr><th>Linh kiện</th><th>Sản phẩm</th><th>SL</th><th>Thành tiền</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+        <p class="total">Tổng chi phí: ${total.toLocaleString('vi-VN')}đ</p>
+        </body></html>`;
+        const win = window.open('', '_blank');
+        win.document.write(html);
+        win.document.close();
+        win.print();
+    });
+
+    // Copy config
+    document.getElementById('copyBtn').addEventListener('click', function() {
+        const items = Object.entries(buildState.selectedComponents);
+        if (items.length === 0) { alert('Chưa có linh kiện nào.'); return; }
+        let total = 0;
+        const text = items.map(([slot, c]) => {
+            total += c.price * c.qty;
+            return `${SLOT_LABELS[slot] || slot}: ${c.name} x${c.qty} = ${(c.price * c.qty).toLocaleString('vi-VN')}đ`;
+        }).join('\n');
+        navigator.clipboard.writeText(text + `\n\nTổng: ${total.toLocaleString('vi-VN')}đ`)
+            .then(() => alert('Đã sao chép cấu hình vào clipboard!'))
+            .catch(() => alert('Không thể sao chép. Trình duyệt không hỗ trợ.'));
+    });
+    </script>
+    <script src="/assets/js/scripts.js"></script>
+</body>
+</html>

@@ -51,24 +51,44 @@ const getBrandsPage = async (req: Request, res: Response) => {
 }
 
 const getCreateBrandPage = async (req: Request, res: Response) => {
-    res.render("admin/brand/create");
+    const categories = await prisma.category.findMany({
+        where: {
+            status: "ACTIVE"
+        }
+    });
+    res.render("admin/brand/create", {
+        categories: categories
+    });
+}
+const normalizeCategoryIds = (categoryIds: any): string[] => {
+    if (!categoryIds) return [];
+    if (Array.isArray(categoryIds)) return categoryIds.map(String);
+    return [String(categoryIds)];
 }
 
 const PostCreateBrand = async (req: Request, res: Response) => {
-    const { name, description, status } = req.body
-    const brand = await HandleCreateBrand(name, description, status);
+    const { name, categoryIds, description, status } = req.body
+    const normalizedCategoryIds = normalizeCategoryIds(categoryIds);
+    const brand = await HandleCreateBrand(name, normalizedCategoryIds, description, status);
     res.redirect("/admin/brands");
 }
 const getBrandDetailPage = async (req: Request, res: Response) => {
     const brandId = req.params.id as string;
+    const categories = await prisma.category.findMany({
+        where: {
+            status: "ACTIVE"
+        }
+    });
     const brand = await getBrandById(brandId);
     res.render("admin/brand/detail", {
-        brand: brand
+        brand: brand,
+        categories: categories
     });
 }
 const PostUpdateBrand = async (req: Request, res: Response) => {
-    const { id, name, description, status } = req.body
-    const brand = await HandleUpdateBrand(id, name, description, status);
+    const { id, name, categoryIds, description, status } = req.body
+    const normalizedCategoryIds = normalizeCategoryIds(categoryIds);
+    const brand = await HandleUpdateBrand(id, name, normalizedCategoryIds, description, status);
     res.redirect("/admin/brands");
 }
 const PostLockBrand = async (req: Request, res: Response) => {

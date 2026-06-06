@@ -95,3 +95,47 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Lỗi khi xóa sản phẩm", details: error });
     }
 };
+
+// Lấy sản phẩm theo category slug (dùng cho Build PC)
+export const getProductsByCategory = async (req: Request, res: Response) => {
+    try {
+        const { category, search, sort, page = '1', limit = '12' } = req.query;
+
+        const where: any = { status: 'ACTIVE' };
+
+        if (category) {
+            where.category = { slug: category as string };
+        }
+        if (search) {
+            where.name = { contains: (search as string).trim() };
+        }
+
+        let orderBy: any = { createdAt: 'desc' };
+        if (sort === 'price_asc') orderBy = { price: 'asc' };
+        if (sort === 'price_desc') orderBy = { price: 'desc' };
+        if (sort === 'name_asc') orderBy = { name: 'asc' };
+
+        const pageNum = parseInt(page as string) || 1;
+        const limitNum = parseInt(limit as string) || 12;
+        const skip = (pageNum - 1) * limitNum;
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                orderBy,
+                skip,
+                take: limitNum,
+                include: { brand: true },
+            }),
+            prisma.product.count({ where }),
+        ]);
+
+        const serialized = JSON.stringify(
+            { products, total, totalPages: Math.ceil(total / limitNum), currentPage: pageNum },
+            (key, value) => typeof value === 'bigint' ? value.toString() : value
+        );
+        res.status(200).json(JSON.parse(serialized));
+    } catch (error) {
+        res.status(500).json({ error: 'Lỗi khi lấy sản phẩm', details: error });
+    }
+};

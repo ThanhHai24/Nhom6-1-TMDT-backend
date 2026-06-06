@@ -172,8 +172,12 @@
                                     <span></span>
                                 </div>
                                 <div class="meta-item">
-                                    Đã bán: <%= product.sold%>
-                                    <span></span>
+                                    Số lượng còn:
+                                    <span><%= product.stock%></span>
+                                </div>
+                                <div class="meta-item">
+                                    Đã bán:
+                                    <span><%= product.sold%></span>
                                 </div>
                             </div>
 
@@ -182,7 +186,11 @@
                                 <span>36 Tháng</span>
                                 <span style="margin-left: 15px;">|</span>
                                 <span style="margin-left: 10px;">Tình trạng:</span>
+                                <% if(product.stock> 0){%>
                                 <span class="stock-status">Còn hàng</span>
+                                <%} else {%>    
+                                <span class="stock-status">Hết hàng</span>
+                                <%}%>
                             </div>
 
                             <!-- Price Section -->

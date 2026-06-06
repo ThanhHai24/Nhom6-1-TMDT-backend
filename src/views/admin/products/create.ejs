@@ -67,21 +67,10 @@
                                                     style="font-family:monospace;" disabled>
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label">Thương hiệu</label>
-                                                <select name="brand" class="form-input form-select" id="inp-brand">
-                                                    <option value="">-- Chọn Thương hiệu --</option>
-                                                    <% brands.forEach( function (brand) { %>
-                                                        <option value="<%= brand.id %>">
-                                                            <%= brand.name %>
-                                                        </option>
-                                                        <% }) %>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="form-label">Danh mục <span
                                                         style="color:#E24B4A">*</span></label>
                                                 <select name="category" class="form-input form-select"
-                                                    id="inp-category" onchange="updateSpecDropdowns()">
+                                                    id="inp-category" onchange="updateSpecDropdowns(); filterBrandsByCategory();">
                                                     <option value="">-- Chọn danh mục --</option>
                                                     <% categories.forEach( function (category) { %>
                                                         <option value="<%= category.id %>" data-name="<%= category.name.toLowerCase() %>" data-slug="<%= category.slug %>">
@@ -89,6 +78,18 @@
                                                         </option>
                                                         <% }) %>
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Thương hiệu</label>
+                                                <select name="brand" class="form-input form-select" id="inp-brand">
+                                                    <option value="">-- Chọn Thương hiệu --</option>
+                                                    <% brands.forEach( function (brand) { %>
+                                                        <option value="<%= brand.id %>" data-id="<%= brand.id %>">
+                                                            <%= brand.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                                <div id="brand-loading" style="display:none;font-size:11px;color:var(--text-muted);margin-top:4px;">⏳ Đang tải thương hiệu...</div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">Nhà phân phối</label>
@@ -474,7 +475,8 @@
 
             const specTemplates = {
                 pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt", "Quạt tản nhiệt", "Màn hình"],
-                cpu: ["Socket", "Số nhân", "Số luồng", "Xung nhịp cơ bản", "Xung nhịp tối đa", "Bộ nhớ đệm (Cache)", "TDP", "Thế hệ"],
+                cpu: ["Socket", "Số nhân", "Số luồng", "Xung nhịp cơ bản", "Xung nhịp tối đa", "Bộ nhớ đệm (Cache)", "Tổng Bộ nhớ đệm L2", "TDP", "Công suất Turbo tối đa", "Dung lượng bộ nhớ tối Đa", 
+                "Các loại bộ nhớ", "Số Kênh Bộ Nhớ Tối Đa", "Băng thông bộ nhớ tối đa", "Bộ xử lý đồ họa", "Tần số cơ sở đồ họa", "Tần số tối đa đồ họa", "Hỗ trợ DirectX", "Hỗ trợ OpenGL", "Hỗ trợ OpenCL", "Số màn hình được hỗ trợ", "Revision DMI", "Số Làn DMI Tối Đa", "Scalability", "PCI Express Revision", "PCI Express Configurations", "Max # of PCI Express Lanes" ],
                 mainboard: ["Socket", "Chipset", "Chuẩn kích thước", "Số khe RAM", "Dung lượng RAM tối đa", "Loại RAM hỗ trợ", "Cổng lưu trữ", "Cổng kết nối I/O"],
                 ram: ["Loại RAM", "Dung lượng", "Tốc độ (Bus)", "Độ trễ (CAS)", "Điện áp", "Tản nhiệt"],
                 vga: ["Chip đồ họa", "Dung lượng VRAM", "Loại VRAM", "Cổng giao tiếp", "Nguồn đề xuất", "Kích thước"],
@@ -630,6 +632,49 @@
             document.addEventListener("DOMContentLoaded", () => {
                 updateSpecDropdowns();
             });
+
+            /* =============================================
+               FILTER BRANDS BY CATEGORY (AJAX)
+            ============================================= */
+            // Lưu tất cả brands ban đầu để hiển thị lại khi không chọn category
+            const _allBrandsData = <%- JSON.stringify((brands || []).map(b => ({ id: Number(b.id), name: b.name }))) %>;
+
+            function renderBrandOptions(brandList, selectedId = '') {
+                const sel = document.getElementById('inp-brand');
+                let html = '<option value="">-- Chọn Thương hiệu --</option>';
+                brandList.forEach(b => {
+                    const sid = String(b.id);
+                    html += `<option value="${sid}" ${sid === String(selectedId) ? 'selected' : ''}>${b.name}</option>`;
+                });
+                sel.innerHTML = html;
+            }
+
+            async function filterBrandsByCategory() {
+                const categoryId = document.getElementById('inp-category').value;
+                const loading = document.getElementById('brand-loading');
+                const currentBrand = document.getElementById('inp-brand').value;
+
+                if (!categoryId) {
+                    renderBrandOptions(_allBrandsData, currentBrand);
+                    return;
+                }
+
+                loading.style.display = 'block';
+                try {
+                    const res = await fetch(`/admin/api/brands?categoryId=${categoryId}`);
+                    const brands = await res.json();
+                    if (brands.length === 0) {
+                        // Nếu chưa có mapping, hiển thị tất cả
+                        renderBrandOptions(_allBrandsData, currentBrand);
+                    } else {
+                        renderBrandOptions(brands, currentBrand);
+                    }
+                } catch (e) {
+                    renderBrandOptions(_allBrandsData, currentBrand);
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
 
             function submitAddProduct(event) {
                 const errors = [];

@@ -3,12 +3,14 @@ import * as productApiController from "../controllers/api/product.api.controller
 import * as authApiController from "../controllers/api/auth.api.controller";
 import * as orderApiController from "../controllers/api/order.api.controller";
 import * as ghnApiController from "../controllers/api/ghn.api.controller";
+import * as vnpayController from "../controllers/api/vnpay.api.controller";
 
 const router = express.Router();
 
 const apiRoutes = (app: express.Express) => {
     // === Product APIs ===
     router.get('/products', productApiController.getProducts);
+    router.get('/products/by-category', productApiController.getProductsByCategory);
     router.post('/products', productApiController.createProduct);
     router.put('/products/:id', productApiController.updateProduct);
     router.delete('/products/:id', productApiController.deleteProduct);
@@ -31,7 +33,14 @@ const apiRoutes = (app: express.Express) => {
     // === Shipping APIs ===
     router.post('/shipping/fee', ghnApiController.getShippingFee);
     router.post('/shipping/order/create', ghnApiController.createShippingOrder);
+
+    // VNPay
+    router.post('/create-qr', vnpayController.CreateQr);
+    router.get('/check-payment-vnpay', vnpayController.CheckPaymentVnPay);
+
     app.use("/api", router);
+
+
 };
 
 export default apiRoutes;

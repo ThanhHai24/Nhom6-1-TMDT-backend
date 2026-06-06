@@ -4,6 +4,7 @@ import { getHomePage, getProductPage, getListPage, getProfilePage, postUpdatePro
 import express from 'express';
 import { isAuthenticated } from '../middleware/auth.middleware';
 import { avatarUploadMiddleware } from 'src/middleware/multer';
+import { getBuildPcPage } from 'controllers/client/build.controller';
 
 const router = express.Router();
 
@@ -59,6 +60,8 @@ const userRoutes = (app: express.Express) => {
 
     router.get('/search', getSearchPage);
 
+    // Build PC
+    router.get('/xay-dung-cau-hinh', getBuildPcPage)
     app.use("/", router);
 }
 
