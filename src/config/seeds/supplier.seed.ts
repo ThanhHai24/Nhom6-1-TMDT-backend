@@ -12,7 +12,8 @@ const seedSuppliers = async () => {
             { name: "Viễn Sơn", slug: "vien-son", description: "Viễn Sơn", status: "ACTIVE" },
             { name: "Mai Hoàng", slug: "mai-hoang", description: "Mai Hoàng", status: "ACTIVE" },
         ]
-    })
+    });
+    console.log("[Seed] Suppliers: seeded successfully.");
 }
 
 export default seedSuppliers;

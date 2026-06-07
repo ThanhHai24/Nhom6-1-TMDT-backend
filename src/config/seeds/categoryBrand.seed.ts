@@ -1,11 +1,6 @@
 import { prisma } from "config/client";
 
 const seedCategoryBrands = async () => {
-    const count = await prisma.categoryBrand.count();
-    if (count > 0) {
-        console.log("[Seed] CategoryBrands: already seeded, skipping.");
-        return;
-    }
 
     // Lấy tất cả categories và brands theo slug
     const categories = await prisma.category.findMany();

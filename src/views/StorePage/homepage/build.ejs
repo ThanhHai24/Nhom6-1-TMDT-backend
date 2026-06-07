@@ -38,6 +38,7 @@
             padding: 8px 16px; background: #fff; border: 1px solid #ddd;
             border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
             transition: all 0.2s;
+            color: #e74c3c;
         }
         .refresh-btn:hover { border-color: #e74c3c; color: #e74c3c; }
         .total-price-bar { font-size: 15px; font-weight: 700; color: #e74c3c; }
@@ -337,12 +338,12 @@
                 <div class="component-actions"></div>
             </div>
 
-            <!-- Tản nhiệt khí -->
+            <!-- Tản nhiệt CPU -->
             <div class="component-item" data-slot="cooling">
-                <div class="component-number">9. TẢN NHIỆT KHÍ</div>
+                <div class="component-number">9. TẢN NHIỆT CPU</div>
                 <div class="component-selected">
-                    <button class="choose-btn" onclick="openModal('cooling','tan-nhiet-pc')">
-                        <span>+</span> Chọn Tản Nhiệt Khí
+                    <button class="choose-btn" onclick="openModal('cooling','tan-nhiet-cpu')">
+                        <span>+</span> Chọn Tản Nhiệt CPU
                     </button>
                 </div>
                 <div class="build-price"></div>
@@ -433,9 +434,20 @@
                 <button class="close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Toolbar: search + sort -->
+                <!-- Toolbar: search + sort + filter by brand + filter by price -->
                 <div class="modal-toolbar">
                     <input type="text" id="modalSearch" class="search-box" placeholder="Tìm kiếm sản phẩm...">
+                    <select id="modalBrand" class="sort-select">
+                        <option value="">Tất cả hãng</option>
+                    </select>
+                    <select id="modalPrice" class="sort-select">
+                        <option value="">Tất cả mức giá</option>
+                        <option value="under_2m">Dưới 2 triệu</option>
+                        <option value="2m_5m">2 triệu - 5 triệu</option>
+                        <option value="5m_10m">5 triệu - 10 triệu</option>
+                        <option value="10m_20m">10 triệu - 20 triệu</option>
+                        <option value="over_20m">Trên 20 triệu</option>
+                    </select>
                     <select id="modalSort" class="sort-select">
                         <option value="">Mặc định</option>
                         <option value="price_asc">Giá thấp → cao</option>
@@ -467,11 +479,12 @@
     // STATE
     // =========================================================
     const buildState = {
-        selectedComponents: {}, // { slotKey: { id, name, price, image, sku, qty } }
+        selectedComponents: {}, // { slotKey: { id, name, price, image, sku, qty, specifications } }
         currentSlot: null,      // slot key đang mở modal
         currentCategory: null,  // category slug đang load
         currentPage: 1,
         searchTimer: null,
+        currentProducts: [],    // Cache for currently loaded products
     };
 
     // Map slotKey → label để dùng lại khi reset
@@ -484,7 +497,7 @@
         vga: 'Chọn VGA - Card Màn Hình',
         psu: 'Chọn PSU - Nguồn Máy Tính',
         case: 'Chọn Case - Vỏ Máy Tính',
-        cooling: 'Chọn Tản Nhiệt Khí',
+        cooling: 'Chọn Tản Nhiệt CPU',
         casefan: 'Chọn Quạt Tản Nhiệt',
         monitor: 'Chọn Monitor - Màn Hình',
         keyboard: 'Chọn Bàn Phím',
@@ -500,13 +513,89 @@
         vga: 'vga-card-do-hoa',
         psu: 'psu-nguon-may-tinh',
         case: 'case-vo-may-tinh',
-        cooling: 'tan-nhiet-pc',
+        cooling: 'tan-nhiet-cpu',
         casefan: 'quat-tan-nhiet',
         monitor: 'man-hinh',
         keyboard: 'ban-phim',
         mouse: 'chuot',
         headphone: 'tai-nghe',
     };
+
+    // Helper to get spec value from a specifications JSON array
+    function getSpecValue(specs, keyName) {
+        if (!specs) return null;
+        let arr = [];
+        try {
+            arr = typeof specs === 'string' ? JSON.parse(specs) : specs;
+        } catch (e) {
+            return null;
+        }
+        if (!Array.isArray(arr)) return null;
+        const found = arr.find(s => s && s.key && s.key.toLowerCase().trim() === keyName.toLowerCase().trim());
+        return found ? found.value : null;
+    }
+
+    // Dynamic compatibility mapping based on current slot and selected components
+    function getCompatibilityParams() {
+        const params = {};
+        const slot = buildState.currentSlot;
+        const cpu = buildState.selectedComponents.cpu;
+        const mainboard = buildState.selectedComponents.mainboard;
+
+        // 1. Choosing Mainboard
+        if (slot === 'mainboard') {
+            if (cpu) {
+                const socket = getSpecValue(cpu.specifications, "Socket");
+                if (socket) params.compatSocket = socket;
+                
+                const ramType = getSpecValue(cpu.specifications, "Loại RAM hỗ trợ");
+                if (ramType) params.compatRamType = ramType;
+            }
+        }
+        
+        // 2. Choosing CPU
+        else if (slot === 'cpu') {
+            if (mainboard) {
+                const socket = getSpecValue(mainboard.specifications, "Socket CPU");
+                if (socket) params.compatSocket = socket;
+                
+                const ramType = getSpecValue(mainboard.specifications, "Loại RAM hỗ trợ");
+                if (ramType) params.compatRamType = ramType;
+            }
+        }
+        
+        // 3. Choosing RAM
+        else if (slot === 'ram') {
+            if (mainboard) {
+                const ramType = getSpecValue(mainboard.specifications, "Loại RAM hỗ trợ");
+                if (ramType) params.compatRamType = ramType;
+            } else if (cpu) {
+                const ramType = getSpecValue(cpu.specifications, "Loại RAM hỗ trợ");
+                if (ramType) params.compatRamType = ramType;
+            }
+        }
+        
+        // 4. Choosing Case
+        else if (slot === 'case') {
+            if (mainboard) {
+                const formFactor = getSpecValue(mainboard.specifications, "Form Factor (Chuẩn kích thước)");
+                if (formFactor) params.compatFormFactor = formFactor;
+            }
+        }
+        
+        // 5. Choosing Cooling
+        else if (slot === 'cooling') {
+            if (cpu) {
+                const socket = getSpecValue(cpu.specifications, "Socket");
+                if (socket) params.compatSocket = socket;
+            } else if (mainboard) {
+                const socket = getSpecValue(mainboard.specifications, "Socket CPU");
+                if (socket) params.compatSocket = socket;
+            }
+        }
+
+        return params;
+    }
 
     // =========================================================
     // OPEN / CLOSE MODAL
@@ -519,16 +608,18 @@
         // Title
         document.getElementById('modalTitle').textContent = SLOT_LABELS[slotKey] || 'Chọn linh kiện';
 
-        // Reset search & sort
+        // Reset search & sort & filters
         document.getElementById('modalSearch').value = '';
         document.getElementById('modalSort').value = '';
+        document.getElementById('modalBrand').innerHTML = '<option value="">Tất cả hãng</option>';
+        document.getElementById('modalPrice').value = '';
 
         // Show modal
         document.getElementById('componentModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
 
-        // Load products
-        loadProducts();
+        // Load products (updating dynamic brands)
+        loadProducts(1, true);
     }
 
     function closeModal() {
@@ -540,10 +631,12 @@
     // =========================================================
     // LOAD PRODUCTS FROM API
     // =========================================================
-    async function loadProducts(page = 1) {
+    async function loadProducts(page = 1, shouldUpdateBrands = false) {
         buildState.currentPage = page;
         const search = document.getElementById('modalSearch').value.trim();
         const sort = document.getElementById('modalSort').value;
+        const brand = document.getElementById('modalBrand').value;
+        const priceRange = document.getElementById('modalPrice').value;
 
         const listEl = document.getElementById('modalProductList');
         listEl.innerHTML = `<div class="loading-state"><i class="ri-loader-4-line"></i>Đang tải...</div>`;
@@ -557,6 +650,35 @@
             });
             if (search) params.append('search', search);
             if (sort) params.append('sort', sort);
+            if (brand) params.append('brand', brand);
+
+            // Parse price range selection
+            if (priceRange) {
+                let minPrice = 0;
+                let maxPrice = 0;
+                if (priceRange === 'under_2m') {
+                    maxPrice = 2000000;
+                } else if (priceRange === '2m_5m') {
+                    minPrice = 2000000;
+                    maxPrice = 5000000;
+                } else if (priceRange === '5m_10m') {
+                    minPrice = 5000000;
+                    maxPrice = 10000000;
+                } else if (priceRange === '10m_20m') {
+                    minPrice = 10000000;
+                    maxPrice = 20000000;
+                } else if (priceRange === 'over_20m') {
+                    minPrice = 20000000;
+                }
+                if (minPrice) params.append('minPrice', minPrice);
+                if (maxPrice) params.append('maxPrice', maxPrice);
+            }
+
+            // Append compatibility parameters
+            const compat = getCompatibilityParams();
+            if (compat.compatSocket) params.append('compatSocket', compat.compatSocket);
+            if (compat.compatRamType) params.append('compatRamType', compat.compatRamType);
+            if (compat.compatFormFactor) params.append('compatFormFactor', compat.compatFormFactor);
 
             const res = await fetch(`/api/products/by-category?${params}`);
             if (!res.ok) throw new Error('Lỗi mạng');
@@ -564,12 +686,29 @@
 
             renderProducts(data.products);
             renderPagination(data.currentPage, data.totalPages);
+
+            if (shouldUpdateBrands) {
+                updateBrandDropdown(data.brands || []);
+            }
         } catch (err) {
             listEl.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i>Không thể tải sản phẩm. Vui lòng thử lại.</div>`;
         }
     }
 
+    function updateBrandDropdown(brands) {
+        const brandSelect = document.getElementById('modalBrand');
+        const selectedValue = brandSelect.value;
+        brandSelect.innerHTML = `<option value="">Tất cả hãng</option>` + 
+            brands.map(b => `<option value="${escHtml(b.slug)}">${escHtml(b.name)}</option>`).join('');
+        if (brands.some(b => b.slug === selectedValue)) {
+            brandSelect.value = selectedValue;
+        } else {
+            brandSelect.value = '';
+        }
+    }
+
     function renderProducts(products) {
+        buildState.currentProducts = products; // Cache page products
         const listEl = document.getElementById('modalProductList');
         if (!products || products.length === 0) {
             listEl.innerHTML = `<div class="empty-state"><i class="ri-search-line"></i>Không tìm thấy sản phẩm phù hợp.</div>`;
@@ -608,17 +747,17 @@
         if (total <= 1) { el.innerHTML = ''; return; }
 
         let html = '';
-        if (current > 1) html += `<button class="page-btn" onclick="loadProducts(${current-1})">‹</button>`;
+        if (current > 1) html += `<button class="page-btn" onclick="loadProducts(${current-1}, false)">‹</button>`;
         for (let i = 1; i <= total; i++) {
             if (i === current) {
                 html += `<button class="page-btn active">${i}</button>`;
             } else if (i === 1 || i === total || Math.abs(i - current) <= 1) {
-                html += `<button class="page-btn" onclick="loadProducts(${i})">${i}</button>`;
+                html += `<button class="page-btn" onclick="loadProducts(${i}, false)">${i}</button>`;
             } else if (Math.abs(i - current) === 2) {
                 html += `<span style="padding:6px 4px;color:#999">…</span>`;
             }
         }
-        if (current < total) html += `<button class="page-btn" onclick="loadProducts(${current+1})">›</button>`;
+        if (current < total) html += `<button class="page-btn" onclick="loadProducts(${current+1}, false)">›</button>`;
         el.innerHTML = html;
     }
 
@@ -629,7 +768,11 @@
         const slot = buildState.currentSlot;
         if (!slot) return;
 
-        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1 };
+        // Retrieve specs from cache
+        const product = buildState.currentProducts.find(p => String(p.id) === String(id));
+        const specs = product ? product.specifications : null;
+
+        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1, specifications: specs };
         renderSlot(slot);
         updateTotal();
         closeModal();
@@ -755,24 +898,60 @@
     // Search with debounce
     document.getElementById('modalSearch').addEventListener('input', function() {
         clearTimeout(buildState.searchTimer);
-        buildState.searchTimer = setTimeout(() => loadProducts(1), 350);
+        buildState.searchTimer = setTimeout(() => loadProducts(1, false), 350);
     });
 
     // Sort
     document.getElementById('modalSort').addEventListener('change', function() {
-        loadProducts(1);
+        loadProducts(1, false);
     });
 
-    // Add to cart button
-    document.getElementById('cartBtn').addEventListener('click', function() {
+    // Brand filter
+    document.getElementById('modalBrand').addEventListener('change', function() {
+        loadProducts(1, false);
+    });
+
+    // Price filter
+    document.getElementById('modalPrice').addEventListener('change', function() {
+        loadProducts(1, false);
+    });
+
+    // Add to cart button (bulk add)
+    document.getElementById('cartBtn').addEventListener('click', async function() {
         const items = Object.values(buildState.selectedComponents);
         if (items.length === 0) {
             alert('Chưa có linh kiện nào trong cấu hình. Vui lòng chọn ít nhất 1 linh kiện.');
             return;
         }
-        // TODO: gọi API thêm từng sản phẩm vào giỏ hàng
-        const names = items.map(c => `• ${c.name} (x${c.qty})`).join('\n');
-        alert(`Đã thêm ${items.length} linh kiện vào giỏ hàng:\n\n${names}`);
+
+        const payload = {
+            items: items.map(c => ({
+                product_id: c.id,
+                product_qty: c.qty
+            }))
+        };
+
+        try {
+            const res = await fetch('/cart/add-bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Đã thêm toàn bộ linh kiện vào giỏ hàng!');
+                window.location.href = '/cart';
+            } else {
+                alert('Có lỗi xảy ra: ' + (data.message || 'Không thể thêm vào giỏ hàng.'));
+            }
+        } catch (err) {
+            console.error('Lỗi khi thêm vào giỏ hàng:', err);
+            alert('Lỗi kết nối. Vui lòng thử lại sau.');
+        }
     });
 
     // Print / xem & in

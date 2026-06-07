@@ -103,11 +103,24 @@
                                                         <% }) %>
                                                 </select>
                                             </div>
-                                            <div class="form-group full">
+                                            <div class="form-group">
                                                 <label class="form-label">Mô tả ngắn</label>
                                                 <input name="shortDescription" class="form-input" type="text"
                                                     id="inp-short-desc"
                                                     placeholder="Mô tả ngắn gọn về sản phẩm, hiển thị trên danh sách">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Bảo hành</label>
+                                                <select name="warranty" class="form-input form-select"
+                                                    id="inp-warranty">
+                                                    <option value="">-- Chọn thời gian bảo hành --</option>
+                                                    <option value="6">6 Tháng</option>
+                                                    <option value="12">12 Tháng</option>
+                                                    <option value="24">24 Tháng</option>
+                                                    <option value="36">36 Tháng</option>
+                                                    <option value="48">48 Tháng</option>
+                                                    <option value="60">60 Tháng</option>
+                                                </select>
                                             </div>
                                             <div class="form-group full">
                                                 <label class="form-label">Mô tả chi tiết</label>
@@ -250,20 +263,26 @@
                                                 số</button>
                                         </div>
                                         <div id="spec-list" style="display:flex;flex-direction:column;gap:10px;">
-                                            <div class="spec-row"
-                                                style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                            <div class="spec-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
                                                 <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
                                                     <option value="">-- Chọn thông số --</option>
                                                 </select>
                                                 <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
-                                                
-                                                <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Giá trị (VD: Apple M4, 16GB...)">
-                                                <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+
+                                                <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Nhập giá trị...">
+                                                <select name="" class="form-input spec-value-select" style="display:none;" disabled>
                                                     <option value="">-- Chọn sản phẩm --</option>
                                                 </select>
-                                                
-                                                <button type="button" class="btn sm danger-outline"
-                                                    onclick="removeSpec(this)">✕</button>
+                                                <select name="" class="form-input spec-value-options" style="display:none;" disabled>
+                                                    <option value="">-- Chọn giá trị --</option>
+                                                </select>
+                                                <div class="spec-value-watt" style="display:none;flex-direction:row;align-items:stretch;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--card-bg);">
+                                                    <input type="number" class="spec-value-watt-num" min="0" step="1" style="flex:1;border:none;background:transparent;color:var(--text);padding:8px 10px;font-size:13px;outline:none;width:100%;" placeholder="125" oninput="syncWattValue(this)">
+                                                    <span style="background:var(--accent);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;white-space:nowrap;">W</span>
+                                                    <input type="hidden" name="" class="spec-value-watt-hidden" disabled>
+                                                </div>
+
+                                                <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
                                             </div>
                                         </div>
                                     </div>
@@ -473,18 +492,300 @@
 
             const allStoreProducts = <%- JSON.stringify((allProducts || []).map(p => ({ id: Number(p.id), name: p.name, categorySlug: p.category?.slug || '', categoryName: p.category?.name || '' }))) %>;
 
+            // ── Cấu hình loại input cho từng thông số ────────────────────────────
+            // type: 'text' | 'options' | 'watt'
+            const specValueConfig = {
+                // ─ Watt (TDP / công suất) ─────────────────────────────────────
+                'TDP':                               { type: 'watt' },
+                'TDP / TGP':                         { type: 'watt' },
+                'TDP được hỗ trợ':                   { type: 'watt' },
+                'Công suất Turbo tối đa (MTP/PL2)':  { type: 'watt' },
+                'Công suất':                         { type: 'watt' },
+                // ─ Socket ─────────────────────────────────────────────────────
+                'Socket':     { type: 'options', options: ['LGA1851','LGA1700','LGA1200','AM5','AM4','AM3+','LGA2066','TR4','sTRX4','SP3','LGA4677'] },
+                'Socket CPU': { type: 'options', options: ['LGA1851','LGA1700','LGA1200','AM5','AM4','AM3+','LGA2066','TR4','sTRX4','LGA4677'] },
+                'Socket hỗ trợ': { type: 'options', options: ['LGA1851 / LGA1700','LGA1851','LGA1700','AM5 / AM4','AM5','AM4','LGA1851 / LGA1700, AM5 / AM4','TR4 / sTRX4'] },
+                // ─ RAM ────────────────────────────────────────────────────────
+                'Loại RAM hỗ trợ': { type: 'options', options: ['DDR5','DDR4','DDR5 / DDR4'] },
+                'Loại RAM':        { type: 'options', options: ['DDR5','DDR4','DDR5 SO-DIMM','DDR4 SO-DIMM','LPDDR5X','LPDDR5'] },
+                'Số kênh RAM tối đa': { type: 'options', options: ['2 (Dual Channel)','4 (Quad Channel)','8 (Octa Channel)'] },
+                'Số kênh':            { type: 'options', options: ['Dual Channel','Single Channel'] },
+                'Số khe RAM':         { type: 'options', options: ['2','4'] },
+                'Số thanh trong kit': { type: 'options', options: ['1','2','4'] },
+                'Hỗ trợ XMP / EXPO':  { type: 'options', options: ['XMP 3.0','XMP 2.0','EXPO','XMP 3.0 / EXPO','Không có'] },
+                'Điện áp': { type: 'options', options: ['1.1V','1.25V','1.35V','1.4V','1.5V','1.8V'] },
+                'Tản nhiệt': { type: 'options', options: ['Có (Heatspreader)','Không có'] },
+                'Đèn RGB':   { type: 'options', options: ['Có (ARGB)','Có (RGB)','Không có'] },
+                'Đèn ARGB':  { type: 'options', options: ['Có','Không có'] },
+                // ─ Form Factor ─────────────────────────────────────────────────
+                'Form Factor (Chuẩn kích thước)': { type: 'options', options: ['ATX','Micro-ATX (mATX)','Mini-ITX','E-ATX','XL-ATX','SSI-EEB'] },
+                'Form Factor Mainboard hỗ trợ':   { type: 'options', options: ['E-ATX / ATX / mATX / Mini-ITX','ATX / mATX / Mini-ITX','ATX / mATX','Mini-ITX'] },
+                'Form Factor PSU': { type: 'options', options: ['ATX 3.1','ATX 3.0','ATX','SFX-L','SFX'] },
+                'Form Factor':     { type: 'options', options: ['ATX 3.1','ATX 3.0','ATX','SFX-L','SFX','M.2 2280','M.2 2242','M.2 22110','2.5"','3.5"'] },
+                // ─ Chipset ─────────────────────────────────────────────────────
+                'Chipset': { type: 'options', options: ['Z890','Z790','Z690','B860','B760','H810','H610','X870E','X870','X670E','X670','B650E','B650','A620'] },
+                // ─ PCIe ────────────────────────────────────────────────────────
+                'PCIe Revision': { type: 'options', options: ['PCIe 5.0','PCIe 4.0','PCIe 3.0'] },
+                // ─ Chuẩn giao tiếp SSD ─────────────────────────────────────────
+                'Chuẩn giao tiếp': { type: 'options', options: ['PCIe 5.0 x4 NVMe 2.0','PCIe 4.0 x4 NVMe 1.4','PCIe 3.0 x4 NVMe 1.4','SATA III (6Gbps)'] },
+                'Loại ổ cứng':     { type: 'options', options: ['SSD NVMe M.2','SSD SATA M.2','SSD SATA 2.5"','HDD 3.5"','HDD 2.5"'] },
+                'NAND Flash': { type: 'options', options: ['3D TLC NAND','3D QLC NAND','3D MLC NAND','3D SLC NAND'] },
+                'DRAM Cache': { type: 'options', options: ['Có (LPDDR4)','Có (DDR4)','HMB (Host Memory Buffer)','Không có'] },
+                // ─ PSU ────────────────────────────────────────────────────────
+                'Chuẩn hiệu suất': { type: 'options', options: ['80+ Titanium','80+ Platinum','80+ Gold','80+ Silver','80+ Bronze','80+'] },
+                'Kiểu dây':        { type: 'options', options: ['Full Modular','Semi Modular','Non Modular'] },
+                // ─ Kết nối mạng ────────────────────────────────────────────────
+                'Chuẩn mạng LAN': { type: 'options', options: ['Intel 2.5GbE + Intel 2.5GbE','Intel 2.5GbE','Realtek 2.5GbE','Intel 1GbE','Realtek 1GbE'] },
+                'WiFi':       { type: 'options', options: ['WiFi 7 (802.11be)','WiFi 6E (802.11ax)','WiFi 6 (802.11ax)','WiFi 5 (802.11ac)','Không có'] },
+                'Bluetooth':  { type: 'options', options: ['Bluetooth 5.4','Bluetooth 5.3','Bluetooth 5.2','Bluetooth 5.1','Bluetooth 5.0','Không có'] },
+                'Hỗ trợ RAID':{ type: 'options', options: ['RAID 0, 1, 5, 10','RAID 0, 1','Không có'] },
+                // ─ VGA ────────────────────────────────────────────────────────
+                'Loại VRAM':       { type: 'options', options: ['GDDR7','GDDR6X','GDDR6','GDDR5X','GDDR5','HBM3e','HBM3'] },
+                'Loại tản nhiệt':  { type: 'options', options: ['AIO (Tản nước)','Tản tháp đôi','Tản tháp đơn','Tản thấp (Low Profile)'] },
+                // ─ Case ────────────────────────────────────────────────────────
+                'Loại case': { type: 'options', options: ['Full Tower','Mid Tower','Mini Tower','Mini-ITX','HTPC'] },
+                // ─ Màn hình ────────────────────────────────────────────────────
+                'Tấm nền':    { type: 'options', options: ['IPS','Fast IPS','VA','TN','OLED','Mini-LED IPS','Nano IPS','QLED'] },
+                'Hỗ trợ VRR': { type: 'options', options: ['G-Sync + FreeSync Premium Pro','G-Sync Compatible','FreeSync Premium Pro','FreeSync Premium','FreeSync','Adaptive Sync','Không có'] },
+                'Hỗ trợ HDR': { type: 'options', options: ['DisplayHDR 1400','DisplayHDR 1000','DisplayHDR 600','DisplayHDR 400','VESA HDR 600','VESA HDR 400','Không có'] },
+                'Độ cong':    { type: 'options', options: ['1000R','1500R','1800R','2300R','Phẳng'] },
+                // ─ Chung ────────────────────────────────────────────────────────
+                'Bảo hành': { type: 'options', options: ['60 tháng','36 tháng','24 tháng','12 tháng','Trọn đời (Lifetime)'] },
+            };
+
             const specTemplates = {
-                pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt", "Quạt tản nhiệt", "Màn hình"],
-                cpu: ["Socket", "Số nhân", "Số luồng", "Xung nhịp cơ bản", "Xung nhịp tối đa", "Bộ nhớ đệm (Cache)", "Tổng Bộ nhớ đệm L2", "TDP", "Công suất Turbo tối đa", "Dung lượng bộ nhớ tối Đa", 
-                "Các loại bộ nhớ", "Số Kênh Bộ Nhớ Tối Đa", "Băng thông bộ nhớ tối đa", "Bộ xử lý đồ họa", "Tần số cơ sở đồ họa", "Tần số tối đa đồ họa", "Hỗ trợ DirectX", "Hỗ trợ OpenGL", "Hỗ trợ OpenCL", "Số màn hình được hỗ trợ", "Revision DMI", "Số Làn DMI Tối Đa", "Scalability", "PCI Express Revision", "PCI Express Configurations", "Max # of PCI Express Lanes" ],
-                mainboard: ["Socket", "Chipset", "Chuẩn kích thước", "Số khe RAM", "Dung lượng RAM tối đa", "Loại RAM hỗ trợ", "Cổng lưu trữ", "Cổng kết nối I/O"],
-                ram: ["Loại RAM", "Dung lượng", "Tốc độ (Bus)", "Độ trễ (CAS)", "Điện áp", "Tản nhiệt"],
-                vga: ["Chip đồ họa", "Dung lượng VRAM", "Loại VRAM", "Cổng giao tiếp", "Nguồn đề xuất", "Kích thước"],
-                psu: ["Công suất", "Chuẩn hiệu suất", "Kích thước nguồn", "Kiểu dây", "Nguồn đầu vào"],
-                case: ["Hỗ trợ Mainboard", "Chất liệu", "Kích thước", "Chiều dài VGA tối đa", "Tản nhiệt CPU tối đa", "Sẵn quạt"],
-                cooler: ["Loại tản nhiệt", "Socket hỗ trợ", "Kích thước quạt", "Tốc độ quạt", "Độ ồn", "Đèn LED"],
-                storage: ["Loại ổ cứng", "Dung lượng", "Chuẩn giao tiếp", "Tốc độ đọc", "Tốc độ ghi", "Kích thước"],
-                monitor: ["Kích thước màn hình", "Độ phân giải", "Tấm nền", "Tần số quét", "Thời gian phản hồi", "Cổng kết nối"],
+                // ── BỘ MÁY TÍNH (PC BUILD) ───────────────────────────────────────
+                // Giá trị là ID sản phẩm → dùng dropdown chọn linh kiện có sẵn
+                pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt CPU", "Màn hình"],
+
+                // ── CPU ──────────────────────────────────────────────────────────
+                // Thông số quan trọng cho tương thích: Socket, TDP, loại RAM
+                cpu: [
+                    // --- Tương thích (build check) ---
+                    "Socket",                    // VD: LGA1700, AM5, AM4
+                    "Loại RAM hỗ trợ",           // VD: DDR5, DDR4, DDR5/DDR4
+                    "Số kênh RAM tối đa",        // VD: 2 (Dual Channel), 4 (Quad)
+                    "Dung lượng RAM tối đa",     // VD: 192GB, 128GB, 64GB
+                    "TDP",                       // VD: 65W, 125W, 253W
+                    "Công suất Turbo tối đa (MTP/PL2)", // VD: 253W
+                    // --- Hiệu năng ---
+                    "Thế hệ / Series",           // VD: Intel Core Ultra 200, Ryzen 7000
+                    "Số nhân (P-core)",          // VD: 8
+                    "Số nhân hiệu suất (E-core)",// VD: 16 (chỉ Intel hybrid)
+                    "Tổng số nhân",              // VD: 24
+                    "Số luồng",                  // VD: 32
+                    "Xung nhịp cơ bản",          // VD: 3.5 GHz
+                    "Xung nhịp Turbo tối đa",   // VD: 5.8 GHz
+                    "Cache L2",                  // VD: 32MB
+                    "Cache L3",                  // VD: 36MB
+                    // --- Đồ họa tích hợp ---
+                    "GPU tích hợp",              // VD: Intel UHD 770, AMD Radeon 890M, Không có
+                    "Xung nhịp GPU tối đa",      // VD: 1.65 GHz
+                    // --- Kết nối ---
+                    "PCIe Revision",             // VD: PCIe 5.0, PCIe 4.0
+                    "Số làn PCIe",              // VD: 20, 24
+                    // --- Khác ---
+                    "Tiến trình sản xuất",       // VD: Intel 7, TSMC 4nm
+                    "Bảo hành"
+                ],
+
+                // ── MAINBOARD ────────────────────────────────────────────────────
+                // Thông số quan trọng: Socket, loại RAM, số khe RAM, form factor
+                mainboard: [
+                    // --- Tương thích (build check) ---
+                    "Socket CPU",                // VD: LGA1700, AM5, AM4
+                    "Chipset",                   // VD: Z790, B650E, X670E
+                    "Loại RAM hỗ trợ",           // VD: DDR5, DDR4, DDR5/DDR4
+                    "Số khe RAM",               // VD: 4, 2
+                    "Dung lượng RAM tối đa",     // VD: 192GB, 128GB
+                    "Tốc độ RAM hỗ trợ (OC)",   // VD: DDR5 up to 8000MHz
+                    "Form Factor (Chuẩn kích thước)", // VD: ATX, mATX, ITX, E-ATX
+                    // --- Lưu trữ ---
+                    "Số khe M.2 NVMe",          // VD: 5, 3, 2
+                    "Số cổng SATA",             // VD: 6, 4
+                    "Hỗ trợ RAID",              // VD: 0,1,5,10
+                    // --- Kết nối ---
+                    "Khe PCIe x16",             // VD: 2 (PCIe 5.0 + PCIe 4.0)
+                    "Khe PCIe x1",              // VD: 1
+                    "Cổng USB phía sau",        // VD: USB 3.2 Gen2x2 Type-C x1...
+                    "Cổng USB header phía trước",
+                    "Chuẩn mạng LAN",           // VD: Intel 2.5GbE
+                    "WiFi",                      // VD: WiFi 7 (802.11be), Không có
+                    "Bluetooth",                 // VD: BT 5.4, Không có
+                    // --- Nguồn & âm thanh ---
+                    "Đầu nguồn CPU (ATX12V)",   // VD: 2x 8-pin EPS
+                    "Đầu nguồn ATX",            // VD: 24-pin
+                    "Codec âm thanh",           // VD: Realtek ALC4080
+                    // --- Khác ---
+                    "Bảo hành"
+                ],
+
+                // ── RAM ──────────────────────────────────────────────────────────
+                // Thông số quan trọng: loại RAM, dung lượng, tốc độ
+                ram: [
+                    // --- Tương thích (build check) ---
+                    "Loại RAM",                  // VD: DDR5, DDR4, DDR5 SO-DIMM
+                    "Dung lượng",               // VD: 16GB (2x8GB), 32GB (2x16GB)
+                    "Dung lượng mỗi thanh",     // VD: 8GB, 16GB, 32GB
+                    "Số thanh trong kit",       // VD: 2, 4
+                    "Tốc độ (Bus)",             // VD: DDR5-6000, DDR4-3600
+                    "Điện áp",                  // VD: 1.1V, 1.35V
+                    // --- Hiệu năng ---
+                    "Độ trễ (Timings)",         // VD: CL30-38-38-96, CL16-18-18-38
+                    "Xung nhịp thực (MHz)",     // VD: 3000 MHz
+                    "Hỗ trợ XMP / EXPO",        // VD: XMP 3.0, EXPO, Không có
+                    "Số kênh",                  // VD: Dual Channel
+                    // --- Vật lý ---
+                    "Tản nhiệt",                // VD: Có (Heatspreader), Không có
+                    "Chiều cao",                // VD: 44mm (low profile)
+                    "Đèn RGB",                  // VD: Có, Không có
+                    "Bảo hành"
+                ],
+
+                // ── VGA / GPU ─────────────────────────────────────────────────
+                // Thông số quan trọng: VRAM, TDP, chiều dài card, nguồn đề xuất
+                vga: [
+                    // --- Hiệu năng ---
+                    "Chip đồ họa (GPU)",        // VD: NVIDIA RTX 5090, AMD RX 9070 XT
+                    "Số nhân Shader / CUDA",    // VD: 21760 CUDA Cores
+                    "Xung nhịp",
+                    "Kiến trúc",                // VD: Blackwell, RDNA 4
+                    "Loại VRAM",                // VD: GDDR7, GDDR6X
+                    "Dung lượng VRAM",          // VD: 24GB, 16GB, 8GB
+                    "Băng thông bộ nhớ",        // VD: 896 GB/s
+                    "Xung bộ nhớ",              // VD: 256-bit, 192-bit
+                    
+                    // --- Tương thích (build check) ---
+                    "TDP / TGP",                 // VD: 285W, 320W
+                    "Nguồn cấp PCIe",           // VD: 3x 8-pin, 1x 16-pin (12VHPWR)
+                    "Nguồn PSU đề xuất",        // VD: 850W
+                    "Chiều dài card",           // VD: 336mm, 290mm
+                    "Số khe chiếm dụng",        // VD: 3 khe, 2.5 khe
+                    // --- Cổng xuất hình ---
+                    "Cổng xuất hình",           // VD: 3x DP 2.1, 1x HDMI 2.1
+                    "Số màn hình đồng thời",    // VD: 4
+                    // --- Khác ---
+                    "Hỗ trợ DirectX/OpenGL",   // VD: DirectX 12 Ultimate, OpenGL 4.6
+                    "Hỗ trợ Ray Tracing",       // VD: Có (Gen 4)
+                    "Hỗ trợ DLSS / FSR",        // VD: DLSS 4, FSR 4
+                    "Bảo hành"
+                ],
+
+                // ── NGUỒN (PSU) ──────────────────────────────────────────────
+                // Thông số quan trọng: công suất, chuẩn hiệu suất, kiểu dây
+                psu: [
+                    // --- Tương thích (build check) ---
+                    "Công suất",                 // VD: 1000W, 850W, 750W
+                    "Form Factor",               // VD: ATX 3.1, ATX 3.0, SFX-L
+                    "Chiều dài",                // VD: 160mm
+                    // --- Chất lượng ---
+                    "Chuẩn hiệu suất",          // VD: 80+ Titanium, 80+ Platinum, 80+ Gold
+                    "Hiệu suất tại tải 50%",    // VD: 96%
+                    // --- Dây cáp ---
+                    "Kiểu dây",                 // VD: Full Modular, Semi Modular, Non Modular
+                    "Cổng 12VHPWR (PCIe 5.0)",  // VD: 1x (600W), Không có
+                    "Cổng PCIe 8-pin",          // VD: 4x
+                    "Cổng SATA",                // VD: 6x
+                    "Cổng EPS/CPU",             // VD: 2x 8-pin
+                    // --- Bảo vệ ---
+                    "Bảo vệ (OVP/OCP/SCP)",     // VD: OVP, UVP, OCP, OPP, SCP, OTP
+                    "Quạt",                     // VD: 135mm, Semi-fanless
+                    // --- Khác ---
+                    "Bảo hành"
+                ],
+
+                // ── VỎ CASE ──────────────────────────────────────────────────
+                // Thông số quan trọng: hỗ trợ mainboard form factor, chiều dài VGA
+                case: [
+                    // --- Tương thích (build check) ---
+                    "Form Factor Mainboard hỗ trợ", // VD: ATX, mATX, ITX, E-ATX
+                    "Chiều dài VGA tối đa",      // VD: 420mm, 380mm
+                    "Chiều cao CPU Cooler tối đa",// VD: 170mm, 160mm
+                    "Chiều dài PSU tối đa",      // VD: 200mm, 160mm (SFX)
+                    "Form Factor PSU",           // VD: ATX, SFX-L, SFX
+                    // --- Vật lý ---
+                    "Loại case",                // VD: Full Tower, Mid Tower, Mini-ITX
+                    "Kích thước (D x R x C)",   // VD: 480 x 220 x 500mm
+                    "Chất liệu",                // VD: Thép SPCC + Kính cường lực
+                    // --- Tản nhiệt ---
+                    "Vị trí lắp quạt",          // VD: 3x120mm top, 3x120mm front...
+                    "Vị trí lắp radiator",      // VD: 360mm top, 360mm front
+                    "Quạt đi kèm",             // VD: 3x 120mm ARGB
+                    // --- Kết nối trước ---
+                    "Cổng I/O phía trước",      // VD: 1x USB 3.2 Gen2 Type-C, 2x USB 3.0
+                    // --- Khác ---
+                    "Bảo hành"
+                ],
+
+                // ── TẢN NHIỆT CPU ────────────────────────────────────────────
+                // Thông số quan trọng: socket hỗ trợ, TDP, chiều cao
+                cooler: [
+                    // --- Tương thích (build check) ---
+                    "Socket hỗ trợ",             // VD: LGA1700/1851, AM5/AM4
+                    "TDP được hỗ trợ",           // VD: 250W+
+                    "Chiều cao (tản tháp)",      // VD: 158mm
+                    "Chiều dài Radiator (AIO)",  // VD: 360mm, 280mm, 240mm
+                    // --- Loại & Hiệu năng ---
+                    "Loại tản nhiệt",            // VD: Tản tháp đôi, AIO 360mm
+                    "Số quạt đi kèm",           // VD: 3x 120mm, 2x 140mm
+                    "Kích thước quạt",          // VD: 120mm, 140mm
+                    "Tốc độ quạt",              // VD: 500 ~ 2000 RPM
+                    "Lưu lượng gió",            // VD: 65.16 CFM
+                    "Độ ồn",                    // VD: ≤ 27 dBA
+                    "Tiếp điểm nhiệt",          // VD: Copper base, Direct Touch
+                    "Keo tản nhiệt kèm theo",   // VD: Có, Không có
+                    "Đèn ARGB",                 // VD: Có, Không có
+                    "Bảo hành"
+                ],
+
+                // ── Ổ CỨNG (SSD / HDD) ──────────────────────────────────────
+                // Thông số quan trọng: chuẩn giao tiếp, kích thước
+                storage: [
+                    // --- Tương thích (build check) ---
+                    "Loại ổ cứng",               // VD: SSD NVMe, SSD SATA, HDD
+                    "Chuẩn giao tiếp",          // VD: PCIe 5.0 x4 NVMe 2.0, SATA III
+                    "Form Factor",              // VD: M.2 2280, 2.5", 3.5"
+                    "Dung lượng",               // VD: 2TB, 1TB, 4TB
+                    // --- Hiệu năng ---
+                    "Tốc độ đọc tuần tự",       // VD: 14,900 MB/s
+                    "Tốc độ ghi tuần tự",       // VD: 14,000 MB/s
+                    "Tốc độ đọc ngẫu nhiên",    // VD: 2,500K IOPS
+                    "Tốc độ ghi ngẫu nhiên",    // VD: 2,000K IOPS
+                    // --- Phần cứng ---
+                    "Controller",               // VD: Phison E26
+                    "NAND Flash",               // VD: 3D TLC NAND, QLC NAND
+                    "DRAM Cache",               // VD: Có (LPDDR4), Không có (HMB)
+                    "TBW (Độ bền ghi)",         // VD: 1,200 TBW
+                    "Tiêu thụ điện",            // VD: 7.9W (đọc)
+                    "Bảo hành"
+                ],
+
+                // ── MÀN HÌNH ──────────────────────────────────────────────────
+                monitor: [
+                    // --- Tương thích (build check) ---
+                    "Cổng kết nối",             // VD: 2x DP 1.4, 1x HDMI 2.1
+                    // --- Thông số chính ---
+                    "Kích thước màn hình",       // VD: 27", 32", 34" Ultrawide
+                    "Tỷ lệ khung hình",         // VD: 16:9, 21:9, 32:9
+                    "Độ phân giải",             // VD: 2560x1440 (2K), 3840x2160 (4K)
+                    "Tấm nền",                  // VD: IPS, VA, OLED, Mini-LED
+                    "Tần số quét",              // VD: 240Hz, 165Hz
+                    "Thời gian phản hồi",       // VD: 1ms GtG, 0.1ms GtG
+                    // --- Màu sắc ---
+                    "Độ phủ màu",               // VD: 99% DCI-P3, 100% sRGB
+                    "Độ sáng",                  // VD: 600 nits (HDR 1000)
+                    "Hỗ trợ HDR",               // VD: DisplayHDR 1000, VESA HDR 400
+                    // --- Hình học ---
+                    "Độ cong",                  // VD: 1000R, 1800R, Phẳng
+                    // --- Sync ---
+                    "Hỗ trợ VRR",               // VD: G-Sync, FreeSync Premium Pro
+                    // --- Vật lý ---
+                    "Chân đế điều chỉnh",       // VD: Xoay, nghiêng, nâng hạ
+                    "Kích thước & trọng lượng",
+                    "Bảo hành"
+                ],
+
+                // ── MẶC ĐỊNH ─────────────────────────────────────────────────
                 default: ["Thương hiệu", "Bảo hành", "Màu sắc", "Trọng lượng", "Kích thước", "Chất liệu"]
             };
 
@@ -496,7 +797,7 @@
                 const name = option.getAttribute('data-name') || '';
                 
                 if (slug.includes('pc') || name.includes('pc') || name.includes('máy tính bộ') || name.includes('build')) return 'pc';
-                if (slug.includes('cpu') || name.includes('cpu') || name.includes('vi xử lý')) return 'cpu';
+                if (name.includes('vi xử lý')) return 'cpu';
                 if (slug.includes('main') || name.includes('main') || name.includes('bo mạch')) return 'mainboard';
                 if (slug.includes('ram') || name.includes('ram') || name.includes('bộ nhớ trong')) return 'ram';
                 if (slug.includes('vga') || name.includes('card') || name.includes('đồ họa')) return 'vga';
@@ -521,106 +822,154 @@
                     });
                     html += `<option value="custom" ${currentValue === 'custom' ? 'selected' : ''}>Khác (Tùy chỉnh...)</option>`;
                     select.innerHTML = html;
+                    handleSpecKeyChange(select, true);
                 });
             }
 
-            function handleSpecKeyChange(select) {
+            // ── Đồng bộ giá trị Watt → hidden input ──────────────────────────
+            function syncWattValue(numInput) {
+                const wattDiv = numInput.closest('.spec-value-watt');
+                const hidden = wattDiv.querySelector('.spec-value-watt-hidden');
+                hidden.value = numInput.value !== '' ? numInput.value + 'W' : '';
+            }
+
+            // ── Đặt chế độ hiển thị cho ô giá trị trong 1 spec-row ────────────
+            // mode: 'text' | 'product' | 'options' | 'watt'
+            function setSpecValueMode(row, mode, extraData, currentValue) {
+                const textEl    = row.querySelector('.spec-value-text');
+                const selectEl  = row.querySelector('.spec-value-select');
+                const optionsEl = row.querySelector('.spec-value-options');
+                const wattDiv   = row.querySelector('.spec-value-watt');
+                const wattNum   = row.querySelector('.spec-value-watt-num');
+                const wattHid   = row.querySelector('.spec-value-watt-hidden');
+
+                // Ẩn & vô hiệu hóa tất cả
+                [textEl, selectEl, optionsEl].forEach(el => {
+                    if (!el) return;
+                    el.style.display = 'none'; el.disabled = true; el.name = '';
+                });
+                if (wattDiv) wattDiv.style.display = 'none';
+                if (wattHid) { wattHid.disabled = true; wattHid.name = ''; }
+
+                // Lấy giá trị hiện tại nếu chưa có (khi init)
+                const existVal = (currentValue !== undefined && currentValue !== null) ? currentValue
+                    : (textEl ? textEl.value : '');
+
+                if (mode === 'text') {
+                    textEl.style.display = 'block'; textEl.disabled = false; textEl.name = 'specValue[]';
+                    if (existVal && !textEl.value) textEl.value = existVal;
+
+                } else if (mode === 'product') {
+                    selectEl.style.display = 'block'; selectEl.disabled = false; selectEl.name = 'specValue[]';
+                    let html = '<option value="">-- Chọn sản phẩm --</option>';
+                    (extraData || []).forEach(p => {
+                        html += `<option value="${p.id}"${String(existVal) === String(p.id) ? ' selected' : ''}>${p.name}</option>`;
+                    });
+                    selectEl.innerHTML = html;
+
+                } else if (mode === 'options') {
+                    optionsEl.style.display = 'block'; optionsEl.disabled = false; optionsEl.name = 'specValue[]';
+                    const opts = extraData || [];
+                    let html = '<option value="">-- Chọn giá trị --</option>';
+                    opts.forEach(opt => html += `<option value="${opt}"${existVal === opt ? ' selected' : ''}>${opt}</option>`);
+                    // Nếu giá trị hiện tại không nằm trong danh sách, thêm vào
+                    if (existVal && !opts.includes(existVal)) {
+                        html += `<option value="${existVal}" selected>${existVal} (giữ nguyên)</option>`;
+                    }
+                    optionsEl.innerHTML = html;
+                    if (existVal) optionsEl.value = existVal;
+
+                } else if (mode === 'watt') {
+                    wattDiv.style.display = 'flex'; wattHid.disabled = false; wattHid.name = 'specValue[]';
+                    // Tách số từ giá trị VD: "125W" → 125
+                    const numVal = existVal ? parseInt(String(existVal).replace(/[^0-9]/g, '')) : '';
+                    if (wattNum) wattNum.value = numVal || '';
+                    wattHid.value = numVal ? numVal + 'W' : '';
+                }
+            }
+
+            function handleSpecKeyChange(select, init) {
                 const row = select.closest('.spec-row');
                 const customInput = row.querySelector('.spec-key-custom');
+
+                // --- Toggle key input: dropdown ↔ text tùy chỉnh ---
                 if (select.value === 'custom') {
-                    select.style.display = 'none';
-                    select.disabled = true;
-                    customInput.style.display = 'block';
-                    customInput.disabled = false;
-                    customInput.name = 'specKey[]'; 
-                    select.name = ''; 
-                    customInput.focus();
+                    select.style.display = 'none'; select.disabled = true; select.name = '';
+                    customInput.style.display = 'block'; customInput.disabled = false; customInput.name = 'specKey[]';
+                    if (!init) customInput.focus();
+                    setSpecValueMode(row, 'text', null, null);
+                    return;
                 } else {
-                    select.style.display = 'block';
-                    select.disabled = false;
-                    customInput.style.display = 'none';
-                    customInput.disabled = true;
-                    customInput.name = 'specKeyCustom[]'; 
-                    select.name = 'specKey[]';
+                    select.style.display = 'block'; select.disabled = false; select.name = 'specKey[]';
+                    customInput.style.display = 'none'; customInput.disabled = true; customInput.name = 'specKeyCustom[]';
                 }
 
-                // Handle PC category logic
-                const key = getCategoryKey();
-                const textVal = row.querySelector('.spec-value-text');
-                const selectVal = row.querySelector('.spec-value-select');
-                
-                if (key === 'pc' && select.value !== 'custom') {
-                    textVal.style.display = 'none';
-                    textVal.disabled = true;
-                    textVal.name = '';
-                    
-                    selectVal.style.display = 'block';
-                    selectVal.disabled = false;
-                    selectVal.name = 'specValue[]';
-                    
-                    const compType = (select.value || '').toLowerCase();
-                    let filtered = allStoreProducts.filter(p => {
-                        let cName = p.categoryName.toLowerCase();
-                        let cSlug = p.categorySlug.toLowerCase();
-                        if (compType === 'cpu' && (cSlug.includes('cpu') || cName.includes('cpu') || cName.includes('vi xử lý'))) return true;
-                        if (compType === 'mainboard' && (cSlug.includes('main') || cName.includes('main') || cName.includes('bo mạch'))) return true;
-                        if (compType === 'ram' && (cSlug.includes('ram') || cName.includes('ram') || cName.includes('bộ nhớ trong'))) return true;
-                        if (compType === 'vga' && (cSlug.includes('vga') || cName.includes('card') || cName.includes('đồ họa'))) return true;
-                        if (compType === 'ssd' && (cSlug.includes('ssd') || cName.includes('ssd'))) return true;
-                        if (compType === 'hdd' && (cSlug.includes('hdd') || cName.includes('hdd'))) return true;
-                        if ((compType.includes('nguồn') || compType === 'psu') && (cSlug.includes('psu') || cName.includes('nguồn'))) return true;
-                        if ((compType.includes('case') || compType.includes('vỏ')) && (cSlug.includes('case') || cName.includes('vỏ'))) return true;
-                        if ((compType.includes('tản nhiệt') || compType === 'cooler') && (cSlug.includes('cooler') || cSlug.includes('tan-nhiet') || cName.includes('tản nhiệt'))) return true;
-                        if (compType.includes('màn hình') && (cSlug.includes('man-hinh') || cName.includes('màn hình'))) return true;
+                const catKey = getCategoryKey();
+                const specKey = select.value;
+
+                // PC Build: chọn linh kiện từ sản phẩm đã có
+                if (catKey === 'pc' && specKey) {
+                    const compType = specKey.toLowerCase();
+                    const filtered = allStoreProducts.filter(p => {
+                        const cN = p.categoryName.toLowerCase(), cS = p.categorySlug.toLowerCase();
+                        if (compType === 'cpu'          && (cS.includes('cpu')  || cN.includes('cpu')  || cN.includes('vi xử lý')))  return true;
+                        if (compType === 'mainboard'    && (cS.includes('main') || cN.includes('main') || cN.includes('bo mạch')))    return true;
+                        if (compType === 'ram'          && (cS.includes('ram')  || cN.includes('ram')  || cN.includes('bộ nhớ')))    return true;
+                        if (compType === 'vga'          && (cS.includes('vga')  || cN.includes('card') || cN.includes('đồ họa')))    return true;
+                        if (compType === 'ssd'          && (cS.includes('ssd')  || cN.includes('ssd')))                              return true;
+                        if (compType === 'hdd'          && (cS.includes('hdd')  || cN.includes('hdd')))                              return true;
+                        if (compType.includes('nguồn')  && (cS.includes('psu')  || cN.includes('nguồn')))                            return true;
+                        if (compType.includes('case')   && (cS.includes('case') || cN.includes('vỏ')))                               return true;
+                        if (compType.includes('tản nhiệt') && (cS.includes('cooler') || cN.includes('tản nhiệt')))                    return true;
+                        if (compType.includes('màn hình')  && (cS.includes('man-hinh') || cN.includes('màn hình')))                   return true;
                         return false;
                     });
-                    
-                    let html = '<option value="">-- Chọn sản phẩm --</option>';
-                    filtered.forEach(p => html += `<option value="${p.id}">${p.name}</option>`);
-                    selectVal.innerHTML = html;
-                } else {
-                    textVal.style.display = 'block';
-                    textVal.disabled = false;
-                    textVal.name = 'specValue[]';
-                    
-                    selectVal.style.display = 'none';
-                    selectVal.disabled = true;
-                    selectVal.name = '';
+                    setSpecValueMode(row, 'product', filtered, null);
+                    return;
                 }
+
+                // Tra cứu cấu hình giá trị
+                const conf = specValueConfig[specKey];
+                if (conf) {
+                    if (conf.type === 'watt')    { setSpecValueMode(row, 'watt',    null,         null); return; }
+                    if (conf.type === 'options') { setSpecValueMode(row, 'options', conf.options, null); return; }
+                }
+                setSpecValueMode(row, 'text', null, null);
             }
 
             function addSpec() {
                 const list = document.getElementById('spec-list');
-                const row = document.createElement('div');
+                const row  = document.createElement('div');
                 row.className = 'spec-row';
-                row.style = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
-                
-                const key = getCategoryKey();
+                row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
+
+                const key  = getCategoryKey();
                 const specs = specTemplates[key] || specTemplates['default'];
-                let optionsHtml = '<option value="">-- Chọn thông số --</option>';
-                specs.forEach(s => optionsHtml += `<option value="${s}">${s}</option>`);
-                optionsHtml += `<option value="custom">Khác (Tùy chỉnh...)</option>`;
+                let optsHtml = '<option value="">-- Chọn thông số --</option>';
+                specs.forEach(s => optsHtml += `<option value="${s}">${s}</option>`);
+                optsHtml += '<option value="custom">Khác (Tùy chỉnh...)</option>';
 
                 row.innerHTML = `
-                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
-                        ${optionsHtml}
-                    </select>
-                    <input type="text" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
-                    
-                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Giá trị (VD: Apple M4, 16GB...)">
-                    <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">${optsHtml}</select>
+                    <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
+
+                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Nhập giá trị...">
+                    <select name="" class="form-input spec-value-select" style="display:none;" disabled>
                         <option value="">-- Chọn sản phẩm --</option>
                     </select>
+                    <select name="" class="form-input spec-value-options" style="display:none;" disabled>
+                        <option value="">-- Chọn giá trị --</option>
+                    </select>
+                    <div class="spec-value-watt" style="display:none;flex-direction:row;align-items:stretch;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--card-bg);">
+                        <input type="number" class="spec-value-watt-num" min="0" step="1" style="flex:1;border:none;background:transparent;color:var(--text);padding:8px 10px;font-size:13px;outline:none;width:100%;" placeholder="125" oninput="syncWattValue(this)">
+                        <span style="background:var(--accent);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;white-space:nowrap;">W</span>
+                        <input type="hidden" name="" class="spec-value-watt-hidden" disabled>
+                    </div>
 
                     <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
                 `;
                 list.appendChild(row);
-                
-                // Triger event handler to setup the initial UI correctly for PC vs Normal
-                const selectEl = row.querySelector('.spec-key-select');
-                if (selectEl) {
-                    handleSpecKeyChange(selectEl);
-                }
+                handleSpecKeyChange(row.querySelector('.spec-key-select'), false);
             }
 
             function removeSpec(btn) {
@@ -628,8 +977,8 @@
                 if (rows.length > 1) btn.closest('.spec-row').remove();
             }
 
-            // Init spec dropdowns on load
-            document.addEventListener("DOMContentLoaded", () => {
+            // Init: load dropdown và tự động nhận dạng mode cho row mặc định
+            document.addEventListener('DOMContentLoaded', () => {
                 updateSpecDropdowns();
             });
 

@@ -46,6 +46,7 @@ const seedBrands = async () => {
             { name: "Lian Li", slug: "lian-li", description: "Lian Li", status: "ACTIVE" },
         ],
     });
+    console.log("[Seed] Brands: seeded successfully.");
 };
 
 export default seedBrands;

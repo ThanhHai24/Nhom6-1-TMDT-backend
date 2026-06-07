@@ -3,7 +3,8 @@ import { getBrandsByCategoryId } from 'services/admin/brand.services';
 import { getCategoriesPage, getCreateParentCategoryPage, getCreateChildCategoryPage, PostCreateCategory, getCategoryDetailPage, PostUpdateCategory } from 'controllers/admin/category.controller';
 import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
 import { getOrderDetailPage, getOrders, PostUpdateOrderStatus } from 'controllers/admin/order.controller';
-import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
+import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostIncrementView, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
+import { getReviewsPage, PostApproveReview, PostDeleteReview, PostRejectReview } from 'controllers/admin/review.controller';
 import { getShippingPage } from 'controllers/admin/shipping.controller';
 import { getCreateShippingProviderPage, getShippingProviderDetailPage, getShippingProvidersPage, PostActiveShippingProvider, PostCreateShippingProvider, PostDeleteShippingProvider, PostLockShippingProvider, PostUpdateShippingProvider } from 'controllers/admin/shippingProvider.controller';
 import { getCreateSupplierPage, getSupplierDetailPage, getSuppliersPage, PostActiveSupplier, PostCreateSupplier, PostDeleteSupplier, PostLockSupplier, PostUpdateSupplier } from 'controllers/admin/supplier.controller';
@@ -57,6 +58,14 @@ const userRoutes = (app: express.Express) => {
     router.post('/product/handleupdate', productUploadMiddleware(), PostUpdateProduct);
     router.post("/products/lock/:id", PostLockProduct);
     router.post("/products/active/:id", PostActiveProduct);
+    router.post("/products/view/:id", PostIncrementView); // API tăng lượt xem (client-side call)
+
+    // Reviews (Catalog roles)
+    router.use('/reviews', catalogRoles);
+    router.get('/reviews', getReviewsPage);
+    router.post('/reviews/approve/:id', PostApproveReview);
+    router.post('/reviews/reject/:id', PostRejectReview);
+    router.post('/reviews/delete/:id', PostDeleteReview);
 
     // Brand (Catalog roles)
     router.use('/brands', catalogRoles);

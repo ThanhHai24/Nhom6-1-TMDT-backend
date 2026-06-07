@@ -1,5 +1,5 @@
 import authController from 'controllers/auth/auth.controller';
-import { getCartPage, addToCart, removeFromCart, checkout, updateCart } from 'controllers/client/cart.controller';
+import { getCartPage, addToCart, removeFromCart, checkout, updateCart, addBulkToCart } from 'controllers/client/cart.controller';
 import { getHomePage, getProductPage, getListPage, getProfilePage, postUpdateProfile, getOrderPage, getOrderDetailPage, postCancelOrder, getSearchPage } from 'controllers/client/home.controller';
 import express from 'express';
 import { isAuthenticated } from '../middleware/auth.middleware';
@@ -48,6 +48,7 @@ const userRoutes = (app: express.Express) => {
 
     router.get('/cart', getCartPage);
     router.post('/cart/add', addToCart);
+    router.post('/cart/add-bulk', addBulkToCart);
     router.post('/cart/remove', removeFromCart);
     router.post('/cart/update', updateCart);
     router.post('/cart/checkout', checkout);

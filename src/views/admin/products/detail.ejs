@@ -104,11 +104,23 @@
                                                         <% }) %>
                                                 </select>
                                             </div>
-                                            <div class="form-group full">
+                                            <div class="form-group">
                                                 <label class="form-label">Mô tả ngắn</label>
                                                 <input name="shortDescription" class="form-input" type="text"
                                                     id="inp-short-desc"
                                                     placeholder="Mô tả ngắn gọn về sản phẩm, hiển thị trên danh sách" value="<%= product?.shortDescription %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Bảo hành</label>
+                                                <select name="warranty" class="form-input form-select" id="inp-warranty">
+                                                    <option value="">-- Chọn thời gian bảo hành --</option>
+                                                    <option value="6"  <%= product?.warranty == 6  ? 'selected' : '' %>>6 Tháng</option>
+                                                    <option value="12" <%= product?.warranty == 12 ? 'selected' : '' %>>12 Tháng</option>
+                                                    <option value="24" <%= product?.warranty == 24 ? 'selected' : '' %>>24 Tháng</option>
+                                                    <option value="36" <%= product?.warranty == 36 ? 'selected' : '' %>>36 Tháng</option>
+                                                    <option value="48" <%= product?.warranty == 48 ? 'selected' : '' %>>48 Tháng</option>
+                                                    <option value="60" <%= product?.warranty == 60 ? 'selected' : '' %>>60 Tháng</option>
+                                                </select>
                                             </div>
                                             <div class="form-group full">
                                                 <label class="form-label">Mô tả chi tiết</label>
@@ -254,39 +266,49 @@
                                         <div id="spec-list" style="display:flex;flex-direction:column;gap:10px;">
                                             <% if (product?.specifications && product.specifications.length > 0) { %>
                                                 <% product.specifications.forEach(function(spec) { %>
-                                                        <div class="spec-row"
-                                                            style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
-                                                            <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)" data-selected="<%= spec.key %>">
-                                                                <option value="">-- Chọn thông số --</option>
-                                                            </select>
-                                                            <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled value="<%= spec.key %>">
-                                                            
-                                                            <input type="text" name="specValue[]" class="form-input spec-value-text"
-                                                                placeholder="VD: Apple M4, 16GB, 6.7 inch..." value="<%= spec.value %>">
-                                                            <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled data-selected="<%= spec.value %>">
-                                                                <option value="">-- Chọn sản phẩm --</option>
-                                                            </select>
+                                                    <div class="spec-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                                        <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)" data-selected="<%= spec.key %>">
+                                                            <option value="">-- Chọn thông số --</option>
+                                                        </select>
+                                                        <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled value="<%= spec.key %>">
 
-                                                            <button type="button" class="btn sm danger-outline"
-                                                                onclick="removeSpec(this)">✕</button>
+                                                        <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Nhập giá trị..." value="<%= spec.value %>">
+                                                        <select name="" class="form-input spec-value-select" style="display:none;" disabled data-selected="<%= spec.value %>">
+                                                            <option value="">-- Chọn sản phẩm --</option>
+                                                        </select>
+                                                        <select name="" class="form-input spec-value-options" style="display:none;" disabled>
+                                                            <option value="">-- Chọn giá trị --</option>
+                                                        </select>
+                                                        <div class="spec-value-watt" style="display:none;flex-direction:row;align-items:stretch;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--card-bg);">
+                                                            <input type="number" class="spec-value-watt-num" min="0" step="1" style="flex:1;border:none;background:transparent;color:var(--text);padding:8px 10px;font-size:13px;outline:none;width:100%;" placeholder="125" oninput="syncWattValue(this)">
+                                                            <span style="background:var(--accent);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;white-space:nowrap;">W</span>
+                                                            <input type="hidden" name="" class="spec-value-watt-hidden" disabled>
                                                         </div>
+
+                                                        <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
+                                                    </div>
                                                 <% }); %>
                                             <% } else { %>
-                                                <div class="spec-row"
-                                                    style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
+                                                <div class="spec-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;">
                                                     <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
                                                         <option value="">-- Chọn thông số --</option>
                                                     </select>
                                                     <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
-                                                    
-                                                    <input type="text" name="specValue[]" class="form-input spec-value-text"
-                                                        placeholder="VD: Apple M4, 16GB, 6.7 inch...">
-                                                    <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+
+                                                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Nhập giá trị...">
+                                                    <select name="" class="form-input spec-value-select" style="display:none;" disabled>
                                                         <option value="">-- Chọn sản phẩm --</option>
                                                     </select>
+                                                    <select name="" class="form-input spec-value-options" style="display:none;" disabled>
+                                                        <option value="">-- Chọn giá trị --</option>
+                                                    </select>
+                                                    <div class="spec-value-watt" style="display:none;flex-direction:row;align-items:stretch;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--card-bg);">
+                                                        <input type="number" class="spec-value-watt-num" min="0" step="1" style="flex:1;border:none;background:transparent;color:var(--text);padding:8px 10px;font-size:13px;outline:none;width:100%;" placeholder="125" oninput="syncWattValue(this)">
+                                                        <span style="background:var(--accent);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;white-space:nowrap;">W</span>
+                                                        <input type="hidden" name="" class="spec-value-watt-hidden" disabled>
+                                                    </div>
 
-                                                    <button type="button" class="btn sm danger-outline"
-                                                        onclick="removeSpec(this)">✕</button>
+                                                    <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
                                                 </div>
                                             <% } %>
                                         </div>
@@ -296,6 +318,52 @@
 
                                 <!-- Right: Status & Actions -->
                                 <div style="display:flex;flex-direction:column;gap:16px;">
+
+                                    <!-- Lượt xem & Thống kê đánh giá -->
+                                    <div class="card" style="background:linear-gradient(135deg,var(--card-bg) 0%,rgba(99,102,241,0.04) 100%);">
+                                        <div class="card-header" style="margin-bottom:16px;"><span class="card-title">📊 Thống kê</span></div>
+                                        <div style="display:flex;flex-direction:column;gap:12px;">
+                                            <!-- Lượt xem -->
+                                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(99,102,241,0.08);border-radius:8px;">
+                                                <div style="display:flex;align-items:center;gap:8px;">
+                                                    <span style="font-size:18px;">👁️</span>
+                                                    <span style="font-size:12px;color:var(--text-muted);font-weight:500;">Lượt xem</span>
+                                                </div>
+                                                <span id="view-count-display" style="font-size:20px;font-weight:700;color:var(--accent);"><%= product?.viewCount ?? 0 %></span>
+                                            </div>
+                                            <!-- Tổng đánh giá -->
+                                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(234,179,8,0.08);border-radius:8px;">
+                                                <div style="display:flex;align-items:center;gap:8px;">
+                                                    <span style="font-size:18px;">⭐</span>
+                                                    <span style="font-size:12px;color:var(--text-muted);font-weight:500;">Điểm TB</span>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <div style="font-size:20px;font-weight:700;color:#ca8a04;"><%= reviewStats?.avgRating ?? 0 %> <span style="font-size:12px;font-weight:400;color:var(--text-muted);">/ 5</span></div>
+                                                    <div style="font-size:11px;color:var(--text-muted);"><%= reviewStats?.total ?? 0 %> đánh giá</div>
+                                                </div>
+                                            </div>
+                                            <!-- Phân bố sao -->
+                                            <% if (reviewStats && reviewStats.total > 0) { %>
+                                            <div style="display:flex;flex-direction:column;gap:5px;padding:8px 0;">
+                                                <% [5,4,3,2,1].forEach(function(star){ %>
+                                                <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+                                                    <span style="width:28px;text-align:right;color:var(--text-muted);"><%= star %>★</span>
+                                                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+                                                        <div style="height:100%;border-radius:3px;background:<%= star>=4?'#22c55e':star===3?'#eab308':'#ef4444' %>;width:<%= reviewStats.total>0?Math.round((reviewStats.ratingDist[star]/reviewStats.total)*100):0 %>%;"></div>
+                                                    </div>
+                                                    <span style="width:22px;color:var(--text-muted);"><%= reviewStats.ratingDist[star] %></span>
+                                                </div>
+                                                <% }); %>
+                                            </div>
+                                            <% } %>
+                                            <!-- Trạng thái duyệt -->
+                                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                                <span style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(234,179,8,0.12);font-size:11px;font-weight:600;color:#ca8a04;">⏳ <%= reviewStats?.pending ?? 0 %> chờ</span>
+                                                <span style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(34,197,94,0.12);font-size:11px;font-weight:600;color:#16a34a;">✓ <%= reviewStats?.approved ?? 0 %> duyệt</span>
+                                                <span style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(239,68,68,0.12);font-size:11px;font-weight:600;color:#dc2626;">✕ <%= reviewStats?.rejected ?? 0 %> từ chối</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <!-- Trạng thái -->
                                     <div class="card">
@@ -390,12 +458,109 @@
 
                             </div>
                         </form>
+
+                        <!-- ===== SECTION: ĐÁNH GIÁ SẢN PHẨM ===== -->
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-header" style="margin-bottom:20px;align-items:flex-start;">
+                                <div>
+                                    <span class="card-title">⭐ Đánh giá & Bình luận</span>
+                                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><%= product?.reviews?.length ?? 0 %> đánh giá · Điểm trung bình: <strong><%= reviewStats?.avgRating ?? 0 %>/5</strong></div>
+                                </div>
+                                <a href="/admin/reviews" style="font-size:12px;color:var(--accent);text-decoration:none;">Xem tất cả →</a>
+                            </div>
+
+                            <% if (!product?.reviews || product.reviews.length === 0) { %>
+                            <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                                <div style="font-size:40px;margin-bottom:12px;">💬</div>
+                                <div style="font-size:14px;font-weight:500;">Chưa có đánh giá nào</div>
+                                <div style="font-size:12px;margin-top:4px;">Khách hàng chưa gửi đánh giá cho sản phẩm này</div>
+                            </div>
+                            <% } else { %>
+                            <div style="display:flex;flex-direction:column;gap:12px;">
+                                <% product.reviews.forEach(function(review){ %>
+                                <%
+                                    const statusColor = review.status === 'APPROVED' ? '#16a34a' : review.status === 'REJECTED' ? '#dc2626' : '#ca8a04';
+                                    const statusBg   = review.status === 'APPROVED' ? 'rgba(34,197,94,0.1)' : review.status === 'REJECTED' ? 'rgba(239,68,68,0.1)' : 'rgba(234,179,8,0.1)';
+                                    const statusLabel = review.status === 'APPROVED' ? 'Đã duyệt' : review.status === 'REJECTED' ? 'Từ chối' : 'Chờ duyệt';
+                                %>
+                                <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                                        <!-- User info -->
+                                        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                                            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;">
+                                                <%= review.user ? review.user.fullName?.charAt(0)?.toUpperCase() : 'K' %>
+                                            </div>
+                                            <div style="min-width:0;">
+                                                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= review.user ? review.user.fullName : 'Khách ẩn danh' %></div>
+                                                <div style="font-size:11px;color:var(--text-muted);"><%= review.user?.email ?? '' %></div>
+                                            </div>
+                                        </div>
+                                        <!-- Rating & date -->
+                                        <div style="text-align:right;flex-shrink:0;">
+                                            <div style="font-size:14px;color:#eab308;letter-spacing:1px;">
+                                                <% for(let s=1;s<=5;s++){ %><%= s <= review.rating ? '★' : '☆' %><% } %>
+                                            </div>
+                                            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+                                                <%= review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN') : '' %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <% if (review.title) { %>
+                                    <div style="font-size:13px;font-weight:600;margin-top:10px;"><%= review.title %></div>
+                                    <% } %>
+                                    <% if (review.comment) { %>
+                                    <div style="font-size:13px;color:var(--text-muted);margin-top:6px;line-height:1.6;"><%= review.comment %></div>
+                                    <% } %>
+
+                                    <!-- Actions -->
+                                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+                                        <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:<%= statusBg %>;color:<%= statusColor %>;"><%= statusLabel %></span>
+                                        <div style="display:flex;gap:6px;">
+                                            <% if(review.status !== 'APPROVED') { %>
+                                            <form action="/admin/reviews/approve/<%= review.id %>" method="post" style="display:inline;">
+                                                <button class="btn sm" style="background:rgba(34,197,94,0.12);color:#16a34a;border:1px solid rgba(34,197,94,0.3);" onmouseover="this.style.background='rgba(34,197,94,0.25)'" onmouseout="this.style.background='rgba(34,197,94,0.12)'">✓ Duyệt</button>
+                                            </form>
+                                            <% } %>
+                                            <% if(review.status !== 'REJECTED') { %>
+                                            <form action="/admin/reviews/reject/<%= review.id %>" method="post" style="display:inline;">
+                                                <button class="btn sm" style="background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3);" onmouseover="this.style.background='rgba(234,179,8,0.25)'" onmouseout="this.style.background='rgba(234,179,8,0.12)'">↩ Từ chối</button>
+                                            </form>
+                                            <% } %>
+                                            <form action="/admin/reviews/delete/<%= review.id %>" method="post" style="display:inline;" onsubmit="return confirm('Xóa đánh giá này?')">
+                                                <button class="btn sm danger-outline">🗑 Xóa</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                            <% } %>
+                        </div>
+                        <!-- ===== END REVIEWS ===== -->
+
                     </div>
 
                 </div>
         </main>
         <script src="https://cdn.ckeditor.com/ckeditor5/48.0.0/ckeditor5.umd.js" crossorigin></script>
         <script src="../js/main.js"></script>
+        <script>
+            // Gọi API tăng lượt xem khi trang load (client-side, Option B)
+            (function(){
+                const productId = '<%= product?.id %>';
+                if (!productId) return;
+                fetch('/admin/products/view/' + productId, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            const el = document.getElementById('view-count-display');
+                            if (el) el.textContent = parseInt(el.textContent || '0') + 1;
+                        }
+                    })
+                    .catch(() => {});
+            })();
+        </script>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
@@ -479,17 +644,276 @@
             const allStoreProducts = <%- JSON.stringify((allProducts || []).map(p => ({ id: Number(p.id), name: p.name, categorySlug: p.category?.slug || '', categoryName: p.category?.name || '' }))) %>;
 
             const specTemplates = {
-                pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt", "Quạt tản nhiệt", "Màn hình"],
-                cpu: ["Socket", "Số nhân", "Số luồng", "Xung nhịp cơ bản", "Xung nhịp tối đa", "Bộ nhớ đệm (Cache)", "TDP", "Thế hệ"],
-                mainboard: ["Socket", "Chipset", "Chuẩn kích thước", "Số khe RAM", "Dung lượng RAM tối đa", "Loại RAM hỗ trợ", "Cổng lưu trữ", "Cổng kết nối I/O"],
-                ram: ["Loại RAM", "Dung lượng", "Tốc độ (Bus)", "Độ trễ (CAS)", "Điện áp", "Tản nhiệt"],
-                vga: ["Chip đồ họa", "Dung lượng VRAM", "Loại VRAM", "Cổng giao tiếp", "Nguồn đề xuất", "Kích thước"],
-                psu: ["Công suất", "Chuẩn hiệu suất", "Kích thước nguồn", "Kiểu dây", "Nguồn đầu vào"],
-                case: ["Hỗ trợ Mainboard", "Chất liệu", "Kích thước", "Chiều dài VGA tối đa", "Tản nhiệt CPU tối đa", "Sẵn quạt"],
-                cooler: ["Loại tản nhiệt", "Socket hỗ trợ", "Kích thước quạt", "Tốc độ quạt", "Độ ồn", "Đèn LED"],
-                storage: ["Loại ổ cứng", "Dung lượng", "Chuẩn giao tiếp", "Tốc độ đọc", "Tốc độ ghi", "Kích thước"],
-                monitor: ["Kích thước màn hình", "Độ phân giải", "Tấm nền", "Tần số quét", "Thời gian phản hồi", "Cổng kết nối"],
+                // ── BỘ MÁY TÍNH (PC BUILD) ───────────────────────────────────────
+                pc: ["CPU", "Mainboard", "RAM", "VGA", "SSD", "HDD", "Nguồn (PSU)", "Vỏ Case", "Tản nhiệt CPU", "Màn hình"],
+
+                // ── CPU ──────────────────────────────────────────────────────────
+                cpu: [
+                    // --- Tương thích (build check) ---
+                    "Socket",                    // VD: LGA1700, AM5, AM4
+                    "Loại RAM hỗ trợ",           // VD: DDR5, DDR4, DDR5/DDR4
+                    "Số kênh RAM tối đa",        // VD: 2 (Dual Channel), 4 (Quad)
+                    "Dung lượng RAM tối đa",     // VD: 192GB, 128GB, 64GB
+                    "TDP",                       // VD: 65W, 125W, 253W
+                    "Công suất Turbo tối đa (MTP/PL2)", // VD: 253W
+                    // --- Hiệu năng ---
+                    "Thế hệ / Series",
+                    "Số nhân (P-core)",
+                    "Số nhân hiệu suất (E-core)",
+                    "Tổng số nhân",
+                    "Số luồng",
+                    "Xung nhịp cơ bản",
+                    "Xung nhịp Turbo tối đa",
+                    "Cache L2",
+                    "Cache L3",
+                    // --- Đồ họa tích hợp ---
+                    "GPU tích hợp",              // VD: Intel UHD 770, Radeon 890M, Không có
+                    "Xung nhịp GPU tối đa",
+                    // --- Kết nối ---
+                    "PCIe Revision",
+                    "Số làn PCIe",
+                    // --- Khác ---
+                    "Tiến trình sản xuất",
+                    "Bảo hành"
+                ],
+
+                // ── MAINBOARD ────────────────────────────────────────────────────
+                mainboard: [
+                    // --- Tương thích (build check) ---
+                    "Socket CPU",                // VD: LGA1700, AM5, AM4
+                    "Chipset",
+                    "Loại RAM hỗ trợ",           // VD: DDR5, DDR4
+                    "Số khe RAM",
+                    "Dung lượng RAM tối đa",
+                    "Tốc độ RAM hỗ trợ (OC)",
+                    "Form Factor (Chuẩn kích thước)", // VD: ATX, mATX, ITX, E-ATX
+                    // --- Lưu trữ ---
+                    "Số khe M.2 NVMe",
+                    "Số cổng SATA",
+                    "Hỗ trợ RAID",
+                    // --- Kết nối ---
+                    "Khe PCIe x16",
+                    "Khe PCIe x1",
+                    "Cổng USB phía sau",
+                    "Cổng USB header phía trước",
+                    "Chuẩn mạng LAN",
+                    "WiFi",
+                    "Bluetooth",
+                    // --- Nguồn & âm thanh ---
+                    "Đầu nguồn CPU (ATX12V)",
+                    "Đầu nguồn ATX",
+                    "Codec âm thanh",
+                    "Bảo hành"
+                ],
+
+                // ── RAM ──────────────────────────────────────────────────────────
+                ram: [
+                    // --- Tương thích (build check) ---
+                    "Loại RAM",                  // VD: DDR5, DDR4
+                    "Dung lượng",
+                    "Dung lượng mỗi thanh",
+                    "Số thanh trong kit",
+                    "Tốc độ (Bus)",              // VD: DDR5-6000, DDR4-3600
+                    "Điện áp",
+                    // --- Hiệu năng ---
+                    "Độ trễ (Timings)",          // VD: CL30-38-38-96
+                    "Xung nhịp thực (MHz)",
+                    "Hỗ trợ XMP / EXPO",
+                    "Số kênh",
+                    // --- Vật lý ---
+                    "Tản nhiệt",
+                    "Chiều cao",
+                    "Đèn RGB",
+                    "Bảo hành"
+                ],
+
+                // ── VGA / GPU ─────────────────────────────────────────────────
+                // Thông số quan trọng: VRAM, TDP, chiều dài card, nguồn đề xuất
+                vga: [
+                    // --- Hiệu năng ---
+                    "Chip đồ họa (GPU)",        // VD: NVIDIA RTX 5090, AMD RX 9070 XT
+                    "Số nhân Shader / CUDA",    // VD: 21760 CUDA Cores
+                    "Xung nhịp",
+                    "Kiến trúc",                // VD: Blackwell, RDNA 4
+                    "Loại VRAM",                // VD: GDDR7, GDDR6X
+                    "Dung lượng VRAM",          // VD: 24GB, 16GB, 8GB
+                    "Băng thông bộ nhớ",        // VD: 896 GB/s
+                    "Xung bộ nhớ",              // VD: 256-bit, 192-bit
+                    
+                    // --- Tương thích (build check) ---
+                    "TDP / TGP",                 // VD: 285W, 320W
+                    "Nguồn cấp PCIe",           // VD: 3x 8-pin, 1x 16-pin (12VHPWR)
+                    "Nguồn PSU đề xuất",        // VD: 850W
+                    "Chiều dài card",           // VD: 336mm, 290mm
+                    "Số khe chiếm dụng",        // VD: 3 khe, 2.5 khe
+                    // --- Cổng xuất hình ---
+                    "Cổng xuất hình",           // VD: 3x DP 2.1, 1x HDMI 2.1
+                    "Số màn hình đồng thời",    // VD: 4
+                    // --- Khác ---
+                    "Hỗ trợ DirectX/OpenGL",   // VD: DirectX 12 Ultimate, OpenGL 4.6
+                    "Hỗ trợ Ray Tracing",       // VD: Có (Gen 4)
+                    "Hỗ trợ DLSS / FSR",        // VD: DLSS 4, FSR 4
+                    "Bảo hành"
+                ],
+
+                // ── NGUỒN (PSU) ──────────────────────────────────────────────
+                psu: [
+                    // --- Tương thích (build check) ---
+                    "Công suất",                 // VD: 1000W, 850W
+                    "Form Factor",               // VD: ATX 3.1, SFX-L
+                    "Chiều dài",
+                    // --- Chất lượng ---
+                    "Chuẩn hiệu suất",           // VD: 80+ Titanium, Platinum, Gold
+                    "Hiệu suất tại tải 50%",
+                    // --- Dây cáp ---
+                    "Kiểu dây",                  // VD: Full Modular, Semi Modular
+                    "Cổng 12VHPWR (PCIe 5.0)",
+                    "Cổng PCIe 8-pin",
+                    "Cổng SATA",
+                    "Cổng EPS/CPU",
+                    // --- Bảo vệ ---
+                    "Bảo vệ (OVP/OCP/SCP)",
+                    "Quạt",
+                    "Bảo hành"
+                ],
+
+                // ── VỎ CASE ──────────────────────────────────────────────────
+                case: [
+                    // --- Tương thích (build check) ---
+                    "Form Factor Mainboard hỗ trợ", // VD: ATX, mATX, ITX, E-ATX
+                    "Chiều dài VGA tối đa",
+                    "Chiều cao CPU Cooler tối đa",
+                    "Chiều dài PSU tối đa",
+                    "Form Factor PSU",
+                    // --- Vật lý ---
+                    "Loại case",
+                    "Kích thước (D x R x C)",
+                    "Chất liệu",
+                    // --- Tản nhiệt ---
+                    "Vị trí lắp quạt",
+                    "Vị trí lắp radiator",
+                    "Quạt đi kèm",
+                    // --- Kết nối trước ---
+                    "Cổng I/O phía trước",
+                    "Bảo hành"
+                ],
+
+                // ── TẢN NHIỆT CPU ────────────────────────────────────────────
+                cooler: [
+                    // --- Tương thích (build check) ---
+                    "Socket hỗ trợ",             // VD: LGA1700/1851, AM5/AM4
+                    "TDP được hỗ trợ",
+                    "Chiều cao (tản tháp)",
+                    "Chiều dài Radiator (AIO)",  // VD: 360mm, 280mm, 240mm
+                    // --- Loại & Hiệu năng ---
+                    "Loại tản nhiệt",
+                    "Số quạt đi kèm",
+                    "Kích thước quạt",
+                    "Tốc độ quạt",
+                    "Lưu lượng gió",
+                    "Độ ồn",
+                    "Tiếp điểm nhiệt",
+                    "Keo tản nhiệt kèm theo",
+                    "Đèn ARGB",
+                    "Bảo hành"
+                ],
+
+                // ── Ổ CỨNG (SSD / HDD) ──────────────────────────────────────
+                storage: [
+                    // --- Tương thích (build check) ---
+                    "Loại ổ cứng",               // VD: SSD NVMe, SSD SATA, HDD
+                    "Chuẩn giao tiếp",           // VD: PCIe 5.0 x4, SATA III
+                    "Form Factor",               // VD: M.2 2280, 2.5", 3.5"
+                    "Dung lượng",
+                    // --- Hiệu năng ---
+                    "Tốc độ đọc tuần tự",
+                    "Tốc độ ghi tuần tự",
+                    "Tốc độ đọc ngẫu nhiên",
+                    "Tốc độ ghi ngẫu nhiên",
+                    // --- Phần cứng ---
+                    "Controller",
+                    "NAND Flash",
+                    "DRAM Cache",
+                    "TBW (Độ bền ghi)",
+                    "Tiêu thụ điện",
+                    "Bảo hành"
+                ],
+
+                // ── MÀN HÌNH ──────────────────────────────────────────────────
+                monitor: [
+                    // --- Tương thích (build check) ---
+                    "Cổng kết nối",              // VD: 2x DP 1.4, 1x HDMI 2.1
+                    // --- Thông số chính ---
+                    "Kích thước màn hình",
+                    "Tỷ lệ khung hình",
+                    "Độ phân giải",
+                    "Tấm nền",                   // VD: IPS, VA, OLED, Mini-LED
+                    "Tần số quét",
+                    "Thời gian phản hồi",
+                    // --- Màu sắc ---
+                    "Độ phủ màu",
+                    "Độ sáng",
+                    "Hỗ trợ HDR",
+                    // --- Hình học ---
+                    "Độ cong",
+                    // --- Sync ---
+                    "Hỗ trợ VRR",               // VD: G-Sync, FreeSync Premium Pro
+                    // --- Vật lý ---
+                    "Chân đế điều chỉnh",
+                    "Kích thước & trọng lượng",
+                    "Bảo hành"
+                ],
+
+                // ── MẶC ĐỊNH ─────────────────────────────────────────────────
                 default: ["Thương hiệu", "Bảo hành", "Màu sắc", "Trọng lượng", "Kích thước", "Chất liệu"]
+            };
+
+            // ── Cấu hình loại input cho từng thông số ────────────────────────────
+            // type: 'text' | 'options' | 'watt'
+            const specValueConfig = {
+                'TDP':                               { type: 'watt' },
+                'TDP / TGP':                         { type: 'watt' },
+                'TDP được hỗ trợ':                   { type: 'watt' },
+                'Công suất Turbo tối đa (MTP/PL2)':  { type: 'watt' },
+                'Công suất':                         { type: 'watt' },
+                'Socket':     { type: 'options', options: ['LGA1851','LGA1700','LGA1200','AM5','AM4','AM3+','LGA2066','TR4','sTRX4','SP3','LGA4677'] },
+                'Socket CPU': { type: 'options', options: ['LGA1851','LGA1700','LGA1200','AM5','AM4','AM3+','LGA2066','TR4','sTRX4','LGA4677'] },
+                'Socket hỗ trợ': { type: 'options', options: ['LGA1851 / LGA1700','LGA1851','LGA1700','AM5 / AM4','AM5','AM4','LGA1851 / LGA1700, AM5 / AM4','TR4 / sTRX4'] },
+                'Loại RAM hỗ trợ': { type: 'options', options: ['DDR5','DDR4','DDR5 / DDR4'] },
+                'Loại RAM':        { type: 'options', options: ['DDR5','DDR4','DDR5 SO-DIMM','DDR4 SO-DIMM','LPDDR5X','LPDDR5'] },
+                'Số kênh RAM tối đa': { type: 'options', options: ['2 (Dual Channel)','4 (Quad Channel)','8 (Octa Channel)'] },
+                'Số kênh':            { type: 'options', options: ['Dual Channel','Single Channel'] },
+                'Số khe RAM':         { type: 'options', options: ['2','4'] },
+                'Số thanh trong kit': { type: 'options', options: ['1','2','4'] },
+                'Hỗ trợ XMP / EXPO':  { type: 'options', options: ['XMP 3.0','XMP 2.0','EXPO','XMP 3.0 / EXPO','Không có'] },
+                'Điện áp': { type: 'options', options: ['1.1V','1.25V','1.35V','1.4V','1.5V','1.8V'] },
+                'Tản nhiệt': { type: 'options', options: ['Có (Heatspreader)','Không có'] },
+                'Đèn RGB':   { type: 'options', options: ['Có (ARGB)','Có (RGB)','Không có'] },
+                'Đèn ARGB':  { type: 'options', options: ['Có','Không có'] },
+                'Form Factor (Chuẩn kích thước)': { type: 'options', options: ['ATX','Micro-ATX (mATX)','Mini-ITX','E-ATX','XL-ATX','SSI-EEB'] },
+                'Form Factor Mainboard hỗ trợ':   { type: 'options', options: ['E-ATX / ATX / mATX / Mini-ITX','ATX / mATX / Mini-ITX','ATX / mATX','Mini-ITX'] },
+                'Form Factor PSU': { type: 'options', options: ['ATX 3.1','ATX 3.0','ATX','SFX-L','SFX'] },
+                'Form Factor':     { type: 'options', options: ['ATX 3.1','ATX 3.0','ATX','SFX-L','SFX','M.2 2280','M.2 2242','M.2 22110','2.5"','3.5"'] },
+                'Chipset': { type: 'options', options: ['Z890','Z790','Z690','B860','B760','H810','H610','X870E','X870','X670E','X670','B650E','B650','A620'] },
+                'PCIe Revision': { type: 'options', options: ['PCIe 5.0','PCIe 4.0','PCIe 3.0'] },
+                'Chuẩn giao tiếp': { type: 'options', options: ['PCIe 5.0 x4 NVMe 2.0','PCIe 4.0 x4 NVMe 1.4','PCIe 3.0 x4 NVMe 1.4','SATA III (6Gbps)'] },
+                'Loại ổ cứng':     { type: 'options', options: ['SSD NVMe M.2','SSD SATA M.2','SSD SATA 2.5"','HDD 3.5"','HDD 2.5"'] },
+                'NAND Flash': { type: 'options', options: ['3D TLC NAND','3D QLC NAND','3D MLC NAND','3D SLC NAND'] },
+                'DRAM Cache': { type: 'options', options: ['Có (LPDDR4)','Có (DDR4)','HMB (Host Memory Buffer)','Không có'] },
+                'Chuẩn hiệu suất': { type: 'options', options: ['80+ Titanium','80+ Platinum','80+ Gold','80+ Silver','80+ Bronze','80+'] },
+                'Kiểu dây':        { type: 'options', options: ['Full Modular','Semi Modular','Non Modular'] },
+                'Chuẩn mạng LAN': { type: 'options', options: ['Intel 2.5GbE + Intel 2.5GbE','Intel 2.5GbE','Realtek 2.5GbE','Intel 1GbE','Realtek 1GbE'] },
+                'WiFi':       { type: 'options', options: ['WiFi 7 (802.11be)','WiFi 6E (802.11ax)','WiFi 6 (802.11ax)','WiFi 5 (802.11ac)','Không có'] },
+                'Bluetooth':  { type: 'options', options: ['Bluetooth 5.4','Bluetooth 5.3','Bluetooth 5.2','Bluetooth 5.1','Bluetooth 5.0','Không có'] },
+                'Hỗ trợ RAID':{ type: 'options', options: ['RAID 0, 1, 5, 10','RAID 0, 1','Không có'] },
+                'Loại VRAM':       { type: 'options', options: ['GDDR7','GDDR6X','GDDR6','GDDR5X','GDDR5','HBM3e','HBM3'] },
+                'Loại tản nhiệt':  { type: 'options', options: ['AIO (Tản nước)','Tản tháp đôi','Tản tháp đơn','Tản thấp (Low Profile)'] },
+                'Loại case': { type: 'options', options: ['Full Tower','Mid Tower','Mini Tower','Mini-ITX','HTPC'] },
+                'Tấm nền':    { type: 'options', options: ['IPS','Fast IPS','VA','TN','OLED','Mini-LED IPS','Nano IPS','QLED'] },
+                'Hỗ trợ VRR': { type: 'options', options: ['G-Sync + FreeSync Premium Pro','G-Sync Compatible','FreeSync Premium Pro','FreeSync Premium','FreeSync','Adaptive Sync','Không có'] },
+                'Hỗ trợ HDR': { type: 'options', options: ['DisplayHDR 1400','DisplayHDR 1000','DisplayHDR 600','DisplayHDR 400','VESA HDR 600','VESA HDR 400','Không có'] },
+                'Độ cong':    { type: 'options', options: ['1000R','1500R','1800R','2300R','Phẳng'] },
+                'Bảo hành': { type: 'options', options: ['60 tháng','36 tháng','24 tháng','12 tháng','Trọn đời (Lifetime)'] },
             };
 
             function getCategoryKey() {
@@ -537,76 +961,113 @@
                 });
             }
 
-            function handleSpecKeyChange(select, init = false) {
-                const row = select.closest('.spec-row');
-                const customInput = row.querySelector('.spec-key-custom');
-                if (select.value === 'custom') {
-                    select.style.display = 'none';
-                    select.disabled = true;
-                    customInput.style.display = 'block';
-                    customInput.disabled = false;
-                    customInput.name = 'specKey[]'; 
-                    select.name = ''; 
-                    if(!init) customInput.focus();
-                } else {
-                    select.style.display = 'block';
-                    select.disabled = false;
-                    customInput.style.display = 'none';
-                    customInput.disabled = true;
-                    customInput.name = 'specKeyCustom[]'; 
-                    select.name = 'specKey[]';
-                }
+            // ── Đồng bộ giá trị Watt → hidden input ──────────────────────────
+            function syncWattValue(numInput) {
+                const wattDiv = numInput.closest('.spec-value-watt');
+                const hidden = wattDiv.querySelector('.spec-value-watt-hidden');
+                hidden.value = numInput.value !== '' ? numInput.value + 'W' : '';
+            }
 
-                // Handle PC category logic
-                const key = getCategoryKey();
-                const textVal = row.querySelector('.spec-value-text');
-                const selectVal = row.querySelector('.spec-value-select');
-                
-                if (key === 'pc' && select.value !== 'custom') {
-                    textVal.style.display = 'none';
-                    textVal.disabled = true;
-                    textVal.name = '';
-                    
-                    selectVal.style.display = 'block';
-                    selectVal.disabled = false;
-                    selectVal.name = 'specValue[]';
-                    
-                    const compType = (select.value || '').toLowerCase();
-                    let filtered = allStoreProducts.filter(p => {
-                        let cName = p.categoryName.toLowerCase();
-                        let cSlug = p.categorySlug.toLowerCase();
-                        if (compType === 'cpu' && (cSlug.includes('cpu') || cName.includes('cpu') || cName.includes('vi xử lý'))) return true;
-                        if (compType === 'mainboard' && (cSlug.includes('main') || cName.includes('main') || cName.includes('bo mạch'))) return true;
-                        if (compType === 'ram' && (cSlug.includes('ram') || cName.includes('ram') || cName.includes('bộ nhớ trong'))) return true;
-                        if (compType === 'vga' && (cSlug.includes('vga') || cName.includes('card') || cName.includes('đồ họa'))) return true;
-                        if (compType === 'ssd' && (cSlug.includes('ssd') || cName.includes('ssd'))) return true;
-                        if (compType === 'hdd' && (cSlug.includes('hdd') || cName.includes('hdd'))) return true;
-                        if ((compType.includes('nguồn') || compType === 'psu') && (cSlug.includes('psu') || cName.includes('nguồn'))) return true;
-                        if ((compType.includes('case') || compType.includes('vỏ')) && (cSlug.includes('case') || cName.includes('vỏ'))) return true;
-                        if ((compType.includes('tản nhiệt') || compType === 'cooler') && (cSlug.includes('cooler') || cSlug.includes('tan-nhiet') || cName.includes('tản nhiệt'))) return true;
-                        if (compType.includes('màn hình') && (cSlug.includes('man-hinh') || cName.includes('màn hình'))) return true;
-                        return false;
-                    });
-                    
-                    let currentValId = selectVal.getAttribute('data-selected') || selectVal.value;
+            // ── Đặt chế độ hiển thị cho ô giá trị trong 1 spec-row ────────────
+            function setSpecValueMode(row, mode, extraData, currentValue) {
+                const textEl    = row.querySelector('.spec-value-text');
+                const selectEl  = row.querySelector('.spec-value-select');
+                const optionsEl = row.querySelector('.spec-value-options');
+                const wattDiv   = row.querySelector('.spec-value-watt');
+                const wattNum   = row.querySelector('.spec-value-watt-num');
+                const wattHid   = row.querySelector('.spec-value-watt-hidden');
+
+                [textEl, selectEl, optionsEl].forEach(el => {
+                    if (!el) return;
+                    el.style.display = 'none'; el.disabled = true; el.name = '';
+                });
+                if (wattDiv) wattDiv.style.display = 'none';
+                if (wattHid) { wattHid.disabled = true; wattHid.name = ''; }
+
+                // ưu tiên currentValue, nếu không có thì lấy từ textEl (dùng khi init từ EJS)
+                const existVal = (currentValue !== undefined && currentValue !== null) ? currentValue
+                    : (textEl ? textEl.value : '');
+
+                if (mode === 'text') {
+                    textEl.style.display = 'block'; textEl.disabled = false; textEl.name = 'specValue[]';
+                    if (existVal && !textEl.value) textEl.value = existVal;
+
+                } else if (mode === 'product') {
+                    const prevId = (selectEl ? selectEl.getAttribute('data-selected') : '') || existVal;
+                    selectEl.style.display = 'block'; selectEl.disabled = false; selectEl.name = 'specValue[]';
                     let html = '<option value="">-- Chọn sản phẩm --</option>';
-                    filtered.forEach(p => {
-                        html += `<option value="${p.id}" ${currentValId == p.id ? 'selected' : ''}>${p.name}</option>`;
+                    (extraData || []).forEach(p => {
+                        html += `<option value="${p.id}"${String(prevId) === String(p.id) ? ' selected' : ''}>${p.name}</option>`;
                     });
-                    selectVal.innerHTML = html;
-                    selectVal.removeAttribute('data-selected');
-                } else {
-                    textVal.style.display = 'block';
-                    textVal.disabled = false;
-                    textVal.name = 'specValue[]';
-                    
-                    selectVal.style.display = 'none';
-                    selectVal.disabled = true;
-                    selectVal.name = '';
+                    selectEl.innerHTML = html;
+                    if (selectEl) selectEl.removeAttribute('data-selected');
+
+                } else if (mode === 'options') {
+                    optionsEl.style.display = 'block'; optionsEl.disabled = false; optionsEl.name = 'specValue[]';
+                    const opts = extraData || [];
+                    let html = '<option value="">-- Chọn giá trị --</option>';
+                    opts.forEach(opt => html += `<option value="${opt}"${existVal === opt ? ' selected' : ''}>${opt}</option>`);
+                    if (existVal && !opts.includes(existVal)) {
+                        html += `<option value="${existVal}" selected>${existVal} (giữ nguyên)</option>`;
+                    }
+                    optionsEl.innerHTML = html;
+                    if (existVal) optionsEl.value = existVal;
+
+                } else if (mode === 'watt') {
+                    wattDiv.style.display = 'flex'; wattHid.disabled = false; wattHid.name = 'specValue[]';
+                    const numVal = existVal ? parseInt(String(existVal).replace(/[^0-9]/g, '')) : '';
+                    if (wattNum) wattNum.value = numVal || '';
+                    wattHid.value = numVal ? numVal + 'W' : '';
                 }
             }
 
-            document.addEventListener("DOMContentLoaded", () => {
+            function handleSpecKeyChange(select, init = false) {
+                const row = select.closest('.spec-row');
+                const customInput = row.querySelector('.spec-key-custom');
+
+                if (select.value === 'custom') {
+                    select.style.display = 'none'; select.disabled = true; select.name = '';
+                    customInput.style.display = 'block'; customInput.disabled = false; customInput.name = 'specKey[]';
+                    if (!init) customInput.focus();
+                    setSpecValueMode(row, 'text', null, null);
+                    return;
+                } else {
+                    select.style.display = 'block'; select.disabled = false; select.name = 'specKey[]';
+                    customInput.style.display = 'none'; customInput.disabled = true; customInput.name = 'specKeyCustom[]';
+                }
+
+                const catKey = getCategoryKey();
+                const specKey = select.value;
+
+                if (catKey === 'pc' && specKey) {
+                    const compType = specKey.toLowerCase();
+                    const filtered = allStoreProducts.filter(p => {
+                        const cN = p.categoryName.toLowerCase(), cS = p.categorySlug.toLowerCase();
+                        if (compType === 'cpu'           && (cS.includes('cpu')  || cN.includes('cpu')  || cN.includes('vi xử lý')))  return true;
+                        if (compType === 'mainboard'     && (cS.includes('main') || cN.includes('main') || cN.includes('bo mạch')))    return true;
+                        if (compType === 'ram'           && (cS.includes('ram')  || cN.includes('ram')  || cN.includes('bộ nhớ')))    return true;
+                        if (compType === 'vga'           && (cS.includes('vga')  || cN.includes('card') || cN.includes('đồ họa')))    return true;
+                        if (compType === 'ssd'           && (cS.includes('ssd')  || cN.includes('ssd')))                              return true;
+                        if (compType === 'hdd'           && (cS.includes('hdd')  || cN.includes('hdd')))                              return true;
+                        if (compType.includes('nguồn')   && (cS.includes('psu')  || cN.includes('nguồn')))                            return true;
+                        if (compType.includes('case')    && (cS.includes('case') || cN.includes('vỏ')))                               return true;
+                        if (compType.includes('tản nhiệt') && (cS.includes('cooler') || cN.includes('tản nhiệt')))                   return true;
+                        if (compType.includes('màn hình')   && (cS.includes('man-hinh') || cN.includes('màn hình')))                  return true;
+                        return false;
+                    });
+                    setSpecValueMode(row, 'product', filtered, null);
+                    return;
+                }
+
+                const conf = specValueConfig[specKey];
+                if (conf) {
+                    if (conf.type === 'watt')    { setSpecValueMode(row, 'watt',    null,         null); return; }
+                    if (conf.type === 'options') { setSpecValueMode(row, 'options', conf.options, null); return; }
+                }
+                setSpecValueMode(row, 'text', null, null);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
                 updateSpecDropdowns();
             });
             /* =============================================
@@ -715,36 +1176,37 @@
 
             function addSpec() {
                 const list = document.getElementById('spec-list');
-                const row = document.createElement('div');
+                const row  = document.createElement('div');
                 row.className = 'spec-row';
-                row.style = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
-                
-                const key = getCategoryKey();
+                row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;';
+
+                const key  = getCategoryKey();
                 const specs = specTemplates[key] || specTemplates['default'];
-                let optionsHtml = '<option value="">-- Chọn thông số --</option>';
-                specs.forEach(s => optionsHtml += `<option value="${s}">${s}</option>`);
-                optionsHtml += `<option value="custom">Khác (Tùy chỉnh...)</option>`;
+                let optsHtml = '<option value="">-- Chọn thông số --</option>';
+                specs.forEach(s => optsHtml += `<option value="${s}">${s}</option>`);
+                optsHtml += '<option value="custom">Khác (Tùy chỉnh...)</option>';
 
                 row.innerHTML = `
-                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">
-                        ${optionsHtml}
-                    </select>
-                    <input type="text" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
-                    
-                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Giá trị (VD: Apple M4, 16GB...)">
-                    <select name="specValueSelect[]" class="form-input spec-value-select" style="display:none;" disabled>
+                    <select name="specKey[]" class="form-input spec-key-select" onchange="handleSpecKeyChange(this)">${optsHtml}</select>
+                    <input type="text" name="specKeyCustom[]" class="form-input spec-key-custom" placeholder="Nhập tên thông số..." style="display:none;" disabled>
+
+                    <input type="text" name="specValue[]" class="form-input spec-value-text" placeholder="Nhập giá trị...">
+                    <select name="" class="form-input spec-value-select" style="display:none;" disabled>
                         <option value="">-- Chọn sản phẩm --</option>
                     </select>
+                    <select name="" class="form-input spec-value-options" style="display:none;" disabled>
+                        <option value="">-- Chọn giá trị --</option>
+                    </select>
+                    <div class="spec-value-watt" style="display:none;flex-direction:row;align-items:stretch;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--card-bg);">
+                        <input type="number" class="spec-value-watt-num" min="0" step="1" style="flex:1;border:none;background:transparent;color:var(--text);padding:8px 10px;font-size:13px;outline:none;width:100%;" placeholder="125" oninput="syncWattValue(this)">
+                        <span style="background:var(--accent);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;white-space:nowrap;">W</span>
+                        <input type="hidden" name="" class="spec-value-watt-hidden" disabled>
+                    </div>
 
                     <button type="button" class="btn sm danger-outline" onclick="removeSpec(this)">✕</button>
                 `;
                 list.appendChild(row);
-                
-                // Triger event handler to setup the initial UI correctly for PC vs Normal
-                const selectEl = row.querySelector('.spec-key-select');
-                if (selectEl) {
-                    handleSpecKeyChange(selectEl);
-                }
+                handleSpecKeyChange(row.querySelector('.spec-key-select'), false);
             }
 
             function removeSpec(btn) {

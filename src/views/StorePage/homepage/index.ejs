@@ -20,6 +20,7 @@
         });
         }
     </style>
+
 </head>
 
 <body>
@@ -346,7 +347,6 @@
     <footer>
         <%- include("../layout/footer.ejs") %>
     </footer>
-
 <script>
 // =============================================
 // PRODUCT SLIDER - Mỗi slider hoạt động độc lập
@@ -420,8 +420,40 @@ document.addEventListener('DOMContentLoaded', function () {
         startAuto();
     }
 });
+// =============================================
+// STICKY NAVBAR & SIDE BANNERS POSITION
+// =============================================
+    window.addEventListener('scroll', function () {
+        const nav = document.querySelector('header');
+        const banners = document.querySelectorAll('.side-banner');
+
+        if (window.scrollY > 100) {
+            nav.classList.add('sticky');
+            const navHeight = nav.offsetHeight;
+            banners.forEach(banner => {
+                banner.style.top = (navHeight + 20) + 'px';
+            });
+        } else {
+            nav.classList.remove('sticky');
+            banners.forEach(banner => {
+                banner.style.top = '180px';
+            });
+        }
+    });
 </script>
 
 </body>
+<!-- Banner trái -->
+<div class="side-banner side-banner-left">
+    <a href="#">
+        <img src="/client/images/bannerleft.jpg" alt="Banner Left">
+    </a>
+</div>
 
+<!-- Banner phải -->
+<div class="side-banner side-banner-right">
+    <a href="#">
+        <img src="/client/images/bannerright.jpg" alt="Banner Right">
+    </a>
+</div>
 </html>

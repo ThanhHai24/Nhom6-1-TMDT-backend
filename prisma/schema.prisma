@@ -35,9 +35,9 @@ model User {
   status    Status    @default(ACTIVE)
   createdAt DateTime  @default(now())
 
-  orders   Order[]
-  reviews  Review[]
-  wishlist Wishlist?
+  orders        Order[]
+  reviews       Review[]
+  wishlist      Wishlist?
   statusChanges OrderStatusHistory[]
 
   @@map("users")
@@ -66,13 +66,13 @@ model Category {
 }
 
 model Brand {
-  id          BigInt    @id @default(autoincrement())
-  name        String    @db.VarChar(150)
-  slug        String    @unique @db.VarChar(200)
-  description String?   @db.Text
-  status      Status    @default(ACTIVE)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             BigInt          @id @default(autoincrement())
+  name           String          @db.VarChar(150)
+  slug           String          @unique @db.VarChar(200)
+  description    String?         @db.Text
+  status         Status          @default(ACTIVE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   products       Product[]
   categoryBrands CategoryBrand[]
 
@@ -120,6 +120,8 @@ model Product {
   isNew             Boolean  @default(false)
   isFeatured        Boolean  @default(false)
   specifications    Json?
+  warranty          Int? // Bảo hành (tháng): 6, 12, 24, 36, 48, 60
+  viewCount         Int      @default(0) // Lượt xem
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -202,16 +204,16 @@ model OrderStatusHistory {
 }
 
 model OrderItem {
-  id        BigInt   @id @default(autoincrement())
-  orderId   BigInt
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId BigInt
-  product   Product  @relation(fields: [productId], references: [id])
-  quantity  Int      @db.Int
-  price     Int      @db.Int
+  id             BigInt   @id @default(autoincrement())
+  orderId        BigInt
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      BigInt
+  product        Product  @relation(fields: [productId], references: [id])
+  quantity       Int      @db.Int
+  price          Int      @db.Int
   specifications Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("order_items")
 }
@@ -264,15 +266,15 @@ enum PromotionType {
 }
 
 model Promotion {
-  id            BigInt    @id @default(autoincrement())
-  name          String    @db.VarChar(255)
+  id            BigInt         @id @default(autoincrement())
+  name          String         @db.VarChar(255)
   type          PromotionType?
-  discountValue Decimal?  @db.Decimal(10, 2)
-  maxDiscount   Decimal?  @db.Decimal(10, 2)
+  discountValue Decimal?       @db.Decimal(10, 2)
+  maxDiscount   Decimal?       @db.Decimal(10, 2)
   startDate     DateTime?
   endDate       DateTime?
 
-  coupons       Coupon[]
+  coupons Coupon[]
 
   @@map("promotions")
 }
@@ -289,34 +291,44 @@ model Coupon {
   @@map("coupons")
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Review {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt       @id @default(autoincrement())
   userId    BigInt?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?        @relation(fields: [userId], references: [id])
   productId BigInt?
-  product   Product? @relation(fields: [productId], references: [id])
-  rating    Int
-  comment   String?  @db.Text
+  product   Product?     @relation(fields: [productId], references: [id])
+  rating    Int          // 1-5 sao
+  title     String?      @db.VarChar(255)
+  comment   String?      @db.Text
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@map("reviews")
 }
 
 model Wishlist {
-  id      BigInt   @id @default(autoincrement())
-  userId  BigInt   @unique
-  user    User     @relation(fields: [userId], references: [id])
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  items   WishlistItem[]
+  items WishlistItem[]
 
   @@map("wishlist")
 }
 
 model WishlistItem {
-  id          BigInt   @id @default(autoincrement())
-  wishlistId  BigInt
-  wishlist    Wishlist @relation(fields: [wishlistId], references: [id])
-  productId   BigInt
-  product     Product  @relation(fields: [productId], references: [id])
+  id         BigInt   @id @default(autoincrement())
+  wishlistId BigInt
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  productId  BigInt
+  product    Product  @relation(fields: [productId], references: [id])
 
   @@map("wishlist_items")
 }
@@ -328,14 +340,14 @@ enum PaymentTransactionStatus {
 }
 
 model Payment {
-  id                BigInt                   @id @default(autoincrement())
-  orderId           BigInt?
-  order             Order?                   @relation(fields: [orderId], references: [id])
-  paymentMethodId   BigInt?
-  amount            Decimal                  @db.Decimal(10, 2)
-  status            PaymentTransactionStatus @default(PENDING)
-  transactionCode   String?                  @db.VarChar(255)
-  createdAt         DateTime?                @default(now())
+  id              BigInt                   @id @default(autoincrement())
+  orderId         BigInt?
+  order           Order?                   @relation(fields: [orderId], references: [id])
+  paymentMethodId BigInt?
+  amount          Decimal                  @db.Decimal(10, 2)
+  status          PaymentTransactionStatus @default(PENDING)
+  transactionCode String?                  @db.VarChar(255)
+  createdAt       DateTime?                @default(now())
 
   @@map("payments")
 }
@@ -356,6 +368,6 @@ model Session {
   sid       String   @unique
   data      String   @db.Text
   expiresAt DateTime
-  
+
   @@map("sessions")
 }

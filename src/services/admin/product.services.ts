@@ -55,7 +55,7 @@ const getProductsPaginated = async function (page: number, limit: number) {
     return { products, totalCount };
 }
 
-const HandleCreateProduct = async function (name: string, slug: string, sku: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any) {
+const HandleCreateProduct = async function (name: string, slug: string, sku: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any, warranty: string | number | null) {
     await prisma.product.create({
         data: {
             name,
@@ -76,6 +76,7 @@ const HandleCreateProduct = async function (name: string, slug: string, sku: str
             brandId: BigInt(brand),
             supplierId: BigInt(supplier),
             specifications: specifications ? specifications : null,
+            warranty: warranty ? Number(warranty) : null,
         },
     });
 
@@ -113,11 +114,23 @@ const getProductById = async (id: String) => {
             category: true,
             brand: true,
             supplier: true,
+            reviews: {
+                include: { user: { select: { id: true, fullName: true, email: true, avatar: true } } },
+                orderBy: { createdAt: 'desc' },
+            },
+            _count: { select: { reviews: true } },
         },
     });
 }
 
-const HandleUpdateProduct = async function (id: string, name: string, slug: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any) {
+const incrementViewCount = async (id: string | number) => {
+    await prisma.product.update({
+        where: { id: BigInt(id) },
+        data: { viewCount: { increment: 1 } },
+    });
+}
+
+const HandleUpdateProduct = async function (id: string, name: string, slug: string, shortDescription: string, description: string, cost: string | number, price: string | number, stock: string | number, lowStockThreshold: string | number, image: string | undefined, images: string[], isHot: boolean, isNew: boolean, isFeatured: boolean, category: string, brand: string, supplier: string, specifications: any, warranty: string | number | null) {
     await prisma.product.update({
         where: {
             id: +id
@@ -140,9 +153,10 @@ const HandleUpdateProduct = async function (id: string, name: string, slug: stri
             brandId: brand ? BigInt(brand) : undefined,
             supplierId: supplier ? BigInt(supplier) : undefined,
             specifications: specifications ? specifications : undefined,
+            warranty: warranty !== undefined && warranty !== '' ? Number(warranty) : null,
         },
     });
 }
 
 
-export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, getProductsPaginated, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct }
+export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, getProductsPaginated, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct, incrementViewCount }

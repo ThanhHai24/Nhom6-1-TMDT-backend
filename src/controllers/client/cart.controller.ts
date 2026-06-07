@@ -239,10 +239,75 @@ const checkout = async (req: Request, res: Response) => {
     }
 }
 
+const addBulkToCart = async (req: Request, res: Response) => {
+    try {
+        const { items } = req.body; // array of { product_id, product_qty }
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, message: "Không có sản phẩm nào để thêm" });
+        }
+
+        if (!req.session.cart) {
+            req.session.cart = [];
+        }
+        const cart = req.session.cart;
+
+        for (const item of items) {
+            const { product_id, product_qty } = item;
+            const quantity = parseInt(product_qty as string) || 1;
+            if (!product_id) continue;
+
+            const product = await prisma.product.findUnique({
+                where: { id: BigInt(product_id as string) }
+            });
+
+            if (!product || product.stock <= 0) continue;
+
+            const productIdStr = product.id.toString();
+            const existingItemIndex = cart.findIndex(i => i.productId === productIdStr);
+            const currentQtyInCart = existingItemIndex > -1 ? cart[existingItemIndex].quantity : 0;
+            const newTotalQty = currentQtyInCart + quantity;
+
+            // Cap at product stock
+            const allowedQty = product.stock - currentQtyInCart;
+            const finalQty = newTotalQty > product.stock ? allowedQty : quantity;
+            if (finalQty <= 0) continue;
+
+            if (existingItemIndex > -1) {
+                cart[existingItemIndex].quantity += finalQty;
+            } else {
+                cart.push({
+                    productId: productIdStr,
+                    name: product.name,
+                    price: product.price,
+                    quantity: finalQty,
+                    image: product.image || "no-image.png",
+                    sku: product.sku
+                });
+            }
+        }
+
+        req.session.save((err) => {
+            if (err) {
+                console.error("Session save error during bulk add:", err);
+                return res.status(500).json({ success: false, message: "Internal Server Error" });
+            }
+            return res.json({
+                success: true,
+                message: "Đã thêm tất cả sản phẩm vào giỏ hàng thành công!",
+                cartCount: cart.reduce((t, i) => t + i.quantity, 0)
+            });
+        });
+    } catch (error) {
+        console.error("Error in addBulkToCart:", error);
+        res.status(500).json({ success: false, message: "Lỗi hệ thống khi thêm sản phẩm vào giỏ hàng." });
+    }
+}
+
 export {
     getCartPage,
     addToCart,
     removeFromCart,
     updateCart,
-    checkout
+    checkout,
+    addBulkToCart
 }
