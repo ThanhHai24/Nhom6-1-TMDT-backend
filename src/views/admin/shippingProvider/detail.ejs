@@ -1,25 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Quản Trị - Thêm thương hiệu</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head>
-
-<body>
-
-    <!-- SIDEBAR -->
-    <%- include('../layout/sidebar') -%>
-
-        <!-- MAIN -->
-        <main class="main">
-            <!-- HEADER -->
-            <%- include('../layout/header') -%>
-
-                <div class="content">
 
                     <!-- ADD BRAND PAGE -->
                     <div class="page active" id="page-add-brand">
@@ -131,8 +109,6 @@
                         </form>
                     </div>
 
-                </div>
-        </main>
         <script>
             function selectStatus(val) {
                 ['active', 'inactive'].forEach(s => {
@@ -169,6 +145,4 @@
             }
         </script>
 
-</body>
 
-</html>

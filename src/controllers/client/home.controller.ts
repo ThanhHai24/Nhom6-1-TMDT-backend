@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
+import { title } from "process";
 import { getHotProducts, getLaptopProducts, getPCProducts, getProductBySlug, getCPUProducts, getGPUProducts, getProductsByFilter, getBrandsForCategory, searchProducts, getRelatedProducts } from "services/client/product.services";
 import { updateProfile, getUserOrders, getOrderByCode, cancelOrderByCode } from "services/client/user.services";
 
@@ -47,6 +48,8 @@ const getHomePage = async (req: Request, res: Response) => {
         pcs,
         cpus,
         gpus,
+        layout: "StorePage/layout/main",
+        title: "Trang chủ",
     });
 };
 
@@ -97,6 +100,8 @@ const getListPage = async (req: Request, res: Response) => {
         inStock,
         currentPage: page,
         totalPages,
+        layout: "StorePage/layout/main",
+        title: categoryName,
     });
 };
 
@@ -113,12 +118,21 @@ const getProductPage = async (req: Request, res: Response) => {
         ? await getRelatedProducts(product.categoryId, product.id, 10)
         : [];
 
-    res.render("StorePage/homepage/product", { product, relatedProducts });
+    res.render("StorePage/homepage/product", {
+        product,
+        relatedProducts,
+        layout: "StorePage/layout/main",
+        title: product.name,
+    });
 };
 
 const getProfilePage = async (req: Request, res: Response) => {
     const user = req.user as User;
-    res.render("StorePage/homepage/profile", { user });
+    res.render("StorePage/homepage/profile", {
+        user,
+        layout: "StorePage/layout/main",
+        title: "Trang cá nhân",
+    });
 };
 
 const postUpdateProfile = async (req: Request, res: Response) => {
@@ -149,7 +163,9 @@ const getOrderPage = async (req: Request, res: Response) => {
         totalPages,
         totalOrders: total,
         currentStatus: status,
-        limit: LIMIT
+        limit: LIMIT,
+        layout: "StorePage/layout/main",
+        title: "Đơn hàng"
     });
 };
 
@@ -162,7 +178,12 @@ const getOrderDetailPage = async (req: Request, res: Response) => {
     if (!order) {
         return res.status(404).render('StorePage/homepage/404', { message: 'Không tìm thấy đơn hàng.' });
     }
-    res.render('StorePage/homepage/order-detail', { user, order });
+    res.render('StorePage/homepage/order-detail', {
+        user,
+        order,
+        layout: "StorePage/layout/main",
+        title: "Chi tiết đơn hàng"
+    });
 };
 
 const postCancelOrder = async (req: Request, res: Response) => {
@@ -181,13 +202,13 @@ const getSearchPage = async (req: Request, res: Response) => {
     const searchTerm = (req.query.searchTerm as string) || '';
 
     // Parse filter params (same as getListPage)
-    const sort        = (req.query.sort as string) || '';
-    const minPrice    = req.query.minPrice ? parseInt(req.query.minPrice as string) : undefined;
-    const maxPrice    = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : undefined;
-    const isHot       = req.query.isHot   === '1';
-    const isNew       = req.query.isNew   === '1';
-    const inStock     = req.query.inStock === '1';
-    const page        = req.query.page    ? parseInt(req.query.page as string) : 1;
+    const sort = (req.query.sort as string) || '';
+    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : undefined;
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : undefined;
+    const isHot = req.query.isHot === '1';
+    const isNew = req.query.isNew === '1';
+    const inStock = req.query.inStock === '1';
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
 
     const rawBrands = req.query.brandId;
     const selectedBrands: string[] = Array.isArray(rawBrands)
@@ -222,6 +243,8 @@ const getSearchPage = async (req: Request, res: Response) => {
         currentPage: page,
         totalPages,
         total,
+        layout: "StorePage/layout/main",
+        title: "Tìm kiếm sản phẩm"
     });
 };
 

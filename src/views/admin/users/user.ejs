@@ -1,24 +1,4 @@
 <!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Quản Trị - Admin Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-
-<body>
-
-    <!-- SIDEBAR -->
-    <%- include('../layout/sidebar') -%>
-
-        <!-- MAIN -->
-        <main class="main">
-            <!-- HEADER -->
-            <%- include('../layout/header') -%>
-
-                <div class="content">
 
                     <!-- USERS PAGE -->
                     <div class="page active" id="page-users">
@@ -164,48 +144,42 @@
                                 </tbody>
                             </table>
                             <div class="pagination">
-    <span>Trang <%= currentPage %> / <%= totalPages %></span>
+                                <span>Trang <%= currentPage %> / <%= totalPages %></span>
 
-    <div class="page-btns">
+                                <div class="page-btns">
 
-        <!-- Prev -->
-        <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">‹</a>
-        <% } %>
+                                    <!-- Prev -->
+                                    <% if (currentPage > 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">‹</a>
+                                    <% } %>
 
-        <% 
-            function getPagination(current, total) {
-                if (total <= 5) return Array.from({length: total}, (_, i) => i + 1);
-                if (current <= 3) return [1, 2, 3, '...', total - 1, total];
-                if (current >= total - 2) return [1, 2, '...', total - 2, total - 1, total];
-                return [1, 2, '...', current, '...', total - 1, total];
-            }
-            const pages = getPagination(currentPage, totalPages);
-        %>
+                                    <% 
+                                        function getPagination(current, total) {
+                                            if (total <= 5) return Array.from({length: total}, (_, i) => i + 1);
+                                            if (current <= 3) return [1, 2, 3, '...', total - 1, total];
+                                            if (current >= total - 2) return [1, 2, '...', total - 2, total - 1, total];
+                                            return [1, 2, '...', current, '...', total - 1, total];
+                                        }
+                                        const pages = getPagination(currentPage, totalPages);
+                                    %>
 
-        <% pages.forEach(p => { %>
-            <% if (p === '...') { %>
-                <span class="page-dots">...</span>
-            <% } else { %>
-                <a href="?page=<%= p %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>"
-                   class="page-btn <%= p === currentPage ? 'active' : '' %>">
-                   <%= p %>
-                </a>
-            <% } %>
-        <% }) %>
+                                    <% pages.forEach(p => { %>
+                                        <% if (p === '...') { %>
+                                            <span class="page-dots">...</span>
+                                        <% } else { %>
+                                            <a href="?page=<%= p %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>"
+                                            class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                                            <%= p %>
+                                            </a>
+                                        <% } %>
+                                    <% }) %>
 
-        <!-- Next -->
-        <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">›</a>
-        <% } %>
+                                    <!-- Next -->
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>&q=<%= typeof q !== 'undefined' ? q : '' %>&role=<%= typeof role !== 'undefined' ? role : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>" class="page-btn">›</a>
+                                    <% } %>
 
-    </div>
-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                </div>
-        </main>
-</body>
-
-</html>

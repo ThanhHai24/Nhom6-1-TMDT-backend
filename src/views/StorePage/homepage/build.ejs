@@ -1,217 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <title>Build PC - Xây dựng cấu hình máy tính | PCStore</title>
-    <link rel="stylesheet" href="/client/css/style.css">
-    <style>
-        /* ===== LAYOUT ===== */
-        .container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
-        .breadcrumb { margin: 12px 0; font-size: 13px; color: #666; }
-        .breadcrumb a { color: #e74c3c; text-decoration: none; }
-        .header { margin-bottom: 16px; }
-        .header h1 { font-size: 20px; font-weight: 700; color: #222; margin: 0 0 4px; }
-        .header p { color: #666; font-size: 14px; margin: 0; }
-
-        /* ===== TABS ===== */
-        .nav-tabs { margin-bottom: 16px; }
-        .tab-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-        .tab-button {
-            padding: 8px 20px; border: 1px solid #ddd; background: #fff;
-            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
-            transition: all 0.2s;
-        }
-        .tab-button.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-        .tab-button:hover:not(.active) { border-color: #e74c3c; color: #e74c3c; }
-
-        /* ===== BUILD CONTAINER ===== */
-        .build-container {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #f8f8f8; border: 1px solid #e0e0e0;
-            border-radius: 6px; padding: 12px 16px; margin-bottom: 8px;
-        }
-        .refresh-btn {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; background: #fff; border: 1px solid #ddd;
-            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
-            transition: all 0.2s;
-            color: #e74c3c;
-        }
-        .refresh-btn:hover { border-color: #e74c3c; color: #e74c3c; }
-        .total-price-bar { font-size: 15px; font-weight: 700; color: #e74c3c; }
-
-        /* ===== COMPONENT LIST ===== */
-        .component-list { border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
-        .component-item {
-            display: grid;
-            grid-template-columns: 200px 1fr auto auto;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
-            min-height: 56px;
-        }
-        .component-item:last-child { border-bottom: none; }
-        .component-number {
-            padding: 10px 12px; font-size: 12px; font-weight: 700;
-            color: #555; background: #fafafa; border-right: 1px solid #f0f0f0;
-            min-height: 56px; display: flex; align-items: center;
-        }
-        .component-selected { padding: 8px 12px; flex: 1; }
-        .choose-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 8px 14px; background: #fff3f3; border: 1px dashed #e74c3c;
-            border-radius: 4px; cursor: pointer; font-size: 13px; color: #e74c3c;
-            font-weight: 600; transition: all 0.2s; white-space: nowrap;
-        }
-        .choose-btn:hover { background: #e74c3c; color: #fff; }
-        .choose-btn span { font-size: 16px; line-height: 1; }
-
-        /* Selected component display */
-        .selected-display { display: flex; align-items: center; gap: 10px; }
-        .component-image { width: 48px; height: 48px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; }
-        .component-info .comp-name { font-size: 13px; font-weight: 600; color: #222; line-height: 1.3; }
-        .component-info .comp-sku { font-size: 11px; color: #999; margin-top: 2px; }
-
-        /* Price column */
-        .build-price { padding: 8px 12px; text-align: right; min-width: 160px; }
-        .price-display { font-size: 14px; font-weight: 700; color: #e74c3c; }
-        .quantity-row { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 4px; font-size: 12px; color: #555; }
-        .quantity-input { width: 50px; padding: 3px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 13px; }
-        .line-total { font-weight: 700; color: #c0392b; font-size: 13px; }
-
-        /* Actions column */
-        .component-actions { padding: 8px 12px; display: flex; gap: 6px; min-width: 80px; }
-        .edit-btn, .delete-btn {
-            width: 30px; height: 30px; border: 1px solid #ddd; background: #fff;
-            border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 14px; transition: all 0.2s;
-        }
-        .edit-btn:hover { border-color: #3498db; color: #3498db; background: #ebf5fb; }
-        .delete-btn:hover { border-color: #e74c3c; color: #e74c3c; background: #fdf2f2; }
-
-        /* ===== ACTION BUTTONS ===== */
-        .action-buttons-build {
-            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
-        }
-        .action-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;
-            font-size: 13px; font-weight: 700; transition: all 0.2s;
-        }
-        .save-btn { background: #3498db; color: #fff; }
-        .save-btn:hover { background: #2980b9; }
-        .export-btn { background: #27ae60; color: #fff; }
-        .export-btn:hover { background: #229954; }
-        .view-btn { background: #8e44ad; color: #fff; }
-        .view-btn:hover { background: #7d3c98; }
-        .cart-btn { background: #e74c3c; color: #fff; }
-        .cart-btn:hover { background: #c0392b; }
-
-        /* ===== MODAL ===== */
-        .modal {
-            display: none; position: fixed; z-index: 9999;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); overflow: auto;
-        }
-        .modal-content {
-            background: #fff; margin: 40px auto;
-            width: 90%; max-width: 980px; border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column; max-height: calc(100vh - 80px);
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; border-bottom: 1px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-        .modal-title { font-size: 18px; font-weight: 700; color: #222; margin: 0; }
-        .close {
-            background: none; border: none; font-size: 24px; cursor: pointer;
-            color: #888; line-height: 1; padding: 0; transition: color 0.2s;
-        }
-        .close:hover { color: #e74c3c; }
-        .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
-
-        /* Modal search & sort bar */
-        .modal-toolbar {
-            display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;
-        }
-        .search-box {
-            flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #ddd;
-            border-radius: 4px; font-size: 14px; outline: none; transition: border 0.2s;
-        }
-        .search-box:focus { border-color: #e74c3c; }
-        .sort-select {
-            padding: 9px 12px; border: 1px solid #ddd; border-radius: 4px;
-            font-size: 13px; background: #fff; cursor: pointer; outline: none;
-        }
-
-        /* Product list inside modal */
-        .product-list { display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
-        .product-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px; border: 1px solid #eee; border-radius: 6px;
-            transition: all 0.2s; background: #fff;
-        }
-        .product-item:hover { border-color: #e74c3c; box-shadow: 0 2px 8px rgba(231,76,60,0.1); }
-        .product-image { width: 72px; height: 72px; flex-shrink: 0; }
-        .product-image img { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; border: 1px solid #f0f0f0; }
-        .product-details { flex: 1; }
-        .product-name { font-size: 14px; font-weight: 600; color: #222; margin-bottom: 4px; line-height: 1.4; }
-        .product-specs { display: flex; flex-wrap: wrap; gap: 6px; }
-        .product-spec { font-size: 12px; color: #888; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; }
-        .product-price-section { text-align: right; flex-shrink: 0; min-width: 140px; }
-        .product-price { font-size: 16px; font-weight: 700; color: #e74c3c; }
-        .add-to-build-btn {
-            display: block; margin-top: 8px; padding: 8px 12px;
-            background: #e74c3c; color: #fff; border: none; border-radius: 4px;
-            font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
-            transition: background 0.2s;
-        }
-        .add-to-build-btn:hover { background: #c0392b; }
-
-        /* Loading & empty states */
-        .loading-state, .empty-state {
-            text-align: center; padding: 40px; color: #999; font-size: 15px;
-        }
-        .loading-state i { font-size: 32px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: #ddd; }
-
-        /* Pagination in modal */
-        .modal-pagination {
-            display: flex; justify-content: center; gap: 6px; margin-top: 16px; flex-wrap: wrap;
-        }
-        .page-btn {
-            padding: 6px 12px; border: 1px solid #ddd; background: #fff;
-            border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s;
-        }
-        .page-btn.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-        .page-btn:hover:not(.active) { border-color: #e74c3c; color: #e74c3c; }
-        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .component-item { grid-template-columns: 1fr; }
-            .component-number { border-right: none; border-bottom: 1px solid #f0f0f0; min-height: auto; }
-            .build-price { text-align: left; }
-            .action-buttons-build { gap: 8px; }
-            .action-btn { padding: 8px 14px; font-size: 12px; }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <%- include("../layout/header.ejs") %>
-    </header>
-
-    <nav class="main-nav">
-        <%- include("../layout/navbar.ejs") %>
-    </nav>
-
-    <div class="container">
         <div class="breadcrumb">
             <a href="/">Trang chủ</a> &gt; <a href="#">PC GAMING</a> &gt; Build PC
         </div>
@@ -338,12 +124,12 @@
                 <div class="component-actions"></div>
             </div>
 
-            <!-- Tản nhiệt CPU -->
+            <!-- Tản nhiệt khí -->
             <div class="component-item" data-slot="cooling">
-                <div class="component-number">9. TẢN NHIỆT CPU</div>
+                <div class="component-number">9. TẢN NHIỆT KHÍ</div>
                 <div class="component-selected">
-                    <button class="choose-btn" onclick="openModal('cooling','tan-nhiet-cpu')">
-                        <span>+</span> Chọn Tản Nhiệt CPU
+                    <button class="choose-btn" onclick="openModal('cooling','tan-nhiet-pc')">
+                        <span>+</span> Chọn Tản Nhiệt Khí
                     </button>
                 </div>
                 <div class="build-price"></div>
@@ -415,16 +201,16 @@
         <!-- Nút hành động -->
         <div class="action-buttons-build">
             <button class="action-btn cart-btn" id="cartBtn">
-                <span>🛒</span> THÊM TẤT CẢ VÀO GIỎ HÀNG
+                 THÊM TẤT CẢ VÀO GIỎ HÀNG
             </button>
             <button class="action-btn view-btn" id="printBtn">
-                <span>🖨️</span> XEM & IN CẤU HÌNH
+                 XEM & IN CẤU HÌNH
             </button>
             <button class="action-btn save-btn" id="copyBtn">
-                <span>📋</span> SAO CHÉP CẤU HÌNH
+                 SAO CHÉP CẤU HÌNH
             </button>
         </div>
-    </div>
+
 
     <!-- Modal chọn linh kiện -->
     <div id="componentModal" class="modal">
@@ -470,21 +256,16 @@
         </div>
     </div>
 
-    <footer>
-        <%- include("../layout/footer.ejs") %>
-    </footer>
-
     <script>
     // =========================================================
     // STATE
     // =========================================================
     const buildState = {
-        selectedComponents: {}, // { slotKey: { id, name, price, image, sku, qty, specifications } }
+        selectedComponents: {}, // { slotKey: { id, name, price, image, sku, qty } }
         currentSlot: null,      // slot key đang mở modal
         currentCategory: null,  // category slug đang load
         currentPage: 1,
         searchTimer: null,
-        currentProducts: [],    // Cache for currently loaded products
     };
 
     // Map slotKey → label để dùng lại khi reset
@@ -497,7 +278,7 @@
         vga: 'Chọn VGA - Card Màn Hình',
         psu: 'Chọn PSU - Nguồn Máy Tính',
         case: 'Chọn Case - Vỏ Máy Tính',
-        cooling: 'Chọn Tản Nhiệt CPU',
+        cooling: 'Chọn Tản Nhiệt Khí',
         casefan: 'Chọn Quạt Tản Nhiệt',
         monitor: 'Chọn Monitor - Màn Hình',
         keyboard: 'Chọn Bàn Phím',
@@ -513,89 +294,13 @@
         vga: 'vga-card-do-hoa',
         psu: 'psu-nguon-may-tinh',
         case: 'case-vo-may-tinh',
-        cooling: 'tan-nhiet-cpu',
+        cooling: 'tan-nhiet-pc',
         casefan: 'quat-tan-nhiet',
         monitor: 'man-hinh',
         keyboard: 'ban-phim',
         mouse: 'chuot',
         headphone: 'tai-nghe',
     };
-
-    // Helper to get spec value from a specifications JSON array
-    function getSpecValue(specs, keyName) {
-        if (!specs) return null;
-        let arr = [];
-        try {
-            arr = typeof specs === 'string' ? JSON.parse(specs) : specs;
-        } catch (e) {
-            return null;
-        }
-        if (!Array.isArray(arr)) return null;
-        const found = arr.find(s => s && s.key && s.key.toLowerCase().trim() === keyName.toLowerCase().trim());
-        return found ? found.value : null;
-    }
-
-    // Dynamic compatibility mapping based on current slot and selected components
-    function getCompatibilityParams() {
-        const params = {};
-        const slot = buildState.currentSlot;
-        const cpu = buildState.selectedComponents.cpu;
-        const mainboard = buildState.selectedComponents.mainboard;
-
-        // 1. Choosing Mainboard
-        if (slot === 'mainboard') {
-            if (cpu) {
-                const socket = getSpecValue(cpu.specifications, "Socket");
-                if (socket) params.compatSocket = socket;
-                
-                const ramType = getSpecValue(cpu.specifications, "Loại RAM hỗ trợ");
-                if (ramType) params.compatRamType = ramType;
-            }
-        }
-        
-        // 2. Choosing CPU
-        else if (slot === 'cpu') {
-            if (mainboard) {
-                const socket = getSpecValue(mainboard.specifications, "Socket CPU");
-                if (socket) params.compatSocket = socket;
-                
-                const ramType = getSpecValue(mainboard.specifications, "Loại RAM hỗ trợ");
-                if (ramType) params.compatRamType = ramType;
-            }
-        }
-        
-        // 3. Choosing RAM
-        else if (slot === 'ram') {
-            if (mainboard) {
-                const ramType = getSpecValue(mainboard.specifications, "Loại RAM hỗ trợ");
-                if (ramType) params.compatRamType = ramType;
-            } else if (cpu) {
-                const ramType = getSpecValue(cpu.specifications, "Loại RAM hỗ trợ");
-                if (ramType) params.compatRamType = ramType;
-            }
-        }
-        
-        // 4. Choosing Case
-        else if (slot === 'case') {
-            if (mainboard) {
-                const formFactor = getSpecValue(mainboard.specifications, "Form Factor (Chuẩn kích thước)");
-                if (formFactor) params.compatFormFactor = formFactor;
-            }
-        }
-        
-        // 5. Choosing Cooling
-        else if (slot === 'cooling') {
-            if (cpu) {
-                const socket = getSpecValue(cpu.specifications, "Socket");
-                if (socket) params.compatSocket = socket;
-            } else if (mainboard) {
-                const socket = getSpecValue(mainboard.specifications, "Socket CPU");
-                if (socket) params.compatSocket = socket;
-            }
-        }
-
-        return params;
-    }
 
     // =========================================================
     // OPEN / CLOSE MODAL
@@ -674,12 +379,6 @@
                 if (maxPrice) params.append('maxPrice', maxPrice);
             }
 
-            // Append compatibility parameters
-            const compat = getCompatibilityParams();
-            if (compat.compatSocket) params.append('compatSocket', compat.compatSocket);
-            if (compat.compatRamType) params.append('compatRamType', compat.compatRamType);
-            if (compat.compatFormFactor) params.append('compatFormFactor', compat.compatFormFactor);
-
             const res = await fetch(`/api/products/by-category?${params}`);
             if (!res.ok) throw new Error('Lỗi mạng');
             const data = await res.json();
@@ -708,7 +407,6 @@
     }
 
     function renderProducts(products) {
-        buildState.currentProducts = products; // Cache page products
         const listEl = document.getElementById('modalProductList');
         if (!products || products.length === 0) {
             listEl.innerHTML = `<div class="empty-state"><i class="ri-search-line"></i>Không tìm thấy sản phẩm phù hợp.</div>`;
@@ -768,11 +466,7 @@
         const slot = buildState.currentSlot;
         if (!slot) return;
 
-        // Retrieve specs from cache
-        const product = buildState.currentProducts.find(p => String(p.id) === String(id));
-        const specs = product ? product.specifications : null;
-
-        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1, specifications: specs };
+        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1 };
         renderSlot(slot);
         updateTotal();
         closeModal();
@@ -1000,5 +694,3 @@
     });
     </script>
     <script src="/assets/js/scripts.js"></script>
-</body>
-</html>

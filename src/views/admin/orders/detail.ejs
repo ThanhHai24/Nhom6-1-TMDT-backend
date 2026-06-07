@@ -1,413 +1,386 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Quản Trị - Admin Dashboard</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-
-<body>
-
-    <!-- SIDEBAR -->
-    <%- include('../layout/sidebar') -%>
-
-        <!-- MAIN -->
-        <main class="main">
-            <!-- HEADER -->
-            <%- include('../layout/header') -%>
-
-                <div class="content">
 
                     <div style="padding:24px; flex:1;">
 
-      <!-- Page header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div>
-          <h2 style="font-size:18px;font-weight:600;">Chi tiết đơn hàng</h2>
-          <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → <%= order.code %></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn outline" style="background:transparent;color:#185FA5;border:1px solid #185FA5;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">⬇ Xuất PDF</button>
-          
-          <% if (order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'RETURNED') { %>
-          <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
-              <input type="hidden" name="status" value="CANCELLED">
-              <button type="submit" class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
-          </form>
-          <% } %>
+                    <!-- Page header -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                      <div>
+                        <h2 style="font-size:18px;font-weight:600;">Chi tiết đơn hàng</h2>
+                        <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → <%= order.code %></div>
+                      </div>
+                      <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="btn outline" style="background:transparent;color:#185FA5;border:1px solid #185FA5;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">⬇ Xuất PDF</button>
+                        
+                        <% if (order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'RETURNED') { %>
+                        <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
+                            <input type="hidden" name="status" value="CANCELLED">
+                            <button type="submit" class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
+                        </form>
+                        <% } %>
 
-          <% 
-            let nextStatus = '';
-            let nextStatusLabel = '';
-            if (order.status === 'PENDING') { nextStatus = 'CONFIRMED'; nextStatusLabel = 'Xác nhận đơn hàng'; }
-            else if (order.status === 'CONFIRMED') { nextStatus = 'PROCESSING'; nextStatusLabel = 'Bắt đầu đóng gói'; }
-            else if (order.status === 'PROCESSING') { nextStatus = 'SHIPPED'; nextStatusLabel = 'Giao cho vận chuyển'; }
-            else if (order.status === 'SHIPPED') { nextStatus = 'DELIVERED'; nextStatusLabel = 'Xác nhận đã giao'; }
-          %>
-          <% if (nextStatus) { %>
-          <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
-              <input type="hidden" name="status" value="<%= nextStatus %>">
-              <button type="submit" class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;"><%= nextStatusLabel %></button>
-          </form>
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Timeline -->
-      <div class="timeline-card">
-        <div class="timeline-header">
-          <h3>Trạng thái đơn hàng</h3>
-          <br>
-        </div>
-        <div class="timeline">
-          <% 
-            const sequence = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
-            const statusLabels = {
-                'PENDING': 'Đặt hàng',
-                'CONFIRMED': 'Xác nhận',
-                'PROCESSING': 'Đóng gói',
-                'SHIPPED': 'Đang giao',
-                'DELIVERED': 'Hoàn thành',
-                'CANCELLED': 'Đã hủy',
-                'RETURNED': 'Trả hàng'
-            };
-            const statusIcons = {
-                'PENDING': '✓',
-                'CONFIRMED': '✓',
-                'PROCESSING': '✓',
-                'SHIPPED': '🚚',
-                'DELIVERED': '✓',
-                'CANCELLED': '✕',
-                'RETURNED': '✕'
-            };
-            
-            let displaySteps = [...sequence];
-            if (order.status === 'CANCELLED' || order.status === 'RETURNED') {
-                displaySteps = ['PENDING', order.status];
-            }
-            
-            const historyMap = {};
-            if (order.statusHistory) {
-                order.statusHistory.forEach(h => {
-                    historyMap[h.status] = h;
-                });
-            }
-            
-            const currentIndex = displaySteps.indexOf(order.status);
-          %>
-          
-          <% displaySteps.forEach((step, index) => { 
-              const history = historyMap[step];
-              const isCurrent = order.status === step;
-              // If it's a past step in the sequence (even if missing history due to skipping)
-              const isPast = history !== undefined || (currentIndex !== -1 && index <= currentIndex);
-              
-              let dotClass = 'pending';
-              if (isPast) {
-                  if (step === 'CANCELLED' || step === 'RETURNED') dotClass = 'danger';
-                  else if (isCurrent) dotClass = 'active';
-                  else dotClass = 'done';
-              }
-              
-              const icon = statusIcons[step];
-              const label = statusLabels[step];
-
-              let displayTime = '—';
-              let displayUser = null;
-
-              if (history) {
-                  displayTime = new Date(history.createdAt).toLocaleString('vi-VN', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit'
-                  });
-                  displayUser = history.changedBy ? history.changedBy.fullName : 'Hệ thống';
-              } else if (isPast) {
-                  const fallbackDate = step === 'PENDING' ? order.createdAt : order.updatedAt;
-                  displayTime = new Date(fallbackDate).toLocaleString('vi-VN', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit'
-                  });
-              }
-          %>
-          <div class="timeline-step">
-            <div class="step-dot <%= dotClass %>"><%= dotClass !== 'pending' ? icon : '⬤' %></div>
-            <div class="step-label <%= dotClass %>"><%= label %></div>
-            <div class="step-time"><%= displayTime %></div>
-            <% if (displayUser) { %>
-                <div style="font-size: 11px; color: #185FA5; margin-top: 4px; font-weight: 500;"><%= displayUser %></div>
-            <% } %>
-          </div>
-          <% }); %>
-        </div>
-      </div>
-
-      <!-- Two-col detail -->
-      <div class="detail-grid">
-
-        <!-- Left: order info + customer -->
-        <div style="display:flex;flex-direction:column;gap:16px;">
-
-          <!-- Order info -->
-          <div class="card">
-            <h3>Thông tin đơn hàng</h3>
-            <div class="info-row">
-              <span class="info-label">Mã đơn hàng</span>
-              <span class="info-value mono">#<%= order.code %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Ngày đặt hàng</span>
-              <span class="info-value"><%= order.createdAt.toLocaleString('vi-VN') %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Trạng thái</span>
-              <% const orderBadgeClass = order.status === 'PENDING' ? 'badge info' : order.status === 'DELIVERED' ? 'badge success' : order.status === 'CANCELLED' ? 'badge danger' : 'badge warning'; %>
-              <span class="info-value"><span class="<%= orderBadgeClass %>"><%= order.status %></span></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Hình thức thanh toán</span>
-              <span class="info-value">
-                  <%= 
-                      order.paymentMethod === 'COD' 
-                          ? 'Thanh toán khi nhận hàng' 
-                          : order.paymentMethod === 'BANKING'
-                          ? 'Chuyển khoản ngân hàng'
-                          : order.paymentMethod === 'MOMO'
-                          ? 'Ví MoMo'
-                          : order.paymentMethod
-                  %>
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Trạng thái thanh toán</span>
-              <% const paymentBadgeClass = order.paymentStatus === 'PAID' ? 'badge success' : 'badge danger'; %>
-              <span class="info-value"><span class="<%= paymentBadgeClass %>"><%= order.paymentStatus %></span></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Ghi chú</span>
-              <span class="info-value" style="font-style:italic;color:#5F5E5A;"><%= order.notes || "Không có ghi chú" %></span>
-            </div>
-          </div>
-
-          <!-- Shipping -->
-          <% 
-            let shippingOrder = null;
-            if (order.shippingOrders && order.shippingOrders.length > 0) {
-                shippingOrder = order.shippingOrders[0];
-            }
-          %>
-          <% if (order.status !== 'PENDING' && shippingOrder) { %>
-          <div class="card">
-            <h3>Thông tin giao hàng</h3>
-            <div class="info-row">
-              <span class="info-label">Đơn vị vận chuyển</span>
-              <span class="info-value"><%= shippingOrder.provider ? shippingOrder.provider.name : 'Chưa có' %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Mã vận đơn</span>
-              <span class="info-value mono"><%= shippingOrder.trackingNumber %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Dự kiến giao</span>
-              <span class="info-value"><%= shippingOrder.estimatedDeliveryDate ? new Date(shippingOrder.estimatedDeliveryDate).toLocaleDateString('vi-VN') : 'Đang tính toán' %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Địa chỉ giao</span>
-              <span class="info-value" style="max-width:220px;text-align:right;"><%= order.shippingAddress %></span>
-            </div>
-          </div>
-          <% } %>
-        </div>
-
-        <!-- Right: customer + summary -->
-        <div style="display:flex;flex-direction:column;gap:16px;">
-
-          <!-- Customer -->
-          <div class="card">
-            <h3>Khách hàng</h3>
-            <% if (order.user) { %>
-              <%
-                const avatarUrl = order.user.avatar || 'UserAvatar.png';
-              %>
-              <div class="customer-row">
-                <div class="user-cell">
-                  <div class="user-avatar" style="background:#eeeeee">
-                    <img class="user-avatar"
-                      src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
-                      onerror="this.style.display='none';">
-                  </div>
-                  <div>
-                    <div class="user-name"><%= order.user.fullName %></div>
-                    <div class="user-email" style="color:#0F6E56;font-size:11px;font-weight:500;">Tài khoản thành viên</div>
-                  </div>
-                </div>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Số điện thoại</span>
-                <span class="info-value"><%= order.user.phone || order.customerPhone || '—' %></span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value" style="font-size:12px;"><%= order.user.email %></span>
-              </div>
-            <% } else { %>
-              <!-- Guest order -->
-              <div class="customer-row">
-                <div class="user-cell">
-                  <div class="user-avatar" style="background:#eeeeee; display:flex; align-items:center; justify-content:center; font-size:24px;">
-                    👤
-                  </div>
-                  <div>
-                    <div class="user-name"><%= order.customerName || 'Khách vãng lai' %></div>
-                    <div class="user-email" style="color:#B4B2A9;font-size:11px;font-weight:500;">Khách không đăng nhập</div>
-                  </div>
-                </div>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Số điện thoại</span>
-                <span class="info-value"><%= order.customerPhone || '—' %></span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value" style="font-size:12px;"><%= order.customerEmail || '—' %></span>
-              </div>
-            <% } %>
-            <div class="info-row">
-              <span class="info-label">Địa chỉ nhận hàng</span>
-              <span class="info-value" style="font-size:12px; max-width:220px; text-align:right;"><%= order.shippingAddress || '—' %></span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Số sản phẩm</span>
-              <span class="info-value"><%= order.orderItems?.length %> sản phẩm</span>
-            </div>
-          </div>
-
-          <!-- Payment summary -->
-          <div class="card">
-            <h3>Tổng thanh toán</h3>
-            <div class="info-row">
-              <span class="info-label">Tạm tính</span>
-              <span class="info-value"><%= order.totalAmount.toLocaleString('vi-VN') %> ₫</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Phí vận chuyển</span>
-              <span class="info-value"> <%= order.shippingFee.toLocaleString('vi-VN') %> ₫</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Giảm giá</span>
-              <span class="info-value" style="color:#0F6E56;">− 0 ₫</span>
-            </div>
-            <hr class="divider">
-            <div class="info-row">
-              <span class="info-label" style="font-weight:600;color:var(--text);">Tổng cộng</span>
-              <span style="font-size:20px;font-weight:700;color:#0C447C;"><%= Number(order.totalAmount + order.shippingFee).toLocaleString('vi-VN') %> ₫</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Product table -->
-      <div class="table-card">
-        <div class="table-card-header">
-          <h3>Sản phẩm trong đơn</h3>
-          <span style="font-size:12px;color:#5F5E5A;"> <%= order.orderItems?.length || 0 %> sản phẩm</span>
-        </div>
-        <table class="product-table">
-          <thead>
-            <tr>
-              <th>Sản phẩm</th>
-              <th>SKU</th>
-              <th style="text-align:center;">Số lượng</th>
-              <th style="text-align:right;">Đơn giá</th>
-              <th style="text-align:right;">Thành tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-            <% order.orderItems.forEach(function(item) { %>
-              <td>
-                <div class="user-cell" >
-                    <div class="user-avatar" style="width:80px;height:80px;border-radius:0px">
-                        <img src="/admin/productImages/<%= item.product.image %>" alt="" style="width:100%;height:100%;object-fit:cover">
+                        <% 
+                          let nextStatus = '';
+                          let nextStatusLabel = '';
+                          if (order.status === 'PENDING') { nextStatus = 'CONFIRMED'; nextStatusLabel = 'Xác nhận đơn hàng'; }
+                          else if (order.status === 'CONFIRMED') { nextStatus = 'PROCESSING'; nextStatusLabel = 'Bắt đầu đóng gói'; }
+                          else if (order.status === 'PROCESSING') { nextStatus = 'SHIPPED'; nextStatusLabel = 'Giao cho vận chuyển'; }
+                          else if (order.status === 'SHIPPED') { nextStatus = 'DELIVERED'; nextStatusLabel = 'Xác nhận đã giao'; }
+                        %>
+                        <% if (nextStatus) { %>
+                        <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
+                            <input type="hidden" name="status" value="<%= nextStatus %>">
+                            <button type="submit" class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;"><%= nextStatusLabel %></button>
+                        </form>
+                        <% } %>
+                      </div>
                     </div>
-                    <div>
-                        <div style="" class="user-name">
-                            <%= item.product.name %>
+
+                    <!-- Timeline -->
+                    <div class="timeline-card">
+                      <div class="timeline-header">
+                        <h3>Trạng thái đơn hàng</h3>
+                        <br>
+                      </div>
+                      <div class="timeline">
+                        <% 
+                          const sequence = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
+                          const statusLabels = {
+                              'PENDING': 'Đặt hàng',
+                              'CONFIRMED': 'Xác nhận',
+                              'PROCESSING': 'Đóng gói',
+                              'SHIPPED': 'Đang giao',
+                              'DELIVERED': 'Hoàn thành',
+                              'CANCELLED': 'Đã hủy',
+                              'RETURNED': 'Trả hàng'
+                          };
+                          const statusIcons = {
+                              'PENDING': '✓',
+                              'CONFIRMED': '✓',
+                              'PROCESSING': '✓',
+                              'SHIPPED': '🚚',
+                              'DELIVERED': '✓',
+                              'CANCELLED': '✕',
+                              'RETURNED': '✕'
+                          };
+                          
+                          let displaySteps = [...sequence];
+                          if (order.status === 'CANCELLED' || order.status === 'RETURNED') {
+                              displaySteps = ['PENDING', order.status];
+                          }
+                          
+                          const historyMap = {};
+                          if (order.statusHistory) {
+                              order.statusHistory.forEach(h => {
+                                  historyMap[h.status] = h;
+                              });
+                          }
+                          
+                          const currentIndex = displaySteps.indexOf(order.status);
+                        %>
+                        
+                        <% displaySteps.forEach((step, index) => { 
+                            const history = historyMap[step];
+                            const isCurrent = order.status === step;
+                            // If it's a past step in the sequence (even if missing history due to skipping)
+                            const isPast = history !== undefined || (currentIndex !== -1 && index <= currentIndex);
+                            
+                            let dotClass = 'pending';
+                            if (isPast) {
+                                if (step === 'CANCELLED' || step === 'RETURNED') dotClass = 'danger';
+                                else if (isCurrent) dotClass = 'active';
+                                else dotClass = 'done';
+                            }
+                            
+                            const icon = statusIcons[step];
+                            const label = statusLabels[step];
+
+                            let displayTime = '—';
+                            let displayUser = null;
+
+                            if (history) {
+                                displayTime = new Date(history.createdAt).toLocaleString('vi-VN', {
+                                    day: '2-digit', month: '2-digit', year: 'numeric',
+                                    hour: '2-digit', minute: '2-digit'
+                                });
+                                displayUser = history.changedBy ? history.changedBy.fullName : 'Hệ thống';
+                            } else if (isPast) {
+                                const fallbackDate = step === 'PENDING' ? order.createdAt : order.updatedAt;
+                                displayTime = new Date(fallbackDate).toLocaleString('vi-VN', {
+                                    day: '2-digit', month: '2-digit', year: 'numeric',
+                                    hour: '2-digit', minute: '2-digit'
+                                });
+                            }
+                        %>
+                        <div class="timeline-step">
+                          <div class="step-dot <%= dotClass %>"><%= dotClass !== 'pending' ? icon : '⬤' %></div>
+                          <div class="step-label <%= dotClass %>"><%= label %></div>
+                          <div class="step-time"><%= displayTime %></div>
+                          <% if (displayUser) { %>
+                              <div style="font-size: 11px; color: #185FA5; margin-top: 4px; font-weight: 500;"><%= displayUser %></div>
+                          <% } %>
                         </div>
-                        <div class="user-email">
-                            <%= item.product.shortDescription %>
-                        </div>
+                        <% }); %>
+                      </div>
                     </div>
-                </div>
-              </td>
-              <td style="font-family:monospace;font-size:12px;color:#5F5E5A;"><%= item.product.sku %></td>
-              <td style="text-align:center;">× <%= item.quantity %></td>
-              <td style="text-align:right;"><%= item.price %> ₫</td>
-              <td style="text-align:right;font-weight:600;"><%= item.quantity * item.price %> ₫</td>
-            </tr>
-            <% }) %>
-            <tr class="total-row">
-              <td colspan="4" style="text-align:right;font-size:12px;color:#5F5E5A;padding-right:16px;">Tổng cộng</td>
-              <td style="text-align:right;font-size:15px;font-weight:700;color:#0C447C;"><%= order.totalAmount %> ₫</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <!-- Activity log -->
-      <div class="card" style="margin-bottom:24px;">
-        <h3 style="margin-bottom:14px;">Lịch sử hoạt động</h3>
-        <div style="display:flex;flex-direction:column;gap:0;">
-          <% if (order.statusHistory && order.statusHistory.length > 0) { %>
-            <% [...order.statusHistory].reverse().forEach((history, idx) => { %>
-              <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
-                <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
-                  <%= new Date(history.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
-                </div>
-                <% 
-                  let dotColor = '#0F6E56'; // Default green for successful steps
-                  if (history.status === 'CANCELLED' || history.status === 'RETURNED') dotColor = '#A32D2D';
-                  else if (history.status === 'PENDING') dotColor = '#B4B2A9';
-                  else if (history.status === 'SHIPPED') dotColor = '#185FA5';
-                %>
-                <div style="width:8px;height:8px;border-radius:50%;background:<%= dotColor %>;margin-top:4px;flex-shrink:0;"></div>
-                <div>
-                  <span style="color:#185FA5;font-weight:500;">
-                    <%= history.changedBy ? history.changedBy.fullName : (history.status === 'PENDING' ? order.customerName : 'Hệ thống') %>
-                  </span> 
-                  <span style="color:#5F5E5A;">
-                    <%= history.status === 'PENDING' ? 'tạo đơn hàng mới' : 'đã cập nhật trạng thái thành' %>
-                  </span> 
-                  <span style="font-weight:500;">
-                    <%= statusLabels[history.status] || history.status %>
-                  </span>
-                  <% if (history.notes && history.notes !== 'Đơn hàng được tạo' && history.notes !== 'Trạng thái được cập nhật') { %>
-                    <div style="margin-top:4px; color:#666; font-size: 12px; font-style: italic;">"<%= history.notes %>"</div>
-                  <% } %>
-                </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
-              <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
-                <%= new Date(order.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
-              </div>
-              <div style="width:8px;height:8px;border-radius:50%;background:#B4B2A9;margin-top:4px;flex-shrink:0;"></div>
-              <div>
-                <span style="color:#185FA5;font-weight:500;"><%= order.customerName %></span> 
-                <span style="color:#5F5E5A;">tạo đơn hàng thành công</span>
-              </div>
-            </div>
-          <% } %>
-        </div>
-      </div>
+                    <!-- Two-col detail -->
+                    <div class="detail-grid">
 
-    </div>
+                      <!-- Left: order info + customer -->
+                      <div style="display:flex;flex-direction:column;gap:16px;">
 
-                </div>
-        </main>
-</body>
+                        <!-- Order info -->
+                        <div class="card">
+                          <h3>Thông tin đơn hàng</h3>
+                          <div class="info-row">
+                            <span class="info-label">Mã đơn hàng</span>
+                            <span class="info-value mono">#<%= order.code %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Ngày đặt hàng</span>
+                            <span class="info-value"><%= order.createdAt.toLocaleString('vi-VN') %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Trạng thái</span>
+                            <% const orderBadgeClass = order.status === 'PENDING' ? 'badge info' : order.status === 'DELIVERED' ? 'badge success' : order.status === 'CANCELLED' ? 'badge danger' : 'badge warning'; %>
+                            <span class="info-value"><span class="<%= orderBadgeClass %>"><%= order.status %></span></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Hình thức thanh toán</span>
+                            <span class="info-value">
+                                <%= 
+                                    order.paymentMethod === 'COD' 
+                                        ? 'Thanh toán khi nhận hàng' 
+                                        : order.paymentMethod === 'BANKING'
+                                        ? 'Chuyển khoản ngân hàng'
+                                        : order.paymentMethod === 'MOMO'
+                                        ? 'Ví MoMo'
+                                        : order.paymentMethod
+                                %>
+                            </span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Trạng thái thanh toán</span>
+                            <% const paymentBadgeClass = order.paymentStatus === 'PAID' ? 'badge success' : 'badge danger'; %>
+                            <span class="info-value"><span class="<%= paymentBadgeClass %>"><%= order.paymentStatus %></span></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Ghi chú</span>
+                            <span class="info-value" style="font-style:italic;color:#5F5E5A;"><%= order.notes || "Không có ghi chú" %></span>
+                          </div>
+                        </div>
 
-</html>
+                        <!-- Shipping -->
+                        <% 
+                          let shippingOrder = null;
+                          if (order.shippingOrders && order.shippingOrders.length > 0) {
+                              shippingOrder = order.shippingOrders[0];
+                          }
+                        %>
+                        <% if (order.status !== 'PENDING' && shippingOrder) { %>
+                        <div class="card">
+                          <h3>Thông tin giao hàng</h3>
+                          <div class="info-row">
+                            <span class="info-label">Đơn vị vận chuyển</span>
+                            <span class="info-value"><%= shippingOrder.provider ? shippingOrder.provider.name : 'Chưa có' %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Mã vận đơn</span>
+                            <span class="info-value mono"><%= shippingOrder.trackingNumber %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Dự kiến giao</span>
+                            <span class="info-value"><%= shippingOrder.estimatedDeliveryDate ? new Date(shippingOrder.estimatedDeliveryDate).toLocaleDateString('vi-VN') : 'Đang tính toán' %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Địa chỉ giao</span>
+                            <span class="info-value" style="max-width:220px;text-align:right;"><%= order.shippingAddress %></span>
+                          </div>
+                        </div>
+                        <% } %>
+                      </div>
+
+                      <!-- Right: customer + summary -->
+                      <div style="display:flex;flex-direction:column;gap:16px;">
+
+                        <!-- Customer -->
+                        <div class="card">
+                          <h3>Khách hàng</h3>
+                          <% if (order.user) { %>
+                            <%
+                              const avatarUrl = order.user.avatar || 'UserAvatar.png';
+                            %>
+                            <div class="customer-row">
+                              <div class="user-cell">
+                                <div class="user-avatar" style="background:#eeeeee">
+                                  <img class="user-avatar"
+                                    src="/admin/userImages/<%= avatarUrl %>" alt="Avatar"
+                                    onerror="this.style.display='none';">
+                                </div>
+                                <div>
+                                  <div class="user-name"><%= order.user.fullName %></div>
+                                  <div class="user-email" style="color:#0F6E56;font-size:11px;font-weight:500;">Tài khoản thành viên</div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="info-row">
+                              <span class="info-label">Số điện thoại</span>
+                              <span class="info-value"><%= order.user.phone || order.customerPhone || '—' %></span>
+                            </div>
+                            <div class="info-row">
+                              <span class="info-label">Email</span>
+                              <span class="info-value" style="font-size:12px;"><%= order.user.email %></span>
+                            </div>
+                          <% } else { %>
+                            <!-- Guest order -->
+                            <div class="customer-row">
+                              <div class="user-cell">
+                                <div class="user-avatar" style="background:#eeeeee; display:flex; align-items:center; justify-content:center; font-size:24px;">
+                                  👤
+                                </div>
+                                <div>
+                                  <div class="user-name"><%= order.customerName || 'Khách vãng lai' %></div>
+                                  <div class="user-email" style="color:#B4B2A9;font-size:11px;font-weight:500;">Khách không đăng nhập</div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="info-row">
+                              <span class="info-label">Số điện thoại</span>
+                              <span class="info-value"><%= order.customerPhone || '—' %></span>
+                            </div>
+                            <div class="info-row">
+                              <span class="info-label">Email</span>
+                              <span class="info-value" style="font-size:12px;"><%= order.customerEmail || '—' %></span>
+                            </div>
+                          <% } %>
+                          <div class="info-row">
+                            <span class="info-label">Địa chỉ nhận hàng</span>
+                            <span class="info-value" style="font-size:12px; max-width:220px; text-align:right;"><%= order.shippingAddress || '—' %></span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Số sản phẩm</span>
+                            <span class="info-value"><%= order.orderItems?.length %> sản phẩm</span>
+                          </div>
+                        </div>
+
+                        <!-- Payment summary -->
+                        <div class="card">
+                          <h3>Tổng thanh toán</h3>
+                          <div class="info-row">
+                            <span class="info-label">Tạm tính</span>
+                            <span class="info-value"><%= order.totalAmount.toLocaleString('vi-VN') %> ₫</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Phí vận chuyển</span>
+                            <span class="info-value"> <%= order.shippingFee.toLocaleString('vi-VN') %> ₫</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">Giảm giá</span>
+                            <span class="info-value" style="color:#0F6E56;">− 0 ₫</span>
+                          </div>
+                          <hr class="divider">
+                          <div class="info-row">
+                            <span class="info-label" style="font-weight:600;color:var(--text);">Tổng cộng</span>
+                            <span style="font-size:20px;font-weight:700;color:#0C447C;"><%= Number(order.totalAmount + order.shippingFee).toLocaleString('vi-VN') %> ₫</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <!-- Product table -->
+                    <div class="table-card">
+                      <div class="table-card-header">
+                        <h3>Sản phẩm trong đơn</h3>
+                        <span style="font-size:12px;color:#5F5E5A;"> <%= order.orderItems?.length || 0 %> sản phẩm</span>
+                      </div>
+                      <table class="product-table">
+                        <thead>
+                          <tr>
+                            <th>Sản phẩm</th>
+                            <th>SKU</th>
+                            <th style="text-align:center;">Số lượng</th>
+                            <th style="text-align:right;">Đơn giá</th>
+                            <th style="text-align:right;">Thành tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                          <% order.orderItems.forEach(function(item) { %>
+                            <td>
+                              <div class="user-cell" >
+                                  <div class="user-avatar" style="width:80px;height:80px;border-radius:0px">
+                                      <img src="/admin/productImages/<%= item.product.image %>" alt="" style="width:100%;height:100%;object-fit:cover">
+                                  </div>
+                                  <div>
+                                      <div style="" class="user-name">
+                                          <%= item.product.name %>
+                                      </div>
+                                      <div class="user-email">
+                                          <%= item.product.shortDescription %>
+                                      </div>
+                                  </div>
+                              </div>
+                            </td>
+                            <td style="font-family:monospace;font-size:12px;color:#5F5E5A;"><%= item.product.sku %></td>
+                            <td style="text-align:center;">× <%= item.quantity %></td>
+                            <td style="text-align:right;"><%= item.price %> ₫</td>
+                            <td style="text-align:right;font-weight:600;"><%= item.quantity * item.price %> ₫</td>
+                          </tr>
+                          <% }) %>
+                          <tr class="total-row">
+                            <td colspan="4" style="text-align:right;font-size:12px;color:#5F5E5A;padding-right:16px;">Tổng cộng</td>
+                            <td style="text-align:right;font-size:15px;font-weight:700;color:#0C447C;"><%= order.totalAmount %> ₫</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Activity log -->
+                    <div class="card" style="margin-bottom:24px;">
+                      <h3 style="margin-bottom:14px;">Lịch sử hoạt động</h3>
+                      <div style="display:flex;flex-direction:column;gap:0;">
+                        <% if (order.statusHistory && order.statusHistory.length > 0) { %>
+                          <% [...order.statusHistory].reverse().forEach((history, idx) => { %>
+                            <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+                              <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
+                                <%= new Date(history.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                              </div>
+                              <% 
+                                let dotColor = '#0F6E56'; // Default green for successful steps
+                                if (history.status === 'CANCELLED' || history.status === 'RETURNED') dotColor = '#A32D2D';
+                                else if (history.status === 'PENDING') dotColor = '#B4B2A9';
+                                else if (history.status === 'SHIPPED') dotColor = '#185FA5';
+                              %>
+                              <div style="width:8px;height:8px;border-radius:50%;background:<%= dotColor %>;margin-top:4px;flex-shrink:0;"></div>
+                              <div>
+                                <span style="color:#185FA5;font-weight:500;">
+                                  <%= history.changedBy ? history.changedBy.fullName : (history.status === 'PENDING' ? order.customerName : 'Hệ thống') %>
+                                </span> 
+                                <span style="color:#5F5E5A;">
+                                  <%= history.status === 'PENDING' ? 'tạo đơn hàng mới' : 'đã cập nhật trạng thái thành' %>
+                                </span> 
+                                <span style="font-weight:500;">
+                                  <%= statusLabels[history.status] || history.status %>
+                                </span>
+                                <% if (history.notes && history.notes !== 'Đơn hàng được tạo' && history.notes !== 'Trạng thái được cập nhật') { %>
+                                  <div style="margin-top:4px; color:#666; font-size: 12px; font-style: italic;">"<%= history.notes %>"</div>
+                                <% } %>
+                              </div>
+                            </div>
+                          <% }) %>
+                        <% } else { %>
+                          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);font-size:13px;align-items:flex-start;">
+                            <div style="font-size:11px;color:#5F5E5A;white-space:nowrap;min-width:110px;padding-top:1px;">
+                              <%= new Date(order.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                            </div>
+                            <div style="width:8px;height:8px;border-radius:50%;background:#B4B2A9;margin-top:4px;flex-shrink:0;"></div>
+                            <div>
+                              <span style="color:#185FA5;font-weight:500;"><%= order.customerName %></span> 
+                              <span style="color:#5F5E5A;">tạo đơn hàng thành công</span>
+                            </div>
+                          </div>
+                        <% } %>
+                      </div>
+                    </div>
+
+                  </div>

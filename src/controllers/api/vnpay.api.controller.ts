@@ -117,20 +117,22 @@ const CheckPaymentVnPay = async (req: Request, res: Response) => {
         // Xác minh chữ ký
         const verify = vnpay.verifyReturnUrl(query);
 
-        const txnRef        = query.vnp_TxnRef;
+        const txnRef = query.vnp_TxnRef;
         const transactionNo = query.vnp_TransactionNo;
-        const responseCode  = query.vnp_ResponseCode ?? "99";
-        const amount        = parseInt(query.vnp_Amount || "0") / 100;
-        const errorMessage  = getResponseMessage(responseCode);
+        const responseCode = query.vnp_ResponseCode ?? "99";
+        const amount = parseInt(query.vnp_Amount || "0") / 100;
+        const errorMessage = getResponseMessage(responseCode);
 
         // Chữ ký không hợp lệ
         if (!verify.isVerified) {
             console.warn("[VNPay] Checksum không hợp lệ:", txnRef);
             return res.render("StorePage/payment/failed", {
-                orderCode:    txnRef,
-                errorCode:    "97",
+                orderCode: txnRef,
+                errorCode: "97",
                 errorMessage: getResponseMessage("97"),
-                canRetry:     false,
+                canRetry: false,
+                layout: "StorePage/layout/main",
+                title: "Thanh toán thất bại",
             });
         }
 
@@ -143,8 +145,10 @@ const CheckPaymentVnPay = async (req: Request, res: Response) => {
         if (order.paymentStatus === "PAID") {
             return res.render("StorePage/payment/success", {
                 orderCode: order.code,
-                txnRef:    transactionNo,
-                note:      "Đơn hàng đã được ghi nhận trước đó.",
+                txnRef: transactionNo,
+                note: "Đơn hàng đã được ghi nhận trước đó.",
+                layout: "StorePage/layout/main",
+                title: "Thanh toán thành công",
             });
         }
 
@@ -153,14 +157,14 @@ const CheckPaymentVnPay = async (req: Request, res: Response) => {
         let paymentRecordStatus: "SUCCESS" | "FAILED" | "PENDING";
 
         if (responseCode === "00") {
-            newPaymentStatus    = "PAID";
+            newPaymentStatus = "PAID";
             paymentRecordStatus = "SUCCESS";
         } else if (RETRYABLE_CODES.has(responseCode)) {
             // Hủy hoặc timeout → giữ PENDING để khách thanh toán lại
-            newPaymentStatus    = "PENDING";
+            newPaymentStatus = "PENDING";
             paymentRecordStatus = "FAILED";
         } else {
-            newPaymentStatus    = "FAILED";
+            newPaymentStatus = "FAILED";
             paymentRecordStatus = "FAILED";
         }
 
@@ -176,9 +180,9 @@ const CheckPaymentVnPay = async (req: Request, res: Response) => {
         // Ghi log giao dịch
         await prisma.payment.create({
             data: {
-                orderId:         order.id,
-                amount:          amount,
-                status:          paymentRecordStatus,
+                orderId: order.id,
+                amount: amount,
+                status: paymentRecordStatus,
                 transactionCode: transactionNo || `ERR-${responseCode}-${Date.now()}`,
             },
         });
@@ -190,14 +194,18 @@ const CheckPaymentVnPay = async (req: Request, res: Response) => {
         if (responseCode === "00") {
             return res.render("StorePage/payment/success", {
                 orderCode: order.code,
-                txnRef:    transactionNo,
+                txnRef: transactionNo,
+                layout: "StorePage/layout/main",
+                title: "Thanh toán thành công",
             });
         } else {
             return res.render("StorePage/payment/failed", {
-                orderCode:    order.code,
-                errorCode:    responseCode,
+                orderCode: order.code,
+                errorCode: responseCode,
                 errorMessage: errorMessage,
-                canRetry:     RETRYABLE_CODES.has(responseCode),
+                canRetry: RETRYABLE_CODES.has(responseCode),
+                layout: "StorePage/layout/main",
+                title: "Thanh toán thất bại",
             });
         }
     } catch (error) {
@@ -216,10 +224,10 @@ const VnpayIpn = async (req: Request, res: Response) => {
         const query = req.query as Record<string, string>;
         const verify = vnpay.verifyIpnCall(query);
 
-        const txnRef        = query.vnp_TxnRef;
-        const responseCode  = query.vnp_ResponseCode ?? "99";
+        const txnRef = query.vnp_TxnRef;
+        const responseCode = query.vnp_ResponseCode ?? "99";
         const transactionNo = query.vnp_TransactionNo;
-        const amount        = parseInt(query.vnp_Amount || "0") / 100;
+        const amount = parseInt(query.vnp_Amount || "0") / 100;
 
         if (!verify.isVerified) {
             return res.status(200).json({ RspCode: "97", Message: "Invalid Checksum" });
@@ -239,13 +247,13 @@ const VnpayIpn = async (req: Request, res: Response) => {
         let paymentRecordStatus: "SUCCESS" | "FAILED" | "PENDING";
 
         if (responseCode === "00") {
-            newPaymentStatus    = "PAID";
+            newPaymentStatus = "PAID";
             paymentRecordStatus = "SUCCESS";
         } else if (RETRYABLE_CODES.has(responseCode)) {
-            newPaymentStatus    = "PENDING";
+            newPaymentStatus = "PENDING";
             paymentRecordStatus = "FAILED";
         } else {
-            newPaymentStatus    = "FAILED";
+            newPaymentStatus = "FAILED";
             paymentRecordStatus = "FAILED";
         }
 
@@ -259,9 +267,9 @@ const VnpayIpn = async (req: Request, res: Response) => {
 
         await prisma.payment.create({
             data: {
-                orderId:         order.id,
-                amount:          amount,
-                status:          paymentRecordStatus,
+                orderId: order.id,
+                amount: amount,
+                status: paymentRecordStatus,
                 transactionCode: transactionNo || `ERR-${responseCode}-${Date.now()}`,
             },
         });

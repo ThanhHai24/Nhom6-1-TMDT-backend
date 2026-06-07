@@ -11,11 +11,16 @@ const getUsersPage = async (req: Request, res: Response) => {
         users: users,
         usercount: usercount,
         activeUsersCount: activeUsersCount,
-        inactiveUsersCount: inactiveUsersCount
+        inactiveUsersCount: inactiveUsersCount,
+        layout: "admin/layout/main",
+        title: "Quản lý người dùng"
     });
 }
 const getCreateUserPage = async (req: Request, res: Response) => {
-    res.render("admin/users/create");
+    res.render("admin/users/create", {
+        layout: "admin/layout/main",
+        title: "Thêm người dùng"
+    });
 }
 
 const getUsers = async (req: Request, res: Response) => {
@@ -32,7 +37,7 @@ const getUsers = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    
+
     if (q) {
         where.OR = [
             { fullName: { contains: q } },
@@ -41,11 +46,11 @@ const getUsers = async (req: Request, res: Response) => {
             { idCard: { contains: q } },
         ];
     }
-    
+
     if (role) {
         where.role = role;
     }
-    
+
     if (status) {
         where.status = status;
     }
@@ -71,7 +76,9 @@ const getUsers = async (req: Request, res: Response) => {
         status: status,
         usercount: usercount,
         activeUsersCount: activeUsersCount,
-        inactiveUsersCount: inactiveUsersCount
+        inactiveUsersCount: inactiveUsersCount,
+        layout: "admin/layout/main",
+        title: "Quản lý người dùng"
     });
 }
 
@@ -87,7 +94,9 @@ const getUserDetailPage = async (req: Request, res: Response) => {
     const userId = req.params.id as string;
     const user = await getUserByID(userId);
     res.render("admin/users/detail", {
-        user: user
+        user: user,
+        layout: "admin/layout/main",
+        title: "Chi tiết người dùng"
     });
 }
 

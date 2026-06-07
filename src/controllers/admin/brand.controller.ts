@@ -46,7 +46,9 @@ const getBrandsPage = async (req: Request, res: Response) => {
         status: status,
         brandCount: brandCount,
         activeBrandsCount: activeBrandsCount,
-        inactiveBrandsCount: inactiveBrandsCount
+        inactiveBrandsCount: inactiveBrandsCount,
+        layout: "admin/layout/main",
+        title: "Quản lý thương hiệu"
     });
 }
 
@@ -57,7 +59,9 @@ const getCreateBrandPage = async (req: Request, res: Response) => {
         }
     });
     res.render("admin/brand/create", {
-        categories: categories
+        categories: categories,
+        layout: "admin/layout/main",
+        title: "Thêm thương hiệu"
     });
 }
 const normalizeCategoryIds = (categoryIds: any): string[] => {
@@ -82,7 +86,9 @@ const getBrandDetailPage = async (req: Request, res: Response) => {
     const brand = await getBrandById(brandId);
     res.render("admin/brand/detail", {
         brand: brand,
-        categories: categories
+        categories: categories,
+        layout: "admin/layout/main",
+        title: "Chi tiết thương hiệu"
     });
 }
 const PostUpdateBrand = async (req: Request, res: Response) => {

@@ -1,24 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Quản Trị - Quản lý danh mục</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-
-<body>
-
-    <!-- SIDEBAR -->
-    <%- include('../layout/sidebar') -%>
-
-        <!-- MAIN -->
-        <main class="main">
-            <!-- HEADER -->
-            <%- include('../layout/header') -%>
-
-                <div class="content">
 
                     <div class="page active" id="page-category">
                         <div class="page-header">
@@ -206,9 +185,6 @@
                         </div>
 
                     </div>
-                </div>
-        </main>
-
         <!-- DELETE CONFIRM MODAL -->
         <div id="delete-overlay"
             style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;">
@@ -275,6 +251,3 @@
             });
         </script>
 
-</body>
-
-</html>

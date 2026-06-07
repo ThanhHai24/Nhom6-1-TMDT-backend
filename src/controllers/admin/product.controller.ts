@@ -17,6 +17,8 @@ const getProductsPage = async (req: Request, res: Response) => {
         totalPages,
         totalCount,
         limit: LIMIT,
+        layout: "admin/layout/main",
+        title: "Quản lý sản phẩm"
     });
 }
 
@@ -30,6 +32,8 @@ const getCreateProductPage = async (req: Request, res: Response) => {
         suppliers: suppliers,
         categories: categories,
         allProducts: allProducts,
+        layout: "admin/layout/main",
+        title: "Thêm sản phẩm"
     });
 }
 
@@ -42,7 +46,7 @@ const PostCreateProduct = async (req: Request, res: Response) => {
 
     const specKeys = req.body.specKey || req.body['specKey[]'] || [];
     const specValues = req.body.specValue || req.body['specValue[]'] || [];
-    
+
     let specifications: any = null;
     if (specKeys.length > 0) {
         specifications = [];
@@ -99,15 +103,17 @@ const getProductDetailPage = async (req: Request, res: Response) => {
         categories: categories,
         allProducts: allProducts,
         reviewStats,
+        layout: "admin/layout/main",
+        title: "Chi tiết sản phẩm"
     });
 }
 
 const PostUpdateProduct = async (req: Request, res: Response) => {
     const { id, name, category, cost, price, stock, lowStockThreshold, brand, supplier, shortDescription, description, isHot, isNew, isFeatured, existingCover, existingImages, warranty } = req.body;
-    
+
     const specKeys = req.body.specKey || req.body['specKey[]'] || [];
     const specValues = req.body.specValue || req.body['specValue[]'] || [];
-    
+
     let specifications: any = null;
     if (specKeys.length > 0) {
         specifications = [];

@@ -46,11 +46,16 @@ const getSuppliersPage = async (req: Request, res: Response) => {
         status: status,
         supplierCount: supplierCount,
         activeSuppliersCount: activeSuppliersCount,
-        inactiveSuppliersCount: inactiveSuppliersCount
+        inactiveSuppliersCount: inactiveSuppliersCount,
+        layout: "admin/layout/main",
+        title: "Quản lý nhà cung cấp"
     });
 }
 const getCreateSupplierPage = async (req: Request, res: Response) => {
-    res.render("admin/supplier/create");
+    res.render("admin/supplier/create", {
+        layout: "admin/layout/main",
+        title: "Thêm nhà cung cấp"
+    });
 }
 
 const PostCreateSupplier = async (req: Request, res: Response) => {
@@ -62,7 +67,9 @@ const getSupplierDetailPage = async (req: Request, res: Response) => {
     const supplierId = req.params.id as string;
     const supplier = await getSupplierById(supplierId);
     res.render("admin/supplier/detail", {
-        supplier: supplier
+        supplier: supplier,
+        layout: "admin/layout/main",
+        title: "Chi tiết nhà cung cấp"
     });
 }
 const PostUpdateSupplier = async (req: Request, res: Response) => {

@@ -6,12 +6,20 @@ import { prisma } from "config/client";
 const getLoginPage = (req: Request, res: Response) => {
     if (req.isAuthenticated()) return res.redirect("/");
     const sessionAny = req.session as any;
-    res.render("StorePage/auth/login", { message: sessionAny.messages ? sessionAny.messages[0] : null });
+    res.render("StorePage/auth/login", {
+        message: sessionAny.messages ? sessionAny.messages[0] : null,
+        layout: "StorePage/layout/main",
+        title: "Đăng nhập",
+    });
 }
 
 const getRegisterPage = (req: Request, res: Response) => {
     if (req.isAuthenticated()) return res.redirect("/");
-    res.render("StorePage/auth/register", { error: null });
+    res.render("StorePage/auth/register", {
+        error: null,
+        layout: "StorePage/layout/main",
+        title: "Đăng ký",
+    });
 }
 
 const postRegister = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,7 +37,7 @@ const postRegister = async (req: Request, res: Response, next: NextFunction) => 
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Construct full name and username
         const fullName = `${ho} ${ten}`.trim();
         const username = email.split('@')[0] + Math.floor(100 + Math.random() * 900); // simple username generation
@@ -51,7 +59,9 @@ const postRegister = async (req: Request, res: Response, next: NextFunction) => 
         res.redirect("/login");
     } catch (error) {
         console.error("Register Error:", error);
-        res.render("StorePage/auth/register", { error: "An error occurred during registration. Please try again." });
+        res.render("StorePage/auth/register", {
+            error: "An error occurred during registration. Please try again.",
+        });
     }
 }
 
@@ -67,7 +77,7 @@ const postLogin = (req: Request, res: Response, next: NextFunction) => {
         }
         req.logIn(user, (err) => {
             if (err) { return next(err); }
-            
+
             // Redirect staff to admin dashboard, customers to homepage
             if (["ADMIN", "MANAGER", "RECEPTIONIST", "WAREHOUSE"].includes(user.role)) {
                 return res.redirect("/admin/dashboard");

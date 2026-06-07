@@ -1,39 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <title>PCStore - Cửa hàng máy tính</title>
-    <link rel="stylesheet" href="client/css/style.css">
-    <style>
-        :root {
-            --main-bg: url("/client/images/backweb.webp"
-
-                );
-            --promotion-bg: url({{asset('homepage/assets/images/background_offer_detail.png')
-        }
-        });
-        }
-    </style>
-
-</head>
-
-<body>
-    
-    <header>
-        <%- include("../layout/header.ejs") %>
-    </header>
-
-    <nav class="main-nav">
-        <%- include("../layout/navbar.ejs") %>
-    </nav>
-
-    
+ 
     <section class="banner-slideshow">
         <div class="container">
             <div class="banner-container">
@@ -344,116 +309,98 @@
 
     </section>
     </div>
-    <footer>
-        <%- include("../layout/footer.ejs") %>
-    </footer>
-<script>
-// =============================================
-// PRODUCT SLIDER - Mỗi slider hoạt động độc lập
-// =============================================
-document.addEventListener('DOMContentLoaded', function () {
-    const sliders = document.querySelectorAll('.product-slider');
 
-    sliders.forEach(function (slider) {
-        const container = slider.querySelector('.product-container');
-        const prevBtn   = slider.querySelector('.prev-btn');
-        const nextBtn   = slider.querySelector('.next-btn');
+    <script>
+        // =============================================
+        // PRODUCT SLIDER - Mỗi slider hoạt động độc lập
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function () {
+            const sliders = document.querySelectorAll('.product-slider');
 
-        if (!container || !prevBtn || !nextBtn) return;
+            sliders.forEach(function (slider) {
+                const container = slider.querySelector('.product-container');
+                const prevBtn   = slider.querySelector('.prev-btn');
+                const nextBtn   = slider.querySelector('.next-btn');
 
-        // Tính width của 1 card (bao gồm gap)
-        function getScrollAmount() {
-            const card = container.querySelector('.product-card, a');
-            if (!card) return 220;
-            const style = getComputedStyle(container);
-            const gap   = parseFloat(style.gap) || 10;
-            return card.offsetWidth + gap;
-        }
+                if (!container || !prevBtn || !nextBtn) return;
 
-        nextBtn.addEventListener('click', function () {
-            container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
-        });
+                // Tính width của 1 card (bao gồm gap)
+                function getScrollAmount() {
+                    const card = container.querySelector('.product-card, a');
+                    if (!card) return 220;
+                    const style = getComputedStyle(container);
+                    const gap   = parseFloat(style.gap) || 10;
+                    return card.offsetWidth + gap;
+                }
 
-        prevBtn.addEventListener('click', function () {
-            container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
-        });
+                nextBtn.addEventListener('click', function () {
+                    container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
+                });
 
-        // Ẩn/hiện nút khi scroll đến đầu/cuối
-        function updateButtons() {
-            prevBtn.style.opacity = container.scrollLeft <= 0 ? '0.4' : '1';
-            nextBtn.style.opacity =
-                container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
-                ? '0.4' : '1';
-        }
-        container.addEventListener('scroll', updateButtons);
-        updateButtons();
-    });
+                prevBtn.addEventListener('click', function () {
+                    container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+                });
 
-    // =============================================
-    // BANNER SLIDESHOW
-    // =============================================
-    const slides = document.querySelectorAll('.slide');
-    const dots   = document.querySelectorAll('.slideshow-dot');
-    let current  = 0;
-    let timer;
+                // Ẩn/hiện nút khi scroll đến đầu/cuối
+                function updateButtons() {
+                    prevBtn.style.opacity = container.scrollLeft <= 0 ? '0.4' : '1';
+                    nextBtn.style.opacity =
+                        container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
+                        ? '0.4' : '1';
+                }
+                container.addEventListener('scroll', updateButtons);
+                updateButtons();
+            });
 
-    function goTo(index) {
-        slides[current].classList.remove('active');
-        dots[current].classList.remove('active');
-        current = (index + slides.length) % slides.length;
-        slides[current].classList.add('active');
-        dots[current].classList.add('active');
-    }
+            // =============================================
+            // BANNER SLIDESHOW
+            // =============================================
+            const slides = document.querySelectorAll('.slide');
+            const dots   = document.querySelectorAll('.slideshow-dot');
+            let current  = 0;
+            let timer;
 
-    function startAuto() {
-        timer = setInterval(function () { goTo(current + 1); }, 4000);
-    }
+            function goTo(index) {
+                slides[current].classList.remove('active');
+                dots[current].classList.remove('active');
+                current = (index + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                dots[current].classList.add('active');
+            }
 
-    if (slides.length > 0) {
-        dots.forEach(function (dot, i) {
-            dot.addEventListener('click', function () {
-                clearInterval(timer);
-                goTo(i);
+            function startAuto() {
+                timer = setInterval(function () { goTo(current + 1); }, 4000);
+            }
+
+            if (slides.length > 0) {
+                dots.forEach(function (dot, i) {
+                    dot.addEventListener('click', function () {
+                        clearInterval(timer);
+                        goTo(i);
+                        startAuto();
+                    });
+                });
                 startAuto();
-            });
+            }
         });
-        startAuto();
-    }
-});
-// =============================================
-// STICKY NAVBAR & SIDE BANNERS POSITION
-// =============================================
-    window.addEventListener('scroll', function () {
-        const nav = document.querySelector('header');
-        const banners = document.querySelectorAll('.side-banner');
+        // =============================================
+        // STICKY NAVBAR & SIDE BANNERS POSITION
+        // =============================================
+            window.addEventListener('scroll', function () {
+                const nav = document.querySelector('header');
+                const banners = document.querySelectorAll('.side-banner');
 
-        if (window.scrollY > 100) {
-            nav.classList.add('sticky');
-            const navHeight = nav.offsetHeight;
-            banners.forEach(banner => {
-                banner.style.top = (navHeight + 20) + 'px';
+                if (window.scrollY > 100) {
+                    nav.classList.add('sticky');
+                    const navHeight = nav.offsetHeight;
+                    banners.forEach(banner => {
+                        banner.style.top = (navHeight + 20) + 'px';
+                    });
+                } else {
+                    nav.classList.remove('sticky');
+                    banners.forEach(banner => {
+                        banner.style.top = '180px';
+                    });
+                }
             });
-        } else {
-            nav.classList.remove('sticky');
-            banners.forEach(banner => {
-                banner.style.top = '180px';
-            });
-        }
-    });
-</script>
-
-</body>
-<!-- Banner trái -->
-<div class="side-banner side-banner-left">
-    <a href="#">
-        <img src="/client/images/bannerleft.jpg" alt="Banner Left">
-    </a>
-</div>
-
-<!-- Banner phải -->
-<div class="side-banner side-banner-right">
-    <a href="#">
-        <img src="/client/images/bannerright.jpg" alt="Banner Right">
-    </a>
-</div>
-</html>
+    </script>

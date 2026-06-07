@@ -11,6 +11,7 @@ import session from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { prisma } from "config/client";
 import passport from "config/passport";
+import expressLayouts from "express-ejs-layouts";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -26,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Config static files
 app.use(express.static("public"));
+
+app.use(expressLayouts);
 
 
 // middleware to set currentUrl for active link in sidebar

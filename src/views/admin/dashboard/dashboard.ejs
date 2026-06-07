@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - PCStore</title>
-    <link rel="stylesheet" href="/admin/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
-       
-    </style>
-</head>
-<body>
-<%- include('../layout/sidebar') -%>
-<main class="main">
-<%- include('../layout/header') -%>
-<div class="content">
+
 
 <%
     // ── Helpers in EJS ──
@@ -235,8 +219,8 @@
     </div>
 </div>
 
-</div><!-- /content -->
-</main>
+</div>
+
 
 <script>
 // ── Data from server ──
@@ -371,5 +355,3 @@ new Chart(document.getElementById('ordersChart'), {
     }
 })();
 </script>
-</body>
-</html>

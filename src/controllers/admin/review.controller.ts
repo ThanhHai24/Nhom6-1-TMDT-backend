@@ -15,6 +15,8 @@ const getReviewsPage = async (req: Request, res: Response) => {
         totalPages,
         totalCount,
         limit: LIMIT,
+        layout: "admin/layout/main",
+        title: "Quản lý đánh giá"
     });
 };
 

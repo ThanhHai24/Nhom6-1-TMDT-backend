@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "config/client";
 import { createOrderTransaction, validateCartStock } from "../../services/client/cart.services";
 import { InsufficientStockError } from "../../types/errors";
+import { title } from "process";
 
 const { VNPay, ignoreLogger, ProductCode, VnpLocale } = require("vnpay");
 
@@ -18,7 +19,10 @@ const VNPAY_RETURN_URL =
     process.env.VNPAY_RETURN_URL || "http://localhost:8080/api/check-payment-vnpay";
 
 const getCartPage = async (req: Request, res: Response) => {
-    return res.render('StorePage/cart/cart');
+    return res.render('StorePage/cart/cart', {
+        layout: 'StorePage/layout/main',
+        title: "Giỏ hàng"
+    });
 }
 
 const addToCart = async (req: Request, res: Response) => {

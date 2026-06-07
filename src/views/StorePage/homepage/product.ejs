@@ -1,123 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <title>PCStore - Cửa hàng máy tính</title>
-    <link rel="stylesheet" href="../client/css/style.css">
-    <style>
-        :root {
-            --main-bg: url("/client/images/backweb.webp"
-
-                );
-            --promotion-bg: url("/client/images/background_offer_detail.png"
-
-                );
-        }
-
-        /* ===== CART NOTIFICATION POPUP ===== */
-        #cart-toast {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 99999;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
-            padding: 18px 22px 18px 18px;
-            min-width: 320px;
-            max-width: 400px;
-            transform: translateX(calc(100% + 40px));
-            opacity: 0;
-            transition: transform 0.38s cubic-bezier(.45,1.6,.55,1), opacity 0.3s ease;
-            pointer-events: none;
-            border-left: 5px solid #22c55e;
-        }
-        #cart-toast.show {
-            transform: translateX(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #cart-toast.error {
-            border-left-color: #ef4444;
-        }
-        #cart-toast .toast-icon {
-            font-size: 28px;
-            line-height: 1;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        #cart-toast .toast-body {
-            flex: 1;
-        }
-        #cart-toast .toast-title {
-            font-weight: 700;
-            font-size: 15px;
-            color: #1a1a2e;
-            margin-bottom: 3px;
-        }
-        #cart-toast .toast-msg {
-            font-size: 13px;
-            color: #555;
-        }
-        #cart-toast .toast-close {
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: #aaa;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            margin-top: 2px;
-            flex-shrink: 0;
-            transition: color 0.2s;
-        }
-        #cart-toast .toast-close:hover {
-            color: #333;
-        }
-        #cart-toast .toast-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            width: 100%;
-            border-radius: 0 0 14px 14px;
-            background: #22c55e;
-            transform-origin: left;
-            animation: none;
-        }
-        #cart-toast.show .toast-progress {
-            animation: toastProgress 3s linear forwards;
-        }
-        #cart-toast.error .toast-progress {
-            background: #ef4444;
-        }
-        @keyframes toastProgress {
-            from { transform: scaleX(1); }
-            to   { transform: scaleX(0); }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="wrapper">
-        <header>
-            <%- include("../layout/header.ejs") %>
-        </header>
-
-        <nav class="main-nav">
-            <%- include("../layout/navbar.ejs") %>
-        </nav>
-
-        <main>
             <div class="container">
                 <div class="breadcrumb">
                     <a href="#">Trang chủ</a> &gt; <a href="#">PC GAMING</a>
@@ -349,72 +230,66 @@
 
 
                 <section class="info-section">
-                <div class="info-container">
-                    
-                    <div class="description">
+                    <div class="info-container">
+                        
+                        <div class="description">
 
-                        <h2 class="description-title">Giới thiệu sản phẩm: <%= product.name %></h2>
-                        <div class="description-detail" id="description-content">
-                            <%- product.description %>
+                            <h2 class="description-title">Giới thiệu sản phẩm: <%= product.name %></h2>
+                            <div class="description-detail" id="description-content">
+                                <%- product.description %>
+                            </div>
+                            <div style="text-align:center; margin-top: 12px;">
+                                <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
+                            </div>
+
                         </div>
-                        <div style="text-align:center; margin-top: 12px;">
-                            <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
-                        </div>
+                        
 
-                    </div>
-                    
-
-                    <%
-                        let specs = [];
-                        try {
-                            if (product.specifications) {
-                                specs = typeof product.specifications === 'string'
-                                    ? JSON.parse(product.specifications)
-                                    : product.specifications;
+                        <%
+                            let specs = [];
+                            try {
+                                if (product.specifications) {
+                                    specs = typeof product.specifications === 'string'
+                                        ? JSON.parse(product.specifications)
+                                        : product.specifications;
+                                }
+                            } catch(e) {
+                                specs = [];
                             }
-                        } catch(e) {
-                            specs = [];
-                        }
-                    %>
-                    <% if (specs && specs.length > 0) { %>
-                    <div class="specs">
-                        <h2 class="specs-title">Thông số kỹ thuật</h2>
-                        <div class="spec-detail" id="specs-content">
-                            <table class="specs-table">
-                                <tbody>
-                                    <% specs.forEach(function(spec) { %>
-                                    <tr class="spec-row">
-                                        <td class="spec-key"><%= spec.key %></td>
-                                        <td class="spec-value">
-                                            <% if (spec.productRef) { %>
-                                                <a href="/product/<%= spec.productRef.slug %>" class="spec-product-link">
-                                                    <i class="bi bi-box-seam"></i>
-                                                    <%= spec.productRef.name %>
-                                                </a>
-                                            <% } else { %>
-                                                <%= spec.value %>
-                                            <% } %>
-                                        </td>
-                                    </tr>
-                                    <% }); %>
-                                </tbody>
-                            </table>
+                        %>
+                        <% if (specs && specs.length > 0) { %>
+                        <div class="specs">
+                            <h2 class="specs-title">Thông số kỹ thuật</h2>
+                            <div class="spec-detail" id="specs-content">
+                                <table class="specs-table">
+                                    <tbody>
+                                        <% specs.forEach(function(spec) { %>
+                                        <tr class="spec-row">
+                                            <td class="spec-key"><%= spec.key %></td>
+                                            <td class="spec-value">
+                                                <% if (spec.productRef) { %>
+                                                    <a href="/product/<%= spec.productRef.slug %>" class="spec-product-link">
+                                                        <i class="bi bi-box-seam"></i>
+                                                        <%= spec.productRef.name %>
+                                                    </a>
+                                                <% } else { %>
+                                                    <%= spec.value %>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="text-align:center; margin-top: 12px;">
+                                <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
+                            </div>
                         </div>
-                        <div style="text-align:center; margin-top: 12px;">
-                            <a class="toggle-btn" onclick="toggleSection('specs-content', this)">Xem thêm</a>
-                        </div>
+                        <% } %>
                     </div>
-                    <% } %>
-                </div>
-            </section>
+                </section>
             
-    </div>
-    </main>
-
-    <footer>
-        <%- include("../layout/footer.ejs") %>
-    </footer>
-    </div>
+            </div>
 
     <!-- ===== CART TOAST NOTIFICATION ===== -->
     <div id="cart-toast" role="alert" aria-live="assertive">
@@ -427,158 +302,155 @@
         <div class="toast-progress" id="toast-progress"></div>
     </div>
     <script>
-    // =========================
-    // PRODUCT IMAGE SLIDER
-    // =========================
+        // =========================
+        // PRODUCT IMAGE SLIDER
+        // =========================
 
-    const mainImage = document.getElementById("mainImage");
-    const thumbnails = document.querySelectorAll(".thumbnail");
+        const mainImage = document.getElementById("mainImage");
+        const thumbnails = document.querySelectorAll(".thumbnail");
 
-    let currentIndex = 0;
+        let currentIndex = 0;
 
-    // Đổi ảnh khi click thumbnail
-    function changeMainImage(el) {
-        mainImage.src = el.src;
+        // Đổi ảnh khi click thumbnail
+        function changeMainImage(el) {
+            mainImage.src = el.src;
 
-        thumbnails.forEach(img => img.classList.remove("active"));
-        el.classList.add("active");
+            thumbnails.forEach(img => img.classList.remove("active"));
+            el.classList.add("active");
 
-        currentIndex = Array.from(thumbnails).indexOf(el);
-    }
-    // =========================
-    // QUANTITY CONTROL
-    // =========================
-
-    function changeQuantity(amount) {
-        const input = document.getElementById("quantityInput");
-        let value = parseInt(input.value) || 1;
-
-        value += amount;
-
-        if (value < 1) value = 1;
-
-        input.value = value;
-    }
-
-
-    // =========================
-    // ADD TO CART (AJAX)
-    // =========================
-
-    // ===== TOAST NOTIFICATION HELPERS =====
-    let toastTimer = null;
-
-    function showCartToast(success, title, msg) {
-        const toast    = document.getElementById('cart-toast');
-        const iconEl   = document.getElementById('toast-icon');
-        const titleEl  = document.getElementById('toast-title');
-        const msgEl    = document.getElementById('toast-msg');
-        const progress = document.getElementById('toast-progress');
-
-        // Reset trạng thái cũ
-        toast.classList.remove('show', 'error');
-        progress.style.animation = 'none';
-        void progress.offsetWidth; // trigger reflow để reset animation
-
-        iconEl.textContent  = success ? '✅' : '❌';
-        titleEl.textContent = title;
-        msgEl.textContent   = msg;
-        if (!success) toast.classList.add('error');
-
-        // Hiện toast
-        requestAnimationFrame(() => {
-            toast.classList.add('show');
-        });
-
-        // Tự ẩn sau 3 giây
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(hideCartToast, 3000);
-    }
-
-    function hideCartToast() {
-        const toast = document.getElementById('cart-toast');
-        toast.classList.remove('show');
-        clearTimeout(toastTimer);
-    }
-
-    // ===== ADD TO CART (AJAX) =====
-    async function addToCart(e) {
-        e.preventDefault();
-
-        const form = document.getElementById("addToCartForm");
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        try {
-            const res = await axios.post("/cart/add", data);
-
-            if (res.data && res.data.cartCount) {
-                const badge = document.querySelector('.cart-count');
-                if (badge) badge.textContent = res.data.cartCount;
-            }
-
-            const qty = data.product_qty || 1;
-            showCartToast(true, 'Thêm vào giỏ hàng thành công!', `Đã thêm ${qty} sản phẩm vào giỏ hàng.`);
-        } catch (err) {
-            console.error(err);
-            showCartToast(false, 'Thêm giỏ hàng thất bại!', 'Vui lòng thử lại hoặc kiểm tra kết nối.');
+            currentIndex = Array.from(thumbnails).indexOf(el);
         }
-    }
+        // =========================
+        // QUANTITY CONTROL
+        // =========================
 
+        function changeQuantity(amount) {
+            const input = document.getElementById("quantityInput");
+            let value = parseInt(input.value) || 1;
 
-    // =========================
-    // TOGGLE DESCRIPTION / SPECS
-    // =========================
+            value += amount;
 
-    function toggleSection(id, btn) {
-        const el = document.getElementById(id);
+            if (value < 1) value = 1;
 
-        if (el.classList.contains("expanded")) {
-            el.classList.remove("expanded");
-            btn.innerText = "Xem thêm";
-        } else {
-            el.classList.add("expanded");
-            btn.innerText = "Thu gọn";
+            input.value = value;
         }
-    }
 
-    // =============================================
-    // RELATED PRODUCTS SLIDER
-    // =============================================
-    (function () {
-        const sliders = document.querySelectorAll('.product-slider');
-        sliders.forEach(function (slider) {
-            const container = slider.querySelector('.product-container');
-            const prevBtn   = slider.querySelector('.prev-btn');
-            const nextBtn   = slider.querySelector('.next-btn');
-            if (!container || !prevBtn || !nextBtn) return;
 
-            function getScrollAmount() {
-                const card = container.querySelector('.product-card, a');
-                if (!card) return 220;
-                const gap = parseFloat(getComputedStyle(container).gap) || 10;
-                return card.offsetWidth + gap;
-            }
+        // =========================
+        // ADD TO CART (AJAX)
+        // =========================
 
-            nextBtn.addEventListener('click', function () {
-                container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
-            });
-            prevBtn.addEventListener('click', function () {
-                container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+        // ===== TOAST NOTIFICATION HELPERS =====
+        let toastTimer = null;
+
+        function showCartToast(success, title, msg) {
+            const toast    = document.getElementById('cart-toast');
+            const iconEl   = document.getElementById('toast-icon');
+            const titleEl  = document.getElementById('toast-title');
+            const msgEl    = document.getElementById('toast-msg');
+            const progress = document.getElementById('toast-progress');
+
+            // Reset trạng thái cũ
+            toast.classList.remove('show', 'error');
+            progress.style.animation = 'none';
+            void progress.offsetWidth; // trigger reflow để reset animation
+
+            iconEl.textContent  = success ? '✅' : '❌';
+            titleEl.textContent = title;
+            msgEl.textContent   = msg;
+            if (!success) toast.classList.add('error');
+
+            // Hiện toast
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
             });
 
-            function updateBtns() {
-                prevBtn.style.opacity = container.scrollLeft <= 1 ? '0.35' : '1';
-                nextBtn.style.opacity =
-                    container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
-                    ? '0.35' : '1';
+            // Tự ẩn sau 3 giây
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(hideCartToast, 3000);
+        }
+
+        function hideCartToast() {
+            const toast = document.getElementById('cart-toast');
+            toast.classList.remove('show');
+            clearTimeout(toastTimer);
+        }
+
+        // ===== ADD TO CART (AJAX) =====
+        async function addToCart(e) {
+            e.preventDefault();
+
+            const form = document.getElementById("addToCartForm");
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await axios.post("/cart/add", data);
+
+                if (res.data && res.data.cartCount) {
+                    const badge = document.querySelector('.cart-count');
+                    if (badge) badge.textContent = res.data.cartCount;
+                }
+
+                const qty = data.product_qty || 1;
+                showCartToast(true, 'Thêm vào giỏ hàng thành công!', `Đã thêm ${qty} sản phẩm vào giỏ hàng.`);
+            } catch (err) {
+                console.error(err);
+                showCartToast(false, 'Thêm giỏ hàng thất bại!', 'Vui lòng thử lại hoặc kiểm tra kết nối.');
             }
-            container.addEventListener('scroll', updateBtns);
-            updateBtns();
-        });
-    })();
+        }
 
-</script>
-</body>
 
-</html>
+        // =========================
+        // TOGGLE DESCRIPTION / SPECS
+        // =========================
+
+        function toggleSection(id, btn) {
+            const el = document.getElementById(id);
+
+            if (el.classList.contains("expanded")) {
+                el.classList.remove("expanded");
+                btn.innerText = "Xem thêm";
+            } else {
+                el.classList.add("expanded");
+                btn.innerText = "Thu gọn";
+            }
+        }
+
+        // =============================================
+        // RELATED PRODUCTS SLIDER
+        // =============================================
+        (function () {
+            const sliders = document.querySelectorAll('.product-slider');
+            sliders.forEach(function (slider) {
+                const container = slider.querySelector('.product-container');
+                const prevBtn   = slider.querySelector('.prev-btn');
+                const nextBtn   = slider.querySelector('.next-btn');
+                if (!container || !prevBtn || !nextBtn) return;
+
+                function getScrollAmount() {
+                    const card = container.querySelector('.product-card, a');
+                    if (!card) return 220;
+                    const gap = parseFloat(getComputedStyle(container).gap) || 10;
+                    return card.offsetWidth + gap;
+                }
+
+                nextBtn.addEventListener('click', function () {
+                    container.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
+                });
+                prevBtn.addEventListener('click', function () {
+                    container.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+                });
+
+                function updateBtns() {
+                    prevBtn.style.opacity = container.scrollLeft <= 1 ? '0.35' : '1';
+                    nextBtn.style.opacity =
+                        container.scrollLeft + container.clientWidth >= container.scrollWidth - 2
+                        ? '0.35' : '1';
+                }
+                container.addEventListener('scroll', updateBtns);
+                updateBtns();
+            });
+        })();
+
+    </script>

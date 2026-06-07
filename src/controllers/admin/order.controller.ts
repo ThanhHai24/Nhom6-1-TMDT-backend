@@ -72,14 +72,20 @@ const getOrders = async (req: Request, res: Response) => {
         shippedOrdersCount: shippedOrdersCount,
         deliveredOrdersCount: deliveredOrdersCount,
         cancelledOrdersCount: cancelledOrdersCount,
-        returnedOrdersCount: returnedOrdersCount
+        returnedOrdersCount: returnedOrdersCount,
+        layout: "admin/layout/main",
+        title: "Quản lý đơn hàng"
     });
 }
 
 const getOrderDetailPage = async (req: Request, res: Response) => {
     const orderId = req.params.id as string;
     const order = await getOrderById(orderId);
-    res.render("admin/orders/detail", { order });
+    res.render("admin/orders/detail", {
+        order,
+        layout: "admin/layout/main",
+        title: "Chi tiết đơn hàng"
+    });
 }
 
 const PostUpdateOrderStatus = async (req: Request, res: Response) => {

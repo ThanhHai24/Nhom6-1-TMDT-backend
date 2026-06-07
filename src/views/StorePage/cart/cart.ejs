@@ -1,29 +1,7 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <title>PCStore - Cửa hàng máy tính</title>
-    <link rel="stylesheet" href="../client/css/style.css">
-</head>
-<body>
-    <header>
-        <%- include("../layout/header.ejs") %>
-    </header>
-
-    <nav class="main-nav">
-        <%- include("../layout/navbar.ejs") %>
-    </nav>
-
-
-    <div class="container">
-        <div class="breadcrumb">
+﻿        <div class="breadcrumb">
             <a href="#">Trang chủ</a> &gt; <a href="#">Giỏ hàng</a>
         </div>
 
-        <!-- Empty Cart -->
         <!-- Empty Cart -->
         <% const hasItems = (locals.cart && locals.cart.length > 0); %>
         <div id="emptyCart" class="cart-container" style="display: <%= hasItems ? 'none' : 'block' %>;">
@@ -232,68 +210,7 @@
                 </div>
             </form>
         </div>
-    </div>
 
-    
-
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3 class="footer-title">Về NguyenCongPC</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Tin tức</a></li>
-                        <li><a href="#">Khuyến mãi</a></li>
-                        <li><a href="#">Tuyển dụng</a></li>
-                        <li><a href="#">Liên hệ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3 class="footer-title">Hỗ trợ khách hàng</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Hướng dẫn mua hàng</a></li>
-                        <li><a href="#">Chính sách bảo hành</a></li>
-                        <li><a href="#">Chính sách vận chuyển</a></li>
-                        <li><a href="#">Phương thức thanh toán</a></li>
-                        <li><a href="#">Hỗ trợ trả góp</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3 class="footer-title">Thông tin cửa hàng</h3>
-                    <ul class="footer-links">
-                        <li>Showroom: 123 Đường ABC, Quận XYZ, TP.HCM</li>
-                        <li>Điện thoại: 1900 1234</li>
-                        <li>Email: contact@nguyencongpc.vn</li>
-                        <li>Giờ làm việc: 8h30 - 20h30 (T2-CN)</li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3 class="footer-title">Kết nối với chúng tôi</h3>
-                    <div style="display: flex; gap: 15px; margin-top: 15px;">
-                        <a href="#" style="color: white; font-size: 24px;">📱</a>
-                        <a href="#" style="color: white; font-size: 24px;">📘</a>
-                        <a href="#" style="color: white; font-size: 24px;">📸</a>
-                        <a href="#" style="color: white; font-size: 24px;">🎬</a>
-                    </div>
-                    <div style="margin-top: 20px;">
-                        <h3 class="footer-title">Phương thức thanh toán</h3>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                            <div style="background-color: white; width: 45px; height: 30px; border-radius: 4px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>© 2025 NguyenCongPC. Tất cả các quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
     <script src="assets/js/scripts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
@@ -491,5 +408,4 @@
             });
         });
     </script>
-</body>
-</html>
+

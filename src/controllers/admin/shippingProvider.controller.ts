@@ -46,11 +46,16 @@ const getShippingProvidersPage = async (req: Request, res: Response) => {
         status: status,
         shippingProviderCount: shippingProviderCount,
         activeShippingProvidersCount: activeShippingProvidersCount,
-        inactiveShippingProvidersCount: inactiveShippingProvidersCount
+        inactiveShippingProvidersCount: inactiveShippingProvidersCount,
+        layout: "admin/layout/main",
+        title: "Quản lý vận chuyển"
     });
 }
 const getCreateShippingProviderPage = async (req: Request, res: Response) => {
-    res.render("admin/shippingProvider/create");
+    res.render("admin/shippingProvider/create", {
+        layout: "admin/layout/main",
+        title: "Quản lý vận chuyển",
+    });
 }
 
 const PostCreateShippingProvider = async (req: Request, res: Response) => {
@@ -62,7 +67,9 @@ const getShippingProviderDetailPage = async (req: Request, res: Response) => {
     const shippingProviderId = req.params.id as string;
     const shippingProvider = await getShippingProviderById(shippingProviderId);
     res.render("admin/shippingProvider/detail", {
-        shippingProvider: shippingProvider
+        shippingProvider: shippingProvider,
+        layout: "admin/layout/main",
+        title: "Quản lý vận chuyển"
     });
 }
 const PostUpdateShippingProvider = async (req: Request, res: Response) => {
