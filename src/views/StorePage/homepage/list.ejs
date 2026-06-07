@@ -107,27 +107,27 @@
             <div class="product-grid" id="productGrid">
                 <% products.forEach(function(p){ %>
                 <a href="/product/<%= p.slug%>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
-                        <div class="product-card">
-                            <% if (p.isHot) { %><span class="bestseller-label">Hot</span><% } %>
-                            <% if (p.isNew) { %><span class="product-badge new">Mới</span><% } %>
-                            <div class="product-image">
-                                <img src="admin/productImages/<%=p.image %>" alt="PC Gaming">
-                            </div>
-                            <h3 class="product-title"><%=p.name%></h3>
-                            <% if (p.originalPrice && p.originalPrice > p.price) { %>
-                            <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ
-
-                                <span class="original-price"><%= p.originalPrice.toLocaleString('vi-VN')%>đ</span>
-
-                            </div>
-                            <% } else { %>
-                            <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ</div>
-                            <% } %>
-                            <div class="product-stats">
-                                <span>⭐ Đã bán: <%= p.sold%></span>
-                            </div>
+                    <div class="product-card">
+                        <% if (p.isHot) { %><span class="bestseller-label">Hot</span><% } %>
+                        <% if (p.isNew) { %><span class="product-badge new">Mới</span><% } %>
+                        <div class="product-image">
+                            <img src="admin/productImages/<%=p.image %>" alt="PC Gaming">
                         </div>
-                    </a>
+                        <h3 class="product-title"><%=p.name%></h3>
+                        <% if (p.originalPrice && p.originalPrice > p.price) { %>
+                        <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ
+
+                            <span class="original-price"><%= p.originalPrice.toLocaleString('vi-VN')%>đ</span>
+
+                        </div>
+                        <% } else { %>
+                        <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ</div>
+                        <% } %>
+                        <div class="product-stats">
+                            <span>⭐ Đã bán: <%= p.sold%></span>
+                        </div>
+                    </div>
+                </a>
                 <% }); %>
             </div>
             <% } else { %>

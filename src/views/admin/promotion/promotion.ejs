@@ -1,103 +1,221 @@
-                    <!-- PROMOTIONS PAGE -->
-                    <div class="page active" id="page-promotions">
-                        <div class="page-header">
-                            <div>
-                                <h2>Quản lý khuyến mãi</h2>
-                                <div class="breadcrumb">Hệ quản trị → Khuyến mãi</div>
-                            </div>
-                            <button class="btn primary">+ Tạo khuyến mãi</button>
-                        </div>
-                        <div class="promo-grid">
-                            <div class="promo-card">
-                                <div class="promo-type">Giảm theo %</div>
-                                <div class="promo-name">Flash Sale T3/2026</div>
-                                <div class="promo-code">FLASH30</div>
-                                <div style="font-size:13px;color:#5F5E5A">Giảm <b>30%</b> cho đơn từ 2 triệu · Còn 3
-                                    ngày</div>
-                                <div class="promo-bar">
-                                    <div class="promo-fill" style="width:73%"></div>
-                                </div>
-                                <div class="promo-stats"><span>Đã dùng: 1,460</span><span>Giới hạn: 2,000</span></div>
-                            </div>
-                            <div class="promo-card">
-                                <div class="promo-type">Miễn phí ship</div>
-                                <div class="promo-name">Freeship toàn quốc</div>
-                                <div class="promo-code">FREESHIP</div>
-                                <div style="font-size:13px;color:#5F5E5A">Miễn phí vận chuyển toàn quốc · Không giới hạn
-                                </div>
-                                <div class="promo-bar">
-                                    <div class="promo-fill" style="width:45%"></div>
-                                </div>
-                                <div class="promo-stats"><span>Đã dùng: 4,520</span><span>Giới hạn: 10,000</span></div>
-                            </div>
-                            <div class="promo-card">
-                                <div class="promo-type">Giảm trực tiếp</div>
-                                <div class="promo-name">Ưu đãi thành viên VIP</div>
-                                <div class="promo-code">VIP500K</div>
-                                <div style="font-size:13px;color:#5F5E5A">Giảm <b>500,000 ₫</b> cho thành viên VIP · Còn
-                                    15 ngày
-                                </div>
-                                <div class="promo-bar">
-                                    <div class="promo-fill" style="width:20%"></div>
-                                </div>
-                                <div class="promo-stats"><span>Đã dùng: 200</span><span>Giới hạn: 1,000</span></div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header"><span class="card-title">Tất cả chương trình khuyến mãi</span>
-                            </div>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Tên chương trình</th>
-                                        <th>Mã</th>
-                                        <th>Loại</th>
-                                        <th>Giá trị</th>
-                                        <th>Đã dùng</th>
-                                        <th>Hạn dùng</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Flash Sale T3/2026</td>
-                                        <td style="font-family:monospace">FLASH30</td>
-                                        <td>Giảm %</td>
-                                        <td>30%</td>
-                                        <td>1,460/2,000</td>
-                                        <td>02/04/2026</td>
-                                        <td><span class="badge active">Đang chạy</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Freeship toàn quốc</td>
-                                        <td style="font-family:monospace">FREESHIP</td>
-                                        <td>Miễn ship</td>
-                                        <td>100%</td>
-                                        <td>4,520/10,000</td>
-                                        <td>30/04/2026</td>
-                                        <td><span class="badge active">Đang chạy</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Ưu đãi thành viên VIP</td>
-                                        <td style="font-family:monospace">VIP500K</td>
-                                        <td>Giảm tiền</td>
-                                        <td>500,000 ₫</td>
-                                        <td>200/1,000</td>
-                                        <td>15/04/2026</td>
-                                        <td><span class="badge active">Đang chạy</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Khuyến mãi Tết 2026</td>
-                                        <td style="font-family:monospace">TET2026</td>
-                                        <td>Giảm %</td>
-                                        <td>20%</td>
-                                        <td>8,240/8,240</td>
-                                        <td>10/02/2026</td>
-                                        <td><span class="badge inactive">Đã kết thúc</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+<!-- PROMOTIONS PAGE -->
+<div class="page active" id="page-promotions">
+    <div class="page-header">
+        <div>
+            <h2>Quản lý khuyến mãi</h2>
+            <div class="breadcrumb">Hệ quản trị → Khuyến mãi</div>
+        </div>
+        <a href="/admin/promotion/create"><button class="btn primary">+ Tạo khuyến mãi</button></a>
+    </div>
 
- 
+    <!-- Top Promo Cards (Dynamic first 3 promotions) -->
+    <% if (promotions && promotions.length > 0) { %>
+        <div class="promo-grid">
+            <% const topPromos = promotions.slice(0, 3); %>
+            <% topPromos.forEach(function(promo) { %>
+                <% 
+                    const now = new Date();
+                    let statusText = 'Đang chạy';
+                    let statusClass = 'active';
+                    let daysLeft = '';
+                    
+                    if (promo.startDate && new Date(promo.startDate) > now) {
+                        statusText = 'Sắp diễn ra';
+                        statusClass = 'warning';
+                        const diffTime = Math.abs(new Date(promo.startDate).getTime() - now.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        daysLeft = `Bắt đầu sau ${diffDays} ngày`;
+                    } else if (promo.endDate && new Date(promo.endDate) < now) {
+                        statusText = 'Đã kết thúc';
+                        statusClass = 'inactive';
+                        daysLeft = 'Hết hạn';
+                    } else if (promo.endDate) {
+                        const diffTime = Math.abs(new Date(promo.endDate).getTime() - now.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        daysLeft = `Còn ${diffDays} ngày`;
+                    } else {
+                        daysLeft = 'Không thời hạn';
+                    }
+                %>
+                <div class="promo-card">
+                    <div class="promo-type">
+                        <%= promo.type === 'PERCENT' ? 'Giảm theo %' : 'Giảm trực tiếp' %>
+                        <span class="badge <%= statusClass %>" style="float: right; font-size: 10px;"><%= statusText %></span>
+                    </div>
+                    <div class="promo-name"><%= promo.name %></div>
+                    <div class="promo-code" style="font-size: 12px; color: var(--accent); font-weight: bold; margin-bottom: 8px;">
+                        <% if (promo.coupons && promo.coupons.length > 0) { %>
+                            <%= promo.coupons.map(c => c.code).join(', ') %>
+                        <% } else { %>
+                            CHƯA CÓ MÃ
+                        <% } %>
+                    </div>
+                    <div style="font-size:13px;color:#5F5E5A">
+                        Giảm <b><%= promo.type === 'PERCENT' ? promo.discountValue + '%' : promo.discountValue.toLocaleString('vi-VN') + ' ₫' %></b>
+                        <% if (promo.maxDiscount) { %>
+                            · Tối đa <%= promo.maxDiscount.toLocaleString('vi-VN') %> ₫
+                        <% } %>
+                        · <%= daysLeft %>
+                    </div>
+                    <div class="promo-bar" style="margin-top: 10px;">
+                        <div class="promo-fill" style="width: <%= promo.coupons && promo.coupons.length > 0 ? '50%' : '0%' %>"></div>
+                    </div>
+                    <div class="promo-stats">
+                        <span>Số lượng mã: <%= promo.coupons ? promo.coupons.length : 0 %></span>
+                        <span>Giới hạn: <%= promo.coupons && promo.coupons.length > 0 ? (promo.coupons[0].usageLimit || 'Vô hạn') : '—' %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <div class="card">
+        <!-- Toolbar & Filter -->
+        <form method="GET" action="/admin/promotion" class="toolbar" style="flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <div class="search-box" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+                    <circle cx="7" cy="7" r="5" />
+                    <path d="M11 11l3 3" />
+                </svg>
+                <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Tìm theo tên chương trình..." style="border: none; outline: none; background: transparent; flex: 1; padding: 4px;">
+            </div>
+
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="RUNNING" <%= typeof status !== 'undefined' && status === 'RUNNING' ? 'selected' : '' %>>Đang chạy</option>
+                <option value="UPCOMING" <%= typeof status !== 'undefined' && status === 'UPCOMING' ? 'selected' : '' %>>Sắp diễn ra</option>
+                <option value="EXPIRED" <%= typeof status !== 'undefined' && status === 'EXPIRED' ? 'selected' : '' %>>Đã kết thúc</option>
+            </select>
+            
+            <button type="submit" class="btn">Tìm / Lọc</button>
+        </form>
+
+        <!-- Data Table -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tên chương trình</th>
+                    <th>Mã giảm giá (Coupons)</th>
+                    <th>Loại</th>
+                    <th>Giá trị</th>
+                    <th>Giới hạn dùng</th>
+                    <th>Thời hạn dùng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (promotions.length === 0) { %>
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
+                            Không tìm thấy chương trình khuyến mãi nào.
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% promotions.forEach(function (promo) { %>
+                        <% 
+                            const now = new Date();
+                            let statusText = 'Đang chạy';
+                            let statusClass = 'active';
+                            
+                            if (promo.startDate && new Date(promo.startDate) > now) {
+                                statusText = 'Sắp diễn ra';
+                                statusClass = 'warning';
+                            } else if (promo.endDate && new Date(promo.endDate) < now) {
+                                statusText = 'Đã kết thúc';
+                                statusClass = 'inactive';
+                            }
+                        %>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 500; color: #333;"><%= promo.name %></div>
+                            </td>
+                            <td>
+                                <% if (promo.coupons && promo.coupons.length > 0) { %>
+                                    <% promo.coupons.forEach(c => { %>
+                                        <span class="badge" style="font-family: monospace; background-color: #f1f3f5; color: #495057; display: inline-block; margin-bottom: 2px;">
+                                            <%= c.code %> (<%= c.status ? 'Mở' : 'Khóa' %>)
+                                        </span>
+                                    <% }); %>
+                                <% } else { %>
+                                    <span style="color: #bbb; font-style: italic;">Chưa tạo mã</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <%= promo.type === 'PERCENT' ? 'Giảm %' : 'Giảm tiền' %>
+                            </td>
+                            <td>
+                                <b><%= promo.type === 'PERCENT' ? promo.discountValue + '%' : promo.discountValue.toLocaleString('vi-VN') + ' ₫' %></b>
+                                <% if (promo.maxDiscount) { %>
+                                    <div style="font-size: 11px; color: #666;">(Tối đa: <%= promo.maxDiscount.toLocaleString('vi-VN') %> ₫)</div>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (promo.coupons && promo.coupons.length > 0) { %>
+                                    <%= promo.coupons[0].usageLimit ? promo.coupons[0].usageLimit : 'Vô hạn' %>
+                                <% } else { %>
+                                    —
+                                <% } %>
+                            </td>
+                            <td>
+                                <div style="font-size: 12px; color: #444;">
+                                    Bắt đầu: <%= promo.startDate ? new Date(promo.startDate).toLocaleDateString('vi-VN') : '—' %>
+                                </div>
+                                <div style="font-size: 12px; color: #444;">
+                                    Kết thúc: <%= promo.endDate ? new Date(promo.endDate).toLocaleDateString('vi-VN') : '—' %>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge <%= statusClass %>"><%= statusText %></span>
+                            </td>
+                            <td>
+                                <a href="/admin/promotion/<%= promo.id %>"><button class="btn sm">Chi tiết</button></a>
+                                <form style="display: inline;" action="/admin/promotion/delete/<%= promo.id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này và tất cả các mã đi kèm?')">
+                                    <button class="btn sm danger-outline">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination" style="margin-top: 20px;">
+                <span>Trang <%= currentPage %> / <%= totalPages %></span>
+
+                <div class="page-btns">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&q=<%= q %>&status=<%= status %>" class="page-btn">‹</a>
+                    <% } %>
+
+                    <% 
+                        function getPagination(current, total) {
+                            if (total <= 5) return Array.from({length: total}, (_, i) => i + 1);
+                            if (current <= 3) return [1, 2, 3, '...', total - 1, total];
+                            if (current >= total - 2) return [1, 2, '...', total - 2, total - 1, total];
+                            return [1, 2, '...', current, '...', total - 1, total];
+                        }
+                        const pages = getPagination(currentPage, totalPages);
+                    %>
+
+                    <% pages.forEach(p => { %>
+                        <% if (p === '...') { %>
+                            <span class="page-dots">...</span>
+                        <% } else { %>
+                            <a href="?page=<%= p %>&q=<%= q %>&status=<%= status %>"
+                            class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                            <%= p %>
+                            </a>
+                        <% } %>
+                    <% }) %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&q=<%= q %>&status=<%= status %>" class="page-btn">›</a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>

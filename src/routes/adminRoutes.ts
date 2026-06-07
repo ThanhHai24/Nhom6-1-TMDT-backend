@@ -1,7 +1,8 @@
 import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
 import { getBrandsByCategoryId } from 'services/admin/brand.services';
 import { getCategoriesPage, getCreateParentCategoryPage, getCreateChildCategoryPage, PostCreateCategory, getCategoryDetailPage, PostUpdateCategory } from 'controllers/admin/category.controller';
-import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage } from 'controllers/admin/dashboard.controller';
+import { getDashboardPage, getHistoryPage } from 'controllers/admin/dashboard.controller';
+import { getNotificationsPage } from 'controllers/admin/notification.controller';
 import { getDashboardStatsByPeriod } from 'services/admin/dashboard.services';
 import { getOrderDetailPage, getOrders, PostUpdateOrderStatus } from 'controllers/admin/order.controller';
 import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostDeleteProduct, PostIncrementView, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
@@ -11,8 +12,20 @@ import { getWarehousePage, getInventoryAPI, importStockAPI, exportStockAPI, setS
 import { getCreateShippingProviderPage, getShippingProviderDetailPage, getShippingProvidersPage, PostActiveShippingProvider, PostCreateShippingProvider, PostDeleteShippingProvider, PostLockShippingProvider, PostUpdateShippingProvider } from 'controllers/admin/shippingProvider.controller';
 import { getCreateSupplierPage, getSupplierDetailPage, getSuppliersPage, PostActiveSupplier, PostCreateSupplier, PostDeleteSupplier, PostLockSupplier, PostUpdateSupplier } from 'controllers/admin/supplier.controller';
 import { getCreateUserPage, getUserDetailPage, getUsers, PostActiveUser, PostCreateUser, PostDeleteUser, PostLockUser, PostUpdateUser } from 'controllers/admin/user.controller';
+import { getBannersPage, getCreateBannerPage, PostCreateBanner, getBannerDetailPage, PostUpdateBanner, PostLockBanner, PostActiveBanner, PostDeleteBanner } from 'controllers/admin/banner.controller';
+import {
+    getPromotionsPage,
+    getCreatePromotionPage,
+    PostCreatePromotion,
+    getPromotionDetailPage,
+    PostUpdatePromotion,
+    PostDeletePromotion,
+    PostCreateCoupon,
+    PostDeleteCoupon,
+    PostToggleCouponStatus
+} from 'controllers/admin/promotion.controller';
 import express from 'express';
-import { avatarUploadMiddleware, productUploadMiddleware } from 'src/middleware/multer';
+import fileUploadMiddleware, { avatarUploadMiddleware, productUploadMiddleware } from 'src/middleware/multer';
 import { isAuthenticated, requireRole } from 'src/middleware/auth.middleware';
 const router = express.Router();
 
@@ -121,14 +134,34 @@ const userRoutes = (app: express.Express) => {
 
     // Promotion (Catalog roles)
     router.use('/promotion', catalogRoles);
-    router.get('/promotion', getPromotionPage);
+    router.get('/promotion', getPromotionsPage);
+    router.get('/promotion/create', getCreatePromotionPage);
+    router.post('/promotion/handlecreate', PostCreatePromotion);
+    router.get('/promotion/:id', getPromotionDetailPage);
+    router.post('/promotion/handleupdate/:id', PostUpdatePromotion);
+    router.post('/promotion/delete/:id', PostDeletePromotion);
+    router.post('/promotion/:id/coupons/create', PostCreateCoupon);
+    router.post('/promotion/coupons/delete/:id', PostDeleteCoupon);
+    router.post('/promotion/coupons/toggle/:id', PostToggleCouponStatus);
+
+    // Banners (Catalog roles)
+    router.use('/banners', catalogRoles);
+    router.get('/banners', getBannersPage);
+    router.get('/banners/create', getCreateBannerPage);
+    router.post('/banners/handlecreate', fileUploadMiddleware("image", "admin/bannerImages"), PostCreateBanner);
+    router.get('/banners/:id', getBannerDetailPage);
+    router.post('/banners/handleupdate', fileUploadMiddleware("image", "admin/bannerImages"), PostUpdateBanner);
+    router.post("/banners/lock/:id", PostLockBanner);
+    router.post("/banners/active/:id", PostActiveBanner);
+    router.post("/banners/delete/:id", PostDeleteBanner);
+
 
     // Shipping (Order roles)
     router.use('/shipping', orderRoles);
     router.get('/shipping', getShippingPage);
 
     // Notification (All admin roles)
-    router.get('/notification', getNotificationPage);
+    router.get('/notification', getNotificationsPage);
 
     // History (ADMIN only)
     router.use('/history', adminOnly);

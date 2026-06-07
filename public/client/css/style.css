@@ -2615,6 +2615,9 @@ footer {
 
 /* Thêm CSS cho grid layout */
 .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
     margin-top: 20px;
 }
 
@@ -4904,4 +4907,17 @@ main {
     font-size: 12px;
     color: #0052cc;
     margin-bottom: 24px;
+}
+
+.product-img-wrap {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.product-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
 }

@@ -60,7 +60,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // middleware to share user data to all views globally
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     res.locals.user = req.user;
     res.locals.cart = req.session.cart || [];
     res.locals.cartCount = req.session.cart ? req.session.cart.reduce((total, item) => total + item.quantity, 0) : 0;
@@ -69,6 +69,28 @@ app.use((req, res, next) => {
     if (req.session.error_msg) {
         res.locals.error_msg = req.session.error_msg;
         delete req.session.error_msg;
+    }
+
+    // Load active banners globally
+    try {
+        const activeBanners = await prisma.banner.findMany({
+            where: { status: 'ACTIVE' },
+            orderBy: { order: 'asc' }
+        });
+        res.locals.slideshows = activeBanners.filter(b => b.type === 'SLIDESHOW');
+        res.locals.sideBanners = {
+            left: activeBanners.find(b => b.type === 'SIDE_BANNER' && b.position === 'LEFT') || null,
+            right: activeBanners.find(b => b.type === 'SIDE_BANNER' && b.position === 'RIGHT') || null
+        };
+        res.locals.bottomBanners = {
+            bottom1: activeBanners.find(b => b.type === 'BOTTOM_BANNER' && b.position === 'BOTTOM_1') || null,
+            bottom2: activeBanners.find(b => b.type === 'BOTTOM_BANNER' && b.position === 'BOTTOM_2') || null
+        };
+    } catch (err) {
+        console.error("Error loading banners globally:", err);
+        res.locals.slideshows = [];
+        res.locals.sideBanners = { left: null, right: null };
+        res.locals.bottomBanners = { bottom1: null, bottom2: null };
     }
 
     next();

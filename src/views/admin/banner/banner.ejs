@@ -1,0 +1,178 @@
+<!-- BANNERS PAGE -->
+<div class="page active" id="page-banners">
+    <div class="page-header">
+        <div>
+            <h2>Quản lý Banner & Slideshow</h2>
+            <div class="breadcrumb">Hệ quản trị → Quản lý Banner & Slideshow</div>
+        </div>
+        <a href="/admin/banners/create"><button class="btn primary">+ Thêm Banner / Slide</button></a>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card blue">
+            <div class="stat-label">Tổng Banner / Slides</div>
+            <div class="stat-value">
+                <%= bannerCount %>
+            </div>
+        </div>
+        <div class="stat-card teal">
+            <div class="stat-label">Đang hoạt động</div>
+            <div class="stat-value">
+                <%= activeBannersCount %>
+            </div>
+        </div>
+        <div class="stat-card red">
+            <div class="stat-label">Tạm ẩn</div>
+            <div class="stat-value">
+                <%= inactiveBannersCount %>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <!-- Toolbar & Filter -->
+        <form method="GET" action="/admin/banners" class="toolbar" style="flex-wrap: wrap; gap: 12px;">
+            <div class="search-box" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+                    <circle cx="7" cy="7" r="5" />
+                    <path d="M11 11l3 3" />
+                </svg>
+                <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Tìm theo tiêu đề, liên kết..." style="border: none; outline: none; background: transparent; flex: 1; padding: 4px;">
+            </div>
+            
+            <select name="type" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tất cả loại</option>
+                <option value="SLIDESHOW" <%= typeof type !== 'undefined' && type === 'SLIDESHOW' ? 'selected' : '' %>>Slideshow</option>
+                <option value="BOTTOM_BANNER" <%= typeof type !== 'undefined' && type === 'BOTTOM_BANNER' ? 'selected' : '' %>>Bottom Banner</option>
+                <option value="SIDE_BANNER" <%= typeof type !== 'undefined' && type === 'SIDE_BANNER' ? 'selected' : '' %>>Side Banner</option>
+            </select>
+
+            <select name="position" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tất cả vị trí</option>
+                <option value="LEFT" <%= typeof position !== 'undefined' && position === 'LEFT' ? 'selected' : '' %>>Left (Side)</option>
+                <option value="RIGHT" <%= typeof position !== 'undefined' && position === 'RIGHT' ? 'selected' : '' %>>Right (Side)</option>
+                <option value="BOTTOM_1" <%= typeof position !== 'undefined' && position === 'BOTTOM_1' ? 'selected' : '' %>>Bottom 1</option>
+                <option value="BOTTOM_2" <%= typeof position !== 'undefined' && position === 'BOTTOM_2' ? 'selected' : '' %>>Bottom 2</option>
+            </select>
+
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="ACTIVE" <%= typeof status !== 'undefined' && status === 'ACTIVE' ? 'selected' : '' %>>Đang hoạt động</option>
+                <option value="INACTIVE" <%= typeof status !== 'undefined' && status === 'INACTIVE' ? 'selected' : '' %>>Tạm ẩn</option>
+            </select>
+            
+            <button type="submit" class="btn">Tìm / Lọc</button>
+        </form>
+
+        <!-- Data Table -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Hình ảnh</th>
+                    <th>Tiêu đề</th>
+                    <th>Loại</th>
+                    <th>Vị trí</th>
+                    <th>Thứ tự</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (banners.length === 0) { %>
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
+                            Chưa có banner nào được tạo.
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% banners.forEach(function (banner) { %>
+                        <tr>
+                            <td>
+                                <img src="/admin/bannerImages/<%= banner.image %>" alt="Banner Image" style="width: 120px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                            </td>
+                            <td>
+                                <div style="font-weight: 500; color: #333;"><%= banner.title || 'Không có tiêu đề' %></div>
+                                <div style="font-size: 11px; color: #666; word-break: break-all;"><%= banner.link || '#' %></div>
+                            </td>
+                            <td>
+                                <% const typeMap = { SLIDESHOW: 'Slideshow', BOTTOM_BANNER: 'Bottom Banner', SIDE_BANNER: 'Side Banner' }; %>
+                                <span class="badge" style="background-color: #f1f3f5; color: #495057;"><%= typeMap[banner.type] || banner.type %></span>
+                            </td>
+                            <td>
+                                <%= banner.position || '—' %>
+                            </td>
+                            <td>
+                                <%= banner.order %>
+                            </td>
+                            <td>
+                                <% if (banner.status === 'ACTIVE') { %>
+                                    <span class="badge active">Hoạt động</span>
+                                <% } else { %>
+                                    <span class="badge danger">Tạm ẩn</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <%= new Date(banner.updatedAt).toLocaleDateString('vi-VN') %>
+                            </td>
+                            <td>
+                                <a href="/admin/banners/<%= banner.id %>"><button class="btn sm">Chi tiết</button></a>
+                                <% if (banner.status === 'ACTIVE') { %>
+                                    <form style="display: inline;" action="/admin/banners/lock/<%= banner.id %>" method="POST">
+                                        <button class="btn sm danger-outline">Ẩn</button>
+                                    </form>
+                                <% } else { %>
+                                    <form style="display: inline;" action="/admin/banners/active/<%= banner.id %>" method="POST">
+                                        <button class="btn sm green-outline">Hiện</button>
+                                    </form>
+                                <% } %>
+                                <form style="display: inline;" action="/admin/banners/delete/<%= banner.id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa banner này?')">
+                                    <button class="btn sm danger-outline">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <span>Trang <%= currentPage %> / <%= totalPages %></span>
+
+                <div class="page-btns">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&q=<%= q %>&type=<%= type %>&position=<%= position %>&status=<%= status %>" class="page-btn">‹</a>
+                    <% } %>
+
+                    <% 
+                        function getPagination(current, total) {
+                            if (total <= 5) return Array.from({length: total}, (_, i) => i + 1);
+                            if (current <= 3) return [1, 2, 3, '...', total - 1, total];
+                            if (current >= total - 2) return [1, 2, '...', total - 2, total - 1, total];
+                            return [1, 2, '...', current, '...', total - 1, total];
+                        }
+                        const pages = getPagination(currentPage, totalPages);
+                    %>
+
+                    <% pages.forEach(p => { %>
+                        <% if (p === '...') { %>
+                            <span class="page-dots">...</span>
+                        <% } else { %>
+                            <a href="?page=<%= p %>&q=<%= q %>&type=<%= type %>&position=<%= position %>&status=<%= status %>"
+                            class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                            <%= p %>
+                            </a>
+                        <% } %>
+                    <% }) %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&q=<%= q %>&type=<%= type %>&position=<%= position %>&status=<%= status %>" class="page-btn">›</a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>

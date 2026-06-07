@@ -1,0 +1,182 @@
+<!-- CREATE PROMOTION PAGE -->
+<div class="page active" id="page-create-promotion">
+    <div class="page-header">
+        <div>
+            <h2>Tạo chương trình khuyến mãi mới</h2>
+            <div class="breadcrumb">Hệ quản trị → <a href="/admin/promotion" style="color:var(--accent); text-decoration: none;">Khuyến mãi</a> → Tạo mới</div>
+        </div>
+        <a href="/admin/promotion"><button class="btn">← Quay lại</button></a>
+    </div>
+
+    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+        <div style="background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px; margin-bottom:20px; color:#C5221F; font-size:14px;">
+            <%= error_msg %>
+        </div>
+    <% } %>
+
+    <form action="/admin/promotion/handlecreate" method="POST" onsubmit="return validateForm(event);">
+        <div style="display:grid; grid-template-columns: 1fr 350px; gap: 20px; align-items: start;">
+            
+            <!-- Left Panel: Promotion Details -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div class="card">
+                    <div class="card-header" style="margin-bottom: 20px;">
+                        <span class="card-title">Thông tin chương trình khuyến mãi</span>
+                        <span style="font-size:12px; color:var(--text-muted)"><span style="color:#E24B4A">*</span> Bắt buộc</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label class="form-label">Tên chương trình khuyến mãi <span style="color:#E24B4A">*</span></label>
+                            <input name="name" class="form-input" type="text" id="inp-name" placeholder="Ví dụ: Flash Sale Mùa Hè 2026..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Loại khuyến mãi <span style="color:#E24B4A">*</span></label>
+                            <select name="type" id="inp-type" class="form-input" onchange="handleTypeChange()" style="width:100%; height:40px; border:1px solid var(--border); border-radius:8px; padding:0 12px; outline:none; background:var(--card-bg);">
+                                <option value="PERCENT">Giảm giá theo phần trăm (%)</option>
+                                <option value="FIXED">Giảm giá theo số tiền cố định (đ)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Giá trị giảm giá <span style="color:#E24B4A">*</span></label>
+                            <input name="discountValue" class="form-input" type="number" id="inp-discountValue" placeholder="Ví dụ: 10 hoặc 200000" min="0" required>
+                        </div>
+
+                        <div class="form-group" id="group-maxDiscount">
+                            <label class="form-label">Mức giảm tối đa (Tùy chọn - VNĐ)</label>
+                            <input name="maxDiscount" class="form-input" type="number" id="inp-maxDiscount" placeholder="Ví dụ: 500000" min="0">
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Chỉ áp dụng khi giảm theo %</div>
+                        </div>
+
+                        <div class="form-group">
+                            <!-- Placeholder to keep grid balanced -->
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ngày bắt đầu</label>
+                            <input name="startDate" class="form-input" type="datetime-local" id="inp-startDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input name="endDate" class="form-input" type="datetime-local" id="inp-endDate">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Initial Coupon Section -->
+                <div class="card">
+                    <div class="card-header" style="margin-bottom: 20px;">
+                        <span class="card-title">Mã giảm giá liên kết (Tạo Coupon đi kèm)</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Mã Coupon (Mã nhập)</label>
+                            <input name="couponCode" class="form-input" type="text" id="inp-couponCode" placeholder="Ví dụ: FLASHSALE10" style="text-transform: uppercase;">
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Mã sẽ tự động viết hoa (Ví dụ: FLASHSALE10)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Giới hạn lượt sử dụng (Tùy chọn)</label>
+                            <input name="usageLimit" class="form-input" type="number" id="inp-usageLimit" placeholder="Ví dụ: 100" min="1">
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Để trống nếu không giới hạn lượt dùng</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Side Actions -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div class="card">
+                    <div class="card-header" style="margin-bottom:16px;">
+                        <span class="card-title">Thông tin thêm</span>
+                    </div>
+                    <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted);">
+                        <p>• <b>Giảm theo %:</b> Nhập giá trị từ 1 đến 100.</p>
+                        <p>• <b>Giảm trực tiếp:</b> Nhập số tiền cụ thể (ví dụ: 50000 cho 50.000 ₫).</p>
+                        <p>• Nếu để trống ngày bắt đầu/kết thúc, khuyến mãi sẽ có hiệu lực vĩnh viễn cho đến khi bị xóa.</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <button class="btn primary" type="submit" style="width:100%; padding:12px; font-size:14px; font-weight: 500;">Tạo chương trình khuyến mãi</button>
+                    <a href="/admin/promotion" style="text-decoration:none;"><button class="btn" type="button" style="width:100%; padding:12px; font-size:14px;">Hủy bỏ</button></a>
+                </div>
+
+                <!-- Validation Error Box -->
+                <div id="form-errors" style="display:none; background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px;">
+                    <div style="font-size:12px; font-weight:600; color:#C5221F; margin-bottom:6px;">
+                        Lỗi nhập liệu:
+                    </div>
+                    <ul id="error-list" style="font-size:12px; color:#C5221F; padding-left:16px; margin:0; line-height: 1.6;">
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script>
+    function handleTypeChange() {
+        const typeSelect = document.getElementById('inp-type');
+        const maxDiscountGroup = document.getElementById('group-maxDiscount');
+        const discountInput = document.getElementById('inp-discountValue');
+        
+        if (typeSelect.value === 'PERCENT') {
+            maxDiscountGroup.style.display = 'block';
+            discountInput.placeholder = 'Ví dụ: 10, 20...';
+            discountInput.max = '100';
+        } else {
+            maxDiscountGroup.style.display = 'none';
+            discountInput.placeholder = 'Ví dụ: 50000, 100000...';
+            discountInput.removeAttribute('max');
+        }
+    }
+
+    function validateForm(event) {
+        const errors = [];
+        const type = document.getElementById('inp-type').value;
+        const discountValue = parseFloat(document.getElementById('inp-discountValue').value);
+        const startDate = document.getElementById('inp-startDate').value;
+        const endDate = document.getElementById('inp-endDate').value;
+        const couponCode = document.getElementById('inp-couponCode').value.trim();
+
+        if (isNaN(discountValue) || discountValue <= 0) {
+            errors.push('Giá trị giảm giá phải lớn hơn 0.');
+        }
+
+        if (type === 'PERCENT' && discountValue > 100) {
+            errors.push('Giá trị giảm giá theo % không được vượt quá 100%.');
+        }
+
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            errors.push('Ngày bắt đầu không thể sau ngày kết thúc.');
+        }
+
+        if (couponCode && couponCode.length < 3) {
+            errors.push('Mã Coupon (nếu có) phải dài ít nhất 3 ký tự.');
+        }
+
+        const errBox = document.getElementById('form-errors');
+        const errList = document.getElementById('error-list');
+        
+        if (errors.length > 0) {
+            errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+            errBox.style.display = 'block';
+            errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        errBox.style.display = 'none';
+        return true;
+    }
+
+    // Initialize display state on load
+    document.addEventListener('DOMContentLoaded', function() {
+        handleTypeChange();
+    });
+</script>

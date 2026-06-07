@@ -1,13 +1,33 @@
 <!-- Banner trái -->
 <div class="side-banner side-banner-left">
-    <a href="#">
-        <img src="/client/images/bannerleft.jpg" alt="Banner Left">
-    </a>
+    <% if (typeof sideBanners !== 'undefined' && sideBanners.left) { %>
+        <% if (sideBanners.left.link) { %>
+            <a href="<%= sideBanners.left.link %>">
+                <img src="/admin/bannerImages/<%= sideBanners.left.image %>" alt="<%= sideBanners.left.title || 'Banner Left' %>">
+            </a>
+        <% } else { %>
+            <img src="/admin/bannerImages/<%= sideBanners.left.image %>" alt="<%= sideBanners.left.title || 'Banner Left' %>">
+        <% } %>
+    <% } else { %>
+        <a href="#">
+            <img src="/client/images/bannerleft.jpg" alt="Banner Left">
+        </a>
+    <% } %>
 </div>
 
 <!-- Banner phải -->
 <div class="side-banner side-banner-right">
-    <a href="#">
-        <img src="/client/images/bannerright.jpg" alt="Banner Right">
-    </a>
+    <% if (typeof sideBanners !== 'undefined' && sideBanners.right) { %>
+        <% if (sideBanners.right.link) { %>
+            <a href="<%= sideBanners.right.link %>">
+                <img src="/admin/bannerImages/<%= sideBanners.right.image %>" alt="<%= sideBanners.right.title || 'Banner Right' %>">
+            </a>
+        <% } else { %>
+            <img src="/admin/bannerImages/<%= sideBanners.right.image %>" alt="<%= sideBanners.right.title || 'Banner Right' %>">
+        <% } %>
+    <% } else { %>
+        <a href="#">
+            <img src="/client/images/bannerright.jpg" alt="Banner Right">
+        </a>
+    <% } %>
 </div>

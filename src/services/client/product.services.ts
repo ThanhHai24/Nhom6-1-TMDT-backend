@@ -133,7 +133,18 @@ const getProductsByFilter = async function (opts: ProductFilterOptions) {
 
     const where: any = { status: 'ACTIVE' };
 
-    if (categorySlug) where.category = { slug: categorySlug };
+    if (categorySlug) {
+        const category = await prisma.category.findUnique({
+            where: { slug: categorySlug },
+            include: { children: { select: { id: true } } },
+        });
+        if (category) {
+            const categoryIds = [category.id, ...category.children.map(c => c.id)];
+            where.categoryId = { in: categoryIds };
+        } else {
+            where.category = { slug: categorySlug };
+        }
+    }
     if (brandIds && brandIds.length > 0) where.brandId = { in: brandIds };
     if (minPrice !== undefined || maxPrice !== undefined) {
         where.price = {};
@@ -161,10 +172,23 @@ const getProductsByFilter = async function (opts: ProductFilterOptions) {
 };
 
 const getBrandsForCategory = async function (categorySlug?: string) {
+    let where: any = { status: 'ACTIVE' };
+
+    if (categorySlug) {
+        const category = await prisma.category.findUnique({
+            where: { slug: categorySlug },
+            include: { children: { select: { id: true } } },
+        });
+        if (category) {
+            const categoryIds = [category.id, ...category.children.map(c => c.id)];
+            where.categoryId = { in: categoryIds };
+        } else {
+            where.category = { slug: categorySlug };
+        }
+    }
+
     const products = await prisma.product.findMany({
-        where: categorySlug
-            ? { category: { slug: categorySlug }, status: 'ACTIVE' }
-            : { status: 'ACTIVE' },
+        where,
         select: { brand: { select: { id: true, name: true } } },
         distinct: ['brandId'],
     });

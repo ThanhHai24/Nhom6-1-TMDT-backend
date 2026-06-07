@@ -1,22 +1,40 @@
- 
     <section class="banner-slideshow">
         <div class="container">
             <div class="banner-container">
                 <div class="main-banner">
-                    <div class="slide active">
-                        <img src="/client/images/slide1.jpg" alt="">
-                    </div>
-                    <div class="slide">
-                        <img src="/client/images/slide2.jpg" alt="">
-                    </div>
-                    <div class="slide">
-                        <img src="/client/images/slide3.jpg" alt="">
-                    </div>
-                    <div class="slideshow-nav">
-                        <div class="slideshow-dot active" data-slide="0"></div>
-                        <div class="slideshow-dot" data-slide="1"></div>
-                        <div class="slideshow-dot" data-slide="2"></div>
-                    </div>
+                    <% if (typeof slideshows !== 'undefined' && slideshows.length > 0) { %>
+                        <% slideshows.forEach(function (slide, index) { %>
+                            <div class="slide <%= index === 0 ? 'active' : '' %>">
+                                <% if (slide.link) { %>
+                                    <a href="<%= slide.link %>">
+                                        <img src="/admin/bannerImages/<%= slide.image %>" alt="<%= slide.title || '' %>">
+                                    </a>
+                                <% } else { %>
+                                    <img src="/admin/bannerImages/<%= slide.image %>" alt="<%= slide.title || '' %>">
+                                <% } %>
+                            </div>
+                        <% }) %>
+                        <div class="slideshow-nav">
+                            <% slideshows.forEach(function (slide, index) { %>
+                                <div class="slideshow-dot <%= index === 0 ? 'active' : '' %>" data-slide="<%= index %>"></div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <div class="slide active">
+                            <img src="/client/images/slide1.jpg" alt="">
+                        </div>
+                        <div class="slide">
+                            <img src="/client/images/slide2.jpg" alt="">
+                        </div>
+                        <div class="slide">
+                            <img src="/client/images/slide3.jpg" alt="">
+                        </div>
+                        <div class="slideshow-nav">
+                            <div class="slideshow-dot active" data-slide="0"></div>
+                            <div class="slideshow-dot" data-slide="1"></div>
+                            <div class="slideshow-dot" data-slide="2"></div>
+                        </div>
+                    <% } %>
                 </div>
 
             </div>
@@ -25,12 +43,37 @@
 
     <div class="container">
         <div class="bottom-banners">
-            <div class="bottom-banner">
-                <img src="/client/images/slide3.jpg" alt="">
-            </div>
-            <div class="bottom-banner">
-                <img src="/client/images/slide2.jpg" alt="">
-            </div>
+            <% if (typeof bottomBanners !== 'undefined' && bottomBanners.bottom1) { %>
+                <div class="bottom-banner">
+                    <% if (bottomBanners.bottom1.link) { %>
+                        <a href="<%= bottomBanners.bottom1.link %>">
+                            <img src="/admin/bannerImages/<%= bottomBanners.bottom1.image %>" alt="<%= bottomBanners.bottom1.title || '' %>">
+                        </a>
+                    <% } else { %>
+                        <img src="/admin/bannerImages/<%= bottomBanners.bottom1.image %>" alt="<%= bottomBanners.bottom1.title || '' %>">
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="bottom-banner">
+                    <img src="/client/images/slide3.jpg" alt="">
+                </div>
+            <% } %>
+
+            <% if (typeof bottomBanners !== 'undefined' && bottomBanners.bottom2) { %>
+                <div class="bottom-banner">
+                    <% if (bottomBanners.bottom2.link) { %>
+                        <a href="<%= bottomBanners.bottom2.link %>">
+                            <img src="/admin/bannerImages/<%= bottomBanners.bottom2.image %>" alt="<%= bottomBanners.bottom2.title || '' %>">
+                        </a>
+                    <% } else { %>
+                        <img src="/admin/bannerImages/<%= bottomBanners.bottom2.image %>" alt="<%= bottomBanners.bottom2.title || '' %>">
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="bottom-banner">
+                    <img src="/client/images/slide2.jpg" alt="">
+                </div>
+            <% } %>
         </div>
 
         <!-- Sale Product -->

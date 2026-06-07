@@ -1,0 +1,280 @@
+<!-- PROMOTION DETAIL & EDIT PAGE -->
+<%
+function formatDateTimeLocal(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+%>
+
+<div class="page active" id="page-promotion-detail">
+    <div class="page-header">
+        <div>
+            <h2>Chi tiết chương trình khuyến mãi</h2>
+            <div class="breadcrumb">Hệ quản trị → <a href="/admin/promotion" style="color:var(--accent); text-decoration: none;">Khuyến mãi</a> → Chi tiết</div>
+        </div>
+        <a href="/admin/promotion"><button class="btn">← Quay lại</button></a>
+    </div>
+
+    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+        <div style="background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px; margin-bottom:20px; color:#C5221F; font-size:14px;">
+            <%= error_msg %>
+        </div>
+    <% } %>
+
+    <div style="display:grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start;">
+        
+        <!-- Left Column: Edit Form & Coupon Management -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            
+            <!-- Update Promotion Card -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 20px;">
+                    <span class="card-title">Cập nhật chương trình khuyến mãi</span>
+                </div>
+                
+                <form action="/admin/promotion/handleupdate/<%= promotion.id %>" method="POST" onsubmit="return validatePromoForm(event);">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label class="form-label">Tên chương trình khuyến mãi <span style="color:#E24B4A">*</span></label>
+                            <input name="name" class="form-input" type="text" id="inp-name" value="<%= promotion.name %>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Loại khuyến mãi <span style="color:#E24B4A">*</span></label>
+                            <select name="type" id="inp-type" class="form-input" onchange="handleTypeChange()" style="width:100%; height:40px; border:1px solid var(--border); border-radius:8px; padding:0 12px; outline:none; background:var(--card-bg);">
+                                <option value="PERCENT" <%= promotion.type === 'PERCENT' ? 'selected' : '' %>>Giảm giá theo phần trăm (%)</option>
+                                <option value="FIXED" <%= promotion.type === 'FIXED' ? 'selected' : '' %>>Giảm giá theo số tiền cố định (đ)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Giá trị giảm giá <span style="color:#E24B4A">*</span></label>
+                            <input name="discountValue" class="form-input" type="number" id="inp-discountValue" value="<%= promotion.discountValue %>" min="0" required>
+                        </div>
+
+                        <div class="form-group" id="group-maxDiscount">
+                            <label class="form-label">Mức giảm tối đa (VNĐ)</label>
+                            <input name="maxDiscount" class="form-input" type="number" id="inp-maxDiscount" value="<%= promotion.maxDiscount || '' %>" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <!-- Placeholder -->
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ngày bắt đầu</label>
+                            <input name="startDate" class="form-input" type="datetime-local" id="inp-startDate" value="<%= formatDateTimeLocal(promotion.startDate) %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input name="endDate" class="form-input" type="datetime-local" id="inp-endDate" value="<%= formatDateTimeLocal(promotion.endDate) %>">
+                        </div>
+
+                        <div class="form-group full" style="margin-top: 10px;">
+                            <button class="btn primary" type="submit" style="padding: 10px 20px;">Lưu thay đổi</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- List & Manage Coupons Card -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 20px;">
+                    <span class="card-title">Quản lý mã giảm giá (Coupons)</span>
+                </div>
+
+                <!-- Coupons Table -->
+                <table class="data-table" style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Mã Coupon</th>
+                            <th>Giới hạn dùng</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (!promotion.coupons || promotion.coupons.length === 0) { %>
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888; padding: 16px;">
+                                    Chưa có mã giảm giá nào thuộc chương trình này.
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% promotion.coupons.forEach(function(coupon) { %>
+                                <tr>
+                                    <td style="font-family: monospace; font-weight: bold; font-size: 14px;">
+                                        <%= coupon.code %>
+                                    </td>
+                                    <td>
+                                        <%= coupon.usageLimit ? coupon.usageLimit : 'Vô hạn' %>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= coupon.status ? 'active' : 'inactive' %>">
+                                            <%= coupon.status ? 'Đang mở' : 'Đã khóa' %>
+                                        </span>
+                                    </td>
+                                    <td style="display: flex; gap: 8px;">
+                                        <!-- Toggle active status -->
+                                        <form action="/admin/promotion/coupons/toggle/<%= coupon.id %>" method="POST" style="display:inline;">
+                                            <input type="hidden" name="status" value="<%= !coupon.status %>">
+                                            <button class="btn sm <%= coupon.status ? 'warning-outline' : 'green-outline' %>">
+                                                <%= coupon.status ? 'Khóa' : 'Kích hoạt' %>
+                                            </button>
+                                        </form>
+
+                                        <!-- Delete Coupon -->
+                                        <form action="/admin/promotion/coupons/delete/<%= coupon.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')">
+                                            <button class="btn sm danger-outline">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Add New Coupon & Delete Promotion -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            
+            <!-- Add Coupon Form Card -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 16px;">
+                    <span class="card-title">+ Tạo mã giảm giá mới</span>
+                </div>
+                
+                <form action="/admin/promotion/<%= promotion.id %>/coupons/create" method="POST" onsubmit="return validateCouponForm(event);">
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <label class="form-label">Mã Coupon mới <span style="color:#E24B4A">*</span></label>
+                            <input name="code" class="form-input" type="text" id="inp-coupon-code" placeholder="Ví dụ: SUMMER50K" style="text-transform: uppercase; width: 100%;" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Giới hạn sử dụng (Tùy chọn)</label>
+                            <input name="usageLimit" class="form-input" type="number" id="inp-coupon-limit" placeholder="Để trống nếu vô hạn" min="1" style="width: 100%;">
+                        </div>
+                        <div>
+                            <label class="form-label">Giá trị (để trống để dùng giá trị gốc)</label>
+                            <input name="discountValue" class="form-input" type="number" id="inp-coupon-value" placeholder="Để trống để dùng: <%= promotion.type === 'PERCENT' ? promotion.discountValue + '%' : promotion.discountValue.toLocaleString('vi-VN') + ' đ' %>" style="width: 100%;">
+                        </div>
+                        <button class="btn primary" type="submit" style="width:100%; margin-top:8px;">Thêm mã giảm giá</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card" style="border: 1px solid var(--red-200); background: #FFF9F9;">
+                <div class="card-header" style="margin-bottom:12px;">
+                    <span class="card-title" style="color: var(--red-600);">Vùng nguy hiểm</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+                    Xóa chương trình khuyến mãi sẽ đồng thời xóa vĩnh viễn tất cả mã giảm giá đi kèm. Hành động này không thể hoàn tác.
+                </div>
+                <form action="/admin/promotion/delete/<%= promotion.id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này cùng toàn bộ các mã đi kèm không?')">
+                    <button class="btn danger" style="width: 100%; padding: 10px;">Xóa chương trình khuyến mãi</button>
+                </form>
+            </div>
+
+            <!-- Validation Error Box -->
+            <div id="form-errors" style="display:none; background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px;">
+                <div style="font-size:12px; font-weight:600; color:#C5221F; margin-bottom:6px;">
+                    Lỗi nhập liệu:
+                </div>
+                <ul id="error-list" style="font-size:12px; color:#C5221F; padding-left:16px; margin:0; line-height: 1.6;">
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function handleTypeChange() {
+        const typeSelect = document.getElementById('inp-type');
+        const maxDiscountGroup = document.getElementById('group-maxDiscount');
+        const discountInput = document.getElementById('inp-discountValue');
+        
+        if (typeSelect.value === 'PERCENT') {
+            maxDiscountGroup.style.display = 'block';
+            discountInput.max = '100';
+        } else {
+            maxDiscountGroup.style.display = 'none';
+            discountInput.removeAttribute('max');
+        }
+    }
+
+    function validatePromoForm(event) {
+        const errors = [];
+        const type = document.getElementById('inp-type').value;
+        const discountValue = parseFloat(document.getElementById('inp-discountValue').value);
+        const startDate = document.getElementById('inp-startDate').value;
+        const endDate = document.getElementById('inp-endDate').value;
+
+        if (isNaN(discountValue) || discountValue <= 0) {
+            errors.push('Giá trị giảm giá phải lớn hơn 0.');
+        }
+
+        if (type === 'PERCENT' && discountValue > 100) {
+            errors.push('Giá trị giảm giá theo % không được vượt quá 100%.');
+        }
+
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            errors.push('Ngày bắt đầu không thể sau ngày kết thúc.');
+        }
+
+        const errBox = document.getElementById('form-errors');
+        const errList = document.getElementById('error-list');
+        
+        if (errors.length > 0) {
+            errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+            errBox.style.display = 'block';
+            return false;
+        }
+
+        errBox.style.display = 'none';
+        return true;
+    }
+
+    function validateCouponForm(event) {
+        const errors = [];
+        const code = document.getElementById('inp-coupon-code').value.trim();
+        const limit = document.getElementById('inp-coupon-limit').value;
+
+        if (!code) {
+            errors.push('Mã Coupon không được để trống.');
+        } else if (code.length < 3) {
+            errors.push('Mã Coupon phải dài ít nhất 3 ký tự.');
+        }
+
+        if (limit && parseInt(limit) <= 0) {
+            errors.push('Giới hạn sử dụng phải lớn hơn 0.');
+        }
+
+        const errBox = document.getElementById('form-errors');
+        const errList = document.getElementById('error-list');
+        
+        if (errors.length > 0) {
+            errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
+            errBox.style.display = 'block';
+            return false;
+        }
+
+        errBox.style.display = 'none';
+        return true;
+    }
+
+    // Initialize display state on load
+    document.addEventListener('DOMContentLoaded', function() {
+        handleTypeChange();
+    });
+</script>

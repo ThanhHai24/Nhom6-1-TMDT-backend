@@ -119,29 +119,25 @@
             <% if (products && products.length > 0) { %>
             <div class="product-grid" id="productGrid">
                 <% products.forEach(function(p){ %>
-                <a href="/product/<%= p.slug %>" class="product-card-link">
+                <a href="/product/<%= p.slug%>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                     <div class="product-card">
-                        <% if (p.isHot) { %><span class="product-badge">Hot</span><% } %>
-                        <% if (p.isNew && !p.isHot) { %><span class="product-badge new">Mới</span><% } %>
-                        <% if (p.stock > 0 && p.stock <= 5) { %><span class="product-badge stock-low">Sắp hết</span><% } %>
-                        <div class="product-img-wrap">
-                            <img src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt="<%= p.name %>" loading="lazy">
+                        <% if (p.isHot) { %><span class="bestseller-label">Hot</span><% } %>
+                        <% if (p.isNew) { %><span class="product-badge new">Mới</span><% } %>
+                        <div class="product-image">
+                            <img src="admin/productImages/<%=p.image %>" alt="PC Gaming">
                         </div>
-                        <div class="product-info">
-                            
-                            <div class="product-name"><%= p.name %></div>
-                            <div class="product-price-wrap">
-                                <div class="product-price"><%= p.price.toLocaleString('vi-VN') %>đ</div>
-                            </div>
-                            <div class="product-stock <%= p.stock > 5 ? 'ok' : p.stock > 0 ? 'low' : 'out' %>">
-                                <% if (p.stock > 5) { %>
-                                    <i class="bi bi-check-circle-fill"></i> Còn hàng
-                                <% } else if (p.stock > 0) { %>
-                                    <i class="bi bi-exclamation-circle-fill"></i> Còn <%= p.stock %> sản phẩm
-                                <% } else { %>
-                                    <i class="bi bi-x-circle-fill"></i> Hết hàng
-                                <% } %>
-                            </div>
+                        <h3 class="product-title"><%=p.name%></h3>
+                        <% if (p.originalPrice && p.originalPrice > p.price) { %>
+                        <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ
+
+                            <span class="original-price"><%= p.originalPrice.toLocaleString('vi-VN')%>đ</span>
+
+                        </div>
+                        <% } else { %>
+                        <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ</div>
+                        <% } %>
+                        <div class="product-stats">
+                            <span>⭐ Đã bán: <%= p.sold%></span>
                         </div>
                     </div>
                 </a>

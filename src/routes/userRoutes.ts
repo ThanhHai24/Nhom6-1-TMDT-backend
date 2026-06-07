@@ -29,12 +29,12 @@ const userRoutes = (app: express.Express) => {
         // Laptop
         'laptop', 'laptop-gaming', 'laptop-van-phong', 'laptop-do-hoa',
         // Linh kiện
-        'linh-kien', 'cpu-vi-xu-ly', 'card-do-hoa-gpu', 'ram',
-        'o-cung-ssd', 'mainboard', 'nguon-may-tinh', 'vo-may-tinh',
+        'linh-kien-may-tinh', 'cpu-bo-vi-xu-ly', 'vga-card-do-hoa', 'ram-bo-nho-trong',
+        'o-cung-hdd-ssd', 'mainboard-bo-mach-chu', 'psu-nguon-may-tinh', 'case-vo-may-tinh',
         // Ngoại vi
         'thiet-bi-ngoai-vi', 'man-hinh', 'ban-phim', 'chuot', 'tai-nghe',
         // Tản nhiệt
-        'tan-nhiet-pc', 'tan-nhiet-khi', 'tan-nhiet-nuoc', 'quat-tan-nhiet',
+        'tan-nhiet-cpu', 'quat-tan-nhiet',
         // Phụ kiện
         'phu-kien-cap',
     ];
