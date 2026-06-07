@@ -133,7 +133,8 @@
                                                                             <% } %>
                                                                                 <form style="display: inline;"
                                                                                     action="/admin/products/delete/<%= product.id%>"
-                                                                                    method="post">
+                                                                                    method="post"
+                                                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
                                                                                     <button
                                                                                         class="btn sm danger-outline">Xóa</button>
                                                                                 </form>

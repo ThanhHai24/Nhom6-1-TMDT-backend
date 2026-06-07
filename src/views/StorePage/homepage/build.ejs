@@ -223,23 +223,25 @@
                 <!-- Toolbar: search + sort + filter by brand + filter by price -->
                 <div class="modal-toolbar">
                     <input type="text" id="modalSearch" class="search-box" placeholder="Tìm kiếm sản phẩm...">
-                    <select id="modalBrand" class="sort-select">
-                        <option value="">Tất cả hãng</option>
-                    </select>
-                    <select id="modalPrice" class="sort-select">
-                        <option value="">Tất cả mức giá</option>
-                        <option value="under_2m">Dưới 2 triệu</option>
-                        <option value="2m_5m">2 triệu - 5 triệu</option>
-                        <option value="5m_10m">5 triệu - 10 triệu</option>
-                        <option value="10m_20m">10 triệu - 20 triệu</option>
-                        <option value="over_20m">Trên 20 triệu</option>
-                    </select>
-                    <select id="modalSort" class="sort-select">
-                        <option value="">Mặc định</option>
-                        <option value="price_asc">Giá thấp → cao</option>
-                        <option value="price_desc">Giá cao → thấp</option>
-                        <option value="name_asc">Tên A → Z</option>
-                    </select>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="modalBrand" class="sort-select">
+                            <option value="">Tất cả hãng</option>
+                        </select>
+                        <select id="modalPrice" class="sort-select">
+                            <option value="">Tất cả mức giá</option>
+                            <option value="under_2m">Dưới 2 triệu</option>
+                            <option value="2m_5m">2 triệu - 5 triệu</option>
+                            <option value="5m_10m">5 triệu - 10 triệu</option>
+                            <option value="10m_20m">10 triệu - 20 triệu</option>
+                            <option value="over_20m">Trên 20 triệu</option>
+                        </select>
+                        <select id="modalSort" class="sort-select">
+                            <option value="">Mặc định</option>
+                            <option value="price_asc">Giá thấp → cao</option>
+                            <option value="price_desc">Giá cao → thấp</option>
+                            <option value="name_asc">Tên A → Z</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Danh sách sản phẩm -->
@@ -417,8 +419,11 @@
             const price = Number(p.price);
             const priceStr = price.toLocaleString('vi-VN') + '₫';
             const img = p.image ? `/admin/productImages/${p.image}` : '/client/images/no-image.png';
+            const stock = Number(p.stock) || 0;
+            const outOfStock = stock <= 0;
+            const lowStock = stock > 0 && stock <= 5;
             return `
-            <div class="product-item" data-id="${p.id}" data-name="${escHtml(p.name)}" data-price="${price}" data-image="${escHtml(img)}" data-sku="${escHtml(p.sku || '')}">
+            <div class="product-item${outOfStock ? ' out-of-stock' : ''}" data-id="${p.id}" data-name="${escHtml(p.name)}" data-price="${price}" data-image="${escHtml(img)}" data-sku="${escHtml(p.sku || '')}" data-stock="${stock}">
                 <div class="product-image">
                     <img src="${escHtml(img)}" alt="${escHtml(p.name)}" onerror="this.src='/client/images/no-image.png'">
                 </div>
@@ -427,13 +432,17 @@
                     <div class="product-specs">
                         ${p.sku ? `<span class="product-spec">SKU: ${escHtml(p.sku)}</span>` : ''}
                         ${p.brand ? `<span class="product-spec">${escHtml(p.brand.name)}</span>` : ''}
-                        <span class="product-spec">${p.stock > 0 ? '✅ Còn hàng' : '❌ Hết hàng'}</span>
+                        <span class="product-spec" style="color:${outOfStock ? '#e53935' : (lowStock ? '#f57c00' : '#27ae60')}">
+                            ${outOfStock ? '❌ Hết hàng' : (lowStock ? `⚠️ Còn ${stock} sản phẩm` : '✅ Còn hàng')}
+                        </span>
                     </div>
                 </div>
                 <div class="product-price-section">
                     <div class="product-price">${priceStr}</div>
-                    <button class="add-to-build-btn" onclick="addToConfig('${p.id}','${escHtml(p.name)}',${price},'${escHtml(img)}','${escHtml(p.sku||'')}')">
-                        THÊM VÀO CẤU HÌNH ➤
+                    <button class="add-to-build-btn" 
+                        ${outOfStock ? 'disabled style="opacity:0.5;cursor:not-allowed;background:#aaa;"' : ''}
+                        onclick="${outOfStock ? 'void(0)' : `addToConfig('${p.id}','${escHtml(p.name)}',${price},'${escHtml(img)}','${escHtml(p.sku||'')}',${stock})`}">
+                        ${outOfStock ? 'HẾT HÀNG' : 'THÊM VÀO CẤU HÌNH ➤'}
                     </button>
                 </div>
             </div>`;
@@ -462,11 +471,12 @@
     // =========================================================
     // ADD TO CONFIG
     // =========================================================
-    function addToConfig(id, name, price, image, sku) {
+    function addToConfig(id, name, price, image, sku, stock) {
         const slot = buildState.currentSlot;
         if (!slot) return;
 
-        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1 };
+        const maxStock = Number(stock) || 99;
+        buildState.selectedComponents[slot] = { id, name, price, image, sku, qty: 1, stock: maxStock };
         renderSlot(slot);
         updateTotal();
         closeModal();
@@ -504,15 +514,18 @@
                 </div>
             </div>`;
 
+        const maxStock = comp.stock || 99;
+        const lowStock = maxStock <= 5;
         priceEl.innerHTML = `
             <div class="price-display">${Number(comp.price).toLocaleString('vi-VN')}₫</div>
             <div class="quantity-row">
                 <span>x</span>
-                <input type="number" class="quantity-input" value="${comp.qty}" min="1" max="99"
-                    onchange="updateQty('${slot}', this.value)">
+                <input type="number" class="quantity-input" value="${comp.qty}" min="1" max="${maxStock}"
+                    onchange="updateQty('${slot}', this.value, ${maxStock})">
                 <span>=</span>
                 <span class="line-total" id="lineTotal_${slot}">${lineTotal.toLocaleString('vi-VN')}₫</span>
-            </div>`;
+            </div>
+            ${lowStock ? `<div style="color:#f57c00;font-size:11px;margin-top:2px;">⚠️ Còn ${maxStock} sản phẩm trong kho</div>` : ''}`;
 
         actionsEl.innerHTML = `
             <button class="edit-btn" title="Đổi linh kiện" onclick="openModal('${slot}','${SLOT_CATEGORY[slot]}')">
@@ -523,11 +536,21 @@
             </button>`;
     }
 
-    function updateQty(slot, val) {
-        const qty = Math.max(1, Math.min(99, parseInt(val) || 1));
-        if (!buildState.selectedComponents[slot]) return;
-        buildState.selectedComponents[slot].qty = qty;
-        const lineTotal = buildState.selectedComponents[slot].price * qty;
+    function updateQty(slot, val, maxStock) {
+        const comp = buildState.selectedComponents[slot];
+        if (!comp) return;
+        const limit = maxStock || comp.stock || 99;
+        let qty = parseInt(val) || 1;
+        if (qty < 1) qty = 1;
+        if (qty > limit) {
+            qty = limit;
+            // Cập nhật lại giá trị input
+            const inputEl = document.querySelector(`.component-item[data-slot="${slot}"] .quantity-input`);
+            if (inputEl) inputEl.value = qty;
+            alert(`Chỉ còn ${limit} sản phẩm trong kho. Số lượng đã được điều chỉnh.`);
+        }
+        comp.qty = qty;
+        const lineTotal = comp.price * qty;
         const el = document.getElementById(`lineTotal_${slot}`);
         if (el) el.textContent = lineTotal.toLocaleString('vi-VN') + '₫';
         updateTotal();

@@ -1,107 +1,656 @@
+﻿<%
+const fmtMoney = v => Number(v).toLocaleString('vi-VN');
+const fmtNum   = v => Number(v).toLocaleString('vi-VN');
+%>
 
-                    <!-- WAREHOUSE PAGE -->
-                    <div class="page active" id="page-warehouse">
-                        <div class="page-header">
-                            <div>
-                                <h2>Quản lý kho</h2>
-                                <div class="breadcrumb">Hệ quản trị → Quản lý kho</div>
-                            </div>
-                            <div style="display:flex;gap:8px"><button class="btn">Nhập kho</button><button
-                                    class="btn primary">Xuất kho</button></div>
-                        </div>
-                        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-                            <div class="stat-card teal">
-                                <div class="stat-label">Tổng sản phẩm trong kho</div>
-                                <div class="stat-value">48,294</div>
-                            </div>
-                            <div class="stat-card amber">
-                                <div class="stat-label">Sắp hết hàng (&lt;50 sp)</div>
-                                <div class="stat-value">34</div>
-                            </div>
-                            <div class="stat-card red">
-                                <div class="stat-label">Hết hàng</div>
-                                <div class="stat-value">12</div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header"><span class="card-title">Danh sách tồn kho</span>
-                                <div class="toolbar" style="margin:0">
-                                    <div class="search-box" style="max-width:220px"><svg width="14" height="14"
-                                            viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
-                                            <circle cx="7" cy="7" r="5" />
-                                            <path d="M11 11l3 3" />
-                                        </svg><input type="text" placeholder="Tìm sản phẩm..."></div>
-                                </div>
-                            </div>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Sản phẩm</th>
-                                        <th>SKU</th>
-                                        <th>Vị trí kho</th>
-                                        <th>Tồn kho</th>
-                                        <th>Đã bán (tháng)</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>iPhone 15 Pro Max 256GB</td>
-                                        <td style="font-family:monospace;font-size:12px">IP15PM-256</td>
-                                        <td>A1-02</td>
-                                        <td>
-                                            <div class="stock-level">
-                                                <div class="stock-bar">
-                                                    <div class="stock-fill high" style="width:80%"></div>
-                                                </div><span class="stock-num">400</span>
-                                            </div>
-                                        </td>
-                                        <td>1,204</td>
-                                        <td><span class="badge active">Đủ hàng</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MacBook Air M4 16GB</td>
-                                        <td style="font-family:monospace;font-size:12px">MBA-M4-16</td>
-                                        <td>B2-07</td>
-                                        <td>
-                                            <div class="stock-level">
-                                                <div class="stock-bar">
-                                                    <div class="stock-fill mid" style="width:35%"></div>
-                                                </div><span class="stock-num">87</span>
-                                            </div>
-                                        </td>
-                                        <td>342</td>
-                                        <td><span class="badge pending">Trung bình</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>AirPods Pro 3</td>
-                                        <td style="font-family:monospace;font-size:12px">APP3-MCS</td>
-                                        <td>C3-01</td>
-                                        <td>
-                                            <div class="stock-level">
-                                                <div class="stock-bar">
-                                                    <div class="stock-fill low" style="width:12%"></div>
-                                                </div><span class="stock-num">23</span>
-                                            </div>
-                                        </td>
-                                        <td>891</td>
-                                        <td><span class="badge danger">Sắp hết</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Samsung Galaxy S25</td>
-                                        <td style="font-family:monospace;font-size:12px">SGS25-128</td>
-                                        <td>A2-04</td>
-                                        <td>
-                                            <div class="stock-level">
-                                                <div class="stock-bar">
-                                                    <div class="stock-fill low" style="width:2%"></div>
-                                                </div><span class="stock-num">4</span>
-                                            </div>
-                                        </td>
-                                        <td>620</td>
-                                        <td><span class="badge danger">Cần nhập</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+<div class="page-header" style="margin-bottom:20px;">
+    <div>
+        <h2>Quản lý kho</h2>
+        <div class="breadcrumb">Hệ quản trị → Quản lý kho</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <button class="btn" onclick="openModal('import')">📥 Nhập kho</button>
+        <button class="btn primary" onclick="openModal('export')">📤 Xuất kho</button>
+    </div>
+</div>
+
+<div class="wh-page">
+
+
+<div class="wh-kpi-grid">
+    <div class="wh-kpi">
+        <div class="wh-kpi-icon" style="background:rgba(99,102,241,.1);">📦</div>
+        <div class="wh-kpi-body">
+            <div class="wh-kpi-label">Tổng sản phẩm</div>
+            <div class="wh-kpi-val"><%= fmtNum(stats.total) %></div>
+            <div class="wh-kpi-sub">Đang hoạt động</div>
+        </div>
+    </div>
+    <div class="wh-kpi">
+        <div class="wh-kpi-icon" style="background:rgba(16,185,129,.1);">💰</div>
+        <div class="wh-kpi-body">
+            <div class="wh-kpi-label">Giá trị tồn kho</div>
+            <div class="wh-kpi-val" style="font-size:18px;color:#059669;"><%= fmtMoney(stats.totalStockValue) %> ₫</div>
+            <div class="wh-kpi-sub">Tính theo giá nhập</div>
+        </div>
+    </div>
+    <div class="wh-kpi">
+        <div class="wh-kpi-icon" style="background:rgba(251,191,36,.1);">⚠️</div>
+        <div class="wh-kpi-body">
+            <div class="wh-kpi-label">Sắp hết hàng</div>
+            <div class="wh-kpi-val" style="color:#d97706;"><%= fmtNum(stats.lowStock) %></div>
+            <div class="wh-kpi-sub">Tồn kho ≤ 10</div>
+        </div>
+    </div>
+    <div class="wh-kpi">
+        <div class="wh-kpi-icon" style="background:rgba(239,68,68,.1);">❌</div>
+        <div class="wh-kpi-body">
+            <div class="wh-kpi-label">Hết hàng</div>
+            <div class="wh-kpi-val" style="color:#e53935;"><%= fmtNum(stats.outOfStock) %></div>
+            <div class="wh-kpi-sub">Cần nhập thêm</div>
+        </div>
+    </div>
+</div>
+
+
+<% if (criticalProducts.length > 0) { %>
+<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:700;color:#111827;">🚨 Sản phẩm cần chú ý (tồn kho ≤ 5)</div>
+        <span style="font-size:12px;color:#6b7280;"><%= criticalProducts.length %> sản phẩm</span>
+    </div>
+    <div class="critical-grid">
+        <% criticalProducts.forEach(p => { %>
+        <div class="critical-card <%= p.stock === 0 ? '' : 'low' %>">
+            <div class="critical-stock-badge <%= p.stock === 0 ? 'csb-out' : 'csb-low' %>">
+                <%= p.stock === 0 ? '0' : p.stock %>
+                <span style="font-size:9px;font-weight:500;margin-top:1px;"><%= p.stock === 0 ? 'hết' : 'còn' %></span>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= p.name %></div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;"><%= p.sku %></div>
+                <div style="font-size:11px;color:#9ca3af;"><%= p.category?.name || '' %></div>
+            </div>
+            <button class="wh-action-btn btn-import"
+                data-id="<%= p.id %>"
+                data-name="<%= p.name %>"
+                data-sku="<%= p.sku %>"
+                data-stock="<%= p.stock %>"
+                onclick="quickImportFromBtn(this)">
+                📥 Nhập
+            </button>
+        </div>
+        <% }); %>
+    </div>
+</div>
+<% } %>
+
+
+<div class="wh-toolbar">
+    <div class="wh-search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+            <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+        </svg>
+        <input type="text" id="whSearch" placeholder="Tìm tên hoặc SKU..." oninput="debounceSearch()">
+    </div>
+
+    <select class="wh-select" id="whCategory" onchange="loadInventory(1)">
+        <option value="">Tất cả danh mục</option>
+        <% categories.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %></option>
+        <% }); %>
+    </select>
+
+    <select class="wh-select" id="whBrand" onchange="loadInventory(1)">
+        <option value="">Tất cả thương hiệu</option>
+        <% brands.forEach(b => { %>
+        <option value="<%= b.id %>"><%= b.name %></option>
+        <% }); %>
+    </select>
+
+    <select class="wh-select" id="whSort" onchange="loadInventory(1)">
+        <option value="stock_asc">Tồn kho: thấp → cao</option>
+        <option value="stock_desc">Tồn kho: cao → thấp</option>
+        <option value="name_asc">Tên A → Z</option>
+        <option value="name_desc">Tên Z → A</option>
+    </select>
+
+    <div class="wh-filter-pills">
+        <button class="wh-pill active" data-filter="all"    onclick="setFilter('all',this)">Tất cả</button>
+        <button class="wh-pill"        data-filter="ok"     onclick="setFilter('ok',this)">✅ Đủ hàng</button>
+        <button class="wh-pill"        data-filter="low"    onclick="setFilter('low',this)">⚠️ Sắp hết</button>
+        <button class="wh-pill"        data-filter="out"    onclick="setFilter('out',this)">❌ Hết hàng</button>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="wh-table-wrap">
+    <div class="wh-table-header">
+        <span class="wh-table-title">Danh sách tồn kho</span>
+        <span class="wh-table-count" id="whTableCount">Đang tải...</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="wh-table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>SKU</th>
+                    <th>Danh mục</th>
+                    <th>Nhà cung cấp</th>
+                    <th>Giá nhập</th>
+                    <th>Giá bán</th>
+                    <th>Tồn kho</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="whTableBody">
+                <tr><td colspan="9"><div class="wh-loader"><div class="wh-spin"></div> Đang tải...</div></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="wh-pagination" id="whPagination"></div>
+</div>
+
+</div><!-- end .wh-page -->
+
+
+<!-- ════════════════════════════
+   MODAL NHẬP / XUẤT / SỬA KHO
+════════════════════════════ -->
+<div class="wh-modal-overlay" id="whModal">
+    <div class="wh-modal" style="width:520px;">
+        <div class="wh-modal-head">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span id="modalIcon" style="font-size:20px;">📥</span>
+                <h3 id="modalTitle">Nhập kho</h3>
+            </div>
+            <button class="wh-modal-close" onclick="closeModal()">×</button>
+        </div>
+
+        <!-- STEP 1: Chọn sản phẩm -->
+        <div id="modalStep1">
+            <div class="wh-modal-body" style="padding-bottom:12px;">
+                <div style="font-size:12px;color:#6b7280;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 13px;">
+                    🔍 Tìm và chọn sản phẩm cần thao tác kho
+                </div>
+
+                <!-- Search bar -->
+                <div class="wh-form-group" style="margin:0;">
+                    <label>Tìm sản phẩm (tên hoặc SKU)</label>
+                    <div style="position:relative;">
+                        <div style="display:flex;align-items:center;gap:8px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;transition:border-color .2s;"
+                             id="modalSearchBox"
+                             onfocusin="this.style.borderColor='#e53935'"
+                             onfocusout="this.style.borderColor='#e5e7eb'">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5">
+                                <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+                            </svg>
+                            <input type="text" id="modalSearchInput"
+                                placeholder="Nhập tên hoặc mã SKU..."
+                                oninput="handleModalSearch()"
+                                autocomplete="off"
+                                style="border:none;background:transparent;outline:none;font-size:13px;color:#374151;width:100%;">
+                            <button onclick="clearModalSearch()" id="modalSearchClear"
+                                style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;line-height:1;display:none;">×</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Product list results -->
+                <div id="modalProductList" style="max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:10px;background:#fff;">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:32px;color:#9ca3af;font-size:13px;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ccc" stroke-width="1.5">
+                            <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+                        </svg>
+                        Nhập tên hoặc SKU để tìm sản phẩm
+                    </div>
+                </div>
+            </div>
+            <div class="wh-modal-foot">
+                <button class="btn" onclick="closeModal()">Hủy</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Nhập số lượng (sau khi đã chọn sp) -->
+        <div id="modalStep2" style="display:none;">
+            <div class="wh-modal-body">
+                <!-- Selected product info -->
+                <div class="wh-modal-product-info" id="modalSelectedProduct">
+                    <img id="modalProductImg" src="" alt="" onerror="this.src='/client/images/no-image.png'">
+                    <div style="flex:1;min-width:0;">
+                        <div id="modalProductName" style="font-size:13px;font-weight:700;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                        <div id="modalProductSku" style="font-size:11px;color:#6b7280;margin-top:2px;"></div>
+                        <div id="modalProductStock" style="font-size:11px;margin-top:2px;"></div>
+                    </div>
+                    <button onclick="backToStep1()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;white-space:nowrap;padding:4px 8px;border-radius:6px;border:1px solid #e5e7eb;">
+                        ← Đổi SP
+                    </button>
+                </div>
+
+                <input type="hidden" id="modalProductId">
+                <input type="hidden" id="modalAction">
+
+                <!-- Quantity input (import / export) -->
+                <div class="wh-form-group" id="modalQtyGroup">
+                    <label id="modalQtyLabel">Số lượng nhập</label>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button onclick="adjustQty(-1)" style="width:36px;height:36px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
+                        <input type="number" id="modalQty" min="1" value="1"
+                            style="text-align:center;font-size:16px;font-weight:700;">
+                        <button onclick="adjustQty(1)"  style="width:36px;height:36px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+                    </div>
+                    <div id="modalStockWarning" style="font-size:11px;color:#f59e0b;margin-top:4px;display:none;">⚠️ Số lượng xuất vượt quá tồn kho</div>
+                </div>
+
+                <!-- Set stock mode -->
+                <div class="wh-form-group" id="modalSetStockGroup" style="display:none;">
+                    <label>Tồn kho mới</label>
+                    <input type="number" id="modalNewStock" min="0" placeholder="Nhập số lượng tồn kho mới...">
+                </div>
+
+                <div class="wh-form-group">
+                    <label>Ghi chú (tùy chọn)</label>
+                    <textarea id="modalNote" rows="2" placeholder="Lý do nhập/xuất kho..."></textarea>
+                </div>
+            </div>
+            <div class="wh-modal-foot">
+                <button class="btn" onclick="closeModal()">Hủy</button>
+                <button class="btn primary" id="modalSubmitBtn" onclick="submitModal()">✓ Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="wh-toast"></div>
+
+<script>
+// ── STATE ──
+let whState = { page: 1, filter: 'all' };
+let _currentModalStock = 0; // tồn kho hiện tại của sp đang chọn
+
+// ════════════════════════════════════════════
+// LOAD INVENTORY TABLE
+// ════════════════════════════════════════════
+async function loadInventory(page = 1) {
+    whState.page = page;
+    const search     = document.getElementById('whSearch').value.trim();
+    const categoryId = document.getElementById('whCategory').value;
+    const brandId    = document.getElementById('whBrand').value;
+    const sort       = document.getElementById('whSort').value;
+
+    document.getElementById('whTableBody').innerHTML =
+        '<tr><td colspan="9"><div class="wh-loader"><div class="wh-spin"></div> Đang tải...</div></td></tr>';
+    document.getElementById('whPagination').innerHTML = '';
+    document.getElementById('whTableCount').textContent = '...';
+
+    try {
+        const params = new URLSearchParams({ page, limit: 20, filter: whState.filter, search, sort });
+        if (categoryId) params.append('categoryId', categoryId);
+        if (brandId)    params.append('brandId', brandId);
+
+        const res  = await fetch(`/admin/api/warehouse/inventory?${params}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        renderTable(data.products);
+        renderPagination(data.page, data.totalPages);
+        document.getElementById('whTableCount').textContent =
+            `${data.total.toLocaleString('vi-VN')} sản phẩm`;
+    } catch (err) {
+        console.error(err);
+        document.getElementById('whTableBody').innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:#e53935;padding:32px;">Lỗi tải dữ liệu</td></tr>';
+    }
+}
+
+function renderTable(products) {
+    if (!products || products.length === 0) {
+        document.getElementById('whTableBody').innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:40px;">Không có sản phẩm nào</td></tr>';
+        return;
+    }
+
+    document.getElementById('whTableBody').innerHTML = products.map(p => {
+        const stock = Number(p.stock);
+        const threshold = Number(p.lowStockThreshold) || 10;
+        const maxBar = Math.max(stock, threshold * 5, 1);
+        const pct = Math.min(100, Math.round(stock / maxBar * 100));
+        const fillClass = stock === 0 ? 'sf-out' : (stock <= threshold ? 'sf-low' : 'sf-ok');
+        const stClass   = stock === 0 ? 'st-out' : (stock <= threshold ? 'st-low' : 'st-ok');
+        const stLabel   = stock === 0 ? 'Hết hàng' : (stock <= threshold ? 'Sắp hết' : 'Đủ hàng');
+        const img = p.image ? `/admin/productImages/${p.image}` : '/client/images/no-image.png';
+
+        return `<tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <img class="wh-prod-img" src="${img}" onerror="this.src='/client/images/no-image.png'" alt="">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:#111827;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</div>
+                        <div style="font-size:11px;color:#9ca3af;">${p.brand?.name || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span style="font-family:monospace;font-size:12px;background:#f3f4f6;padding:2px 7px;border-radius:4px;">${p.sku}</span></td>
+            <td style="font-size:12px;color:#6b7280;">${p.category?.name || '—'}</td>
+            <td style="font-size:12px;color:#6b7280;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.supplier?.name || '—'}</td>
+            <td style="font-size:12px;color:#374151;">${Number(p.cost).toLocaleString('vi-VN')}₫</td>
+            <td style="font-size:12px;color:#374151;">${Number(p.price).toLocaleString('vi-VN')}₫</td>
+            <td>
+                <div class="stock-bar-wrap">
+                    <div class="stock-bar"><div class="stock-fill ${fillClass}" style="width:${pct}%"></div></div>
+                    <span class="stock-num">${stock}</span>
+                </div>
+            </td>
+            <td><span class="${stClass}">${stLabel}</span></td>
+            <td>
+                <div style="display:flex;gap:5px;">
+                    <button class="wh-action-btn btn-import" title="Nhập kho"
+                        onclick="openStep2('import','${p.id}','${p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${p.sku}',${stock},'${img}')">📥</button>
+                    <button class="wh-action-btn btn-export" title="Xuất kho"
+                        onclick="openStep2('export','${p.id}','${p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${p.sku}',${stock},'${img}')">📤</button>
+                    <button class="wh-action-btn btn-edit"   title="Cập nhật tồn kho"
+                        onclick="openStep2('set','${p.id}','${p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${p.sku}',${stock},'${img}')">✏️</button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderPagination(current, total) {
+    const el = document.getElementById('whPagination');
+    if (total <= 1) { el.innerHTML = ''; return; }
+    let html = `<button class="pg-btn" ${current<=1?'disabled':''} onclick="loadInventory(${current-1})">‹</button>`;
+    for (let i = 1; i <= total; i++) {
+        if (i === current) {
+            html += `<button class="pg-btn active">${i}</button>`;
+        } else if (i === 1 || i === total || Math.abs(i - current) <= 1) {
+            html += `<button class="pg-btn" onclick="loadInventory(${i})">${i}</button>`;
+        } else if (Math.abs(i - current) === 2) {
+            html += `<span style="padding:0 4px;color:#9ca3af;">…</span>`;
+        }
+    }
+    html += `<button class="pg-btn" ${current>=total?'disabled':''} onclick="loadInventory(${current+1})">›</button>`;
+    el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════
+// FILTER & SEARCH
+// ════════════════════════════════════════════
+function setFilter(f, btn) {
+    whState.filter = f;
+    document.querySelectorAll('.wh-pill').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    loadInventory(1);
+}
+
+let searchTimer = null;
+function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadInventory(1), 350);
+}
+
+// ════════════════════════════════════════════
+// MODAL — MỞ / ĐÓNG
+// ════════════════════════════════════════════
+function _getActionMeta(action) {
+    return {
+        import: { icon:'📥', title:'Nhập kho',         qtyLabel:'Số lượng nhập' },
+        export: { icon:'📤', title:'Xuất kho',         qtyLabel:'Số lượng xuất' },
+        set:    { icon:'✏️', title:'Cập nhật tồn kho', qtyLabel:''              },
+    }[action] || { icon:'📦', title:'Thao tác kho', qtyLabel:'' };
+}
+
+// Mở modal (bắt đầu từ Step 1 — search)
+function openModal(action) {
+    const meta = _getActionMeta(action);
+    document.getElementById('modalIcon').textContent  = meta.icon;
+    document.getElementById('modalTitle').textContent = meta.title;
+    document.getElementById('modalAction').value      = action;
+
+    // Reset step 1
+    document.getElementById('modalStep1').style.display = '';
+    document.getElementById('modalStep2').style.display = 'none';
+    document.getElementById('modalSearchInput').value   = '';
+    document.getElementById('modalSearchClear').style.display = 'none';
+    _resetProductList();
+
+    document.getElementById('whModal').classList.add('open');
+    setTimeout(() => document.getElementById('modalSearchInput').focus(), 150);
+}
+
+// Mở thẳng Step 2 (từ nút hành động trong bảng / critical cards)
+function openStep2(action, id, name, sku, stock, img) {
+    openModal(action);       // set title, icon, action
+    _fillStep2(id, name, sku, stock, img);
+    document.getElementById('modalStep1').style.display = 'none';
+    document.getElementById('modalStep2').style.display = '';
+}
+
+function closeModal() {
+    document.getElementById('whModal').classList.remove('open');
+}
+
+function backToStep1() {
+    document.getElementById('modalStep1').style.display = '';
+    document.getElementById('modalStep2').style.display = 'none';
+    setTimeout(() => document.getElementById('modalSearchInput').focus(), 100);
+}
+
+// ════════════════════════════════════════════
+// STEP 1 — SEARCH SẢN PHẨM
+// ════════════════════════════════════════════
+function _resetProductList() {
+    document.getElementById('modalProductList').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:32px;color:#9ca3af;font-size:13px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ccc" stroke-width="1.5">
+                <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+            </svg>
+            Nhập tên hoặc SKU để tìm sản phẩm
+        </div>`;
+}
+
+let _modalSearchTimer = null;
+function handleModalSearch() {
+    const q = document.getElementById('modalSearchInput').value.trim();
+    document.getElementById('modalSearchClear').style.display = q ? '' : 'none';
+    clearTimeout(_modalSearchTimer);
+    if (!q) { _resetProductList(); return; }
+    // show mini loader
+    document.getElementById('modalProductList').innerHTML =
+        '<div class="wh-loader" style="padding:20px;"><div class="wh-spin"></div> Đang tìm...</div>';
+    _modalSearchTimer = setTimeout(() => _doModalSearch(q), 280);
+}
+
+function clearModalSearch() {
+    document.getElementById('modalSearchInput').value = '';
+    document.getElementById('modalSearchClear').style.display = 'none';
+    _resetProductList();
+    document.getElementById('modalSearchInput').focus();
+}
+
+async function _doModalSearch(q) {
+    try {
+        const res  = await fetch(`/admin/api/warehouse/inventory?search=${encodeURIComponent(q)}&limit=10`);
+        const data = await res.json();
+        const list = document.getElementById('modalProductList');
+
+        if (!data.products || data.products.length === 0) {
+            list.innerHTML = '<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">Không tìm thấy sản phẩm nào</div>';
+            return;
+        }
+
+        list.innerHTML = data.products.map(p => {
+            const stock = Number(p.stock);
+            const stColor = stock === 0 ? '#e53935' : (stock <= 10 ? '#f59e0b' : '#059669');
+            const img = p.image ? `/admin/productImages/${p.image}` : '/client/images/no-image.png';
+            return `<div class="_modal-prod-row"
+                style="display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background .12s;"
+                onmouseenter="this.style.background='#f9fafb'"
+                onmouseleave="this.style.background=''"
+                data-id="${p.id}" data-name="${(p.name||'').replace(/"/g,'&quot;')}"
+                data-sku="${p.sku||''}" data-stock="${stock}" data-img="${img}"
+                onclick="_selectProduct(this)">
+                <img src="${img}" onerror="this.src='/client/images/no-image.png'"
+                    style="width:38px;height:38px;object-fit:cover;border-radius:7px;border:1px solid #e5e7eb;flex-shrink:0;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">
+                        SKU: ${p.sku} · ${p.category?.name || ''}
+                    </div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:14px;font-weight:700;color:${stColor};">${stock}</div>
+                    <div style="font-size:10px;color:#9ca3af;">tồn kho</div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        document.getElementById('modalProductList').innerHTML =
+            '<div style="padding:20px;text-align:center;color:#e53935;font-size:13px;">Lỗi tải dữ liệu</div>';
+    }
+}
+
+function _selectProduct(row) {
+    const id    = row.dataset.id;
+    const name  = row.querySelector('div[style*="font-weight:600"]').textContent.trim();
+    const sku   = row.dataset.sku;
+    const stock = parseInt(row.dataset.stock) || 0;
+    const img   = row.dataset.img;
+
+    _fillStep2(id, name, sku, stock, img);
+    document.getElementById('modalStep1').style.display = 'none';
+    document.getElementById('modalStep2').style.display = '';
+}
+
+// ════════════════════════════════════════════
+// STEP 2 — NHẬP SỐ LƯỢNG
+// ════════════════════════════════════════════
+function _fillStep2(id, name, sku, stock, img) {
+    _currentModalStock = stock;
+    const action = document.getElementById('modalAction').value;
+
+    document.getElementById('modalProductId').value     = id;
+    document.getElementById('modalProductName').textContent = name;
+    document.getElementById('modalProductSku').textContent  = 'SKU: ' + sku;
+
+    const stockEl = document.getElementById('modalProductStock');
+    const stColor = stock === 0 ? '#e53935' : (stock <= 10 ? '#f59e0b' : '#059669');
+    stockEl.innerHTML = `Tồn kho: <strong style="color:${stColor};">${stock}</strong>`;
+
+    const imgEl = document.getElementById('modalProductImg');
+    imgEl.src = img || '/client/images/no-image.png';
+
+    // Controls
+    document.getElementById('modalNote').value = '';
+    document.getElementById('modalQty').value  = 1;
+    document.getElementById('modalNewStock').value = stock;
+    document.getElementById('modalStockWarning').style.display = 'none';
+
+    const isSet = action === 'set';
+    document.getElementById('modalQtyGroup').style.display      = isSet ? 'none' : '';
+    document.getElementById('modalSetStockGroup').style.display  = isSet ? '' : 'none';
+    document.getElementById('modalQtyLabel').textContent = action === 'import' ? 'Số lượng nhập' : 'Số lượng xuất';
+}
+
+function adjustQty(delta) {
+    const input = document.getElementById('modalQty');
+    const v = Math.max(1, (parseInt(input.value) || 1) + delta);
+    input.value = v;
+    checkExportWarning(v);
+}
+
+function checkExportWarning(qty) {
+    const action = document.getElementById('modalAction').value;
+    const warn   = document.getElementById('modalStockWarning');
+    if (action === 'export' && qty > _currentModalStock) {
+        warn.style.display = '';
+    } else {
+        warn.style.display = 'none';
+    }
+}
+
+// live check qty input
+document.addEventListener('DOMContentLoaded', () => {
+    const qtyInput = document.getElementById('modalQty');
+    if (qtyInput) qtyInput.addEventListener('input', () => checkExportWarning(parseInt(qtyInput.value)||0));
+});
+
+// ════════════════════════════════════════════
+// SUBMIT
+// ════════════════════════════════════════════
+async function submitModal() {
+    const action    = document.getElementById('modalAction').value;
+    const productId = document.getElementById('modalProductId').value;
+    const note      = document.getElementById('modalNote').value;
+
+    if (!productId) { showToast('Vui lòng chọn sản phẩm', 'error'); return; }
+
+    let url, body;
+    if (action === 'set') {
+        const newStock = parseInt(document.getElementById('modalNewStock').value);
+        if (isNaN(newStock) || newStock < 0) { showToast('Số lượng không hợp lệ', 'error'); return; }
+        url  = '/admin/api/warehouse/set-stock';
+        body = { productId, stock: newStock };
+    } else {
+        const qty = parseInt(document.getElementById('modalQty').value);
+        if (!qty || qty < 1) { showToast('Số lượng phải >= 1', 'error'); return; }
+        if (action === 'export' && qty > _currentModalStock) {
+            showToast(`Tồn kho không đủ! Hiện có: ${_currentModalStock}`, 'error'); return;
+        }
+        url  = action === 'import' ? '/admin/api/warehouse/import' : '/admin/api/warehouse/export';
+        body = { productId, quantity: qty, note };
+    }
+
+    const btn = document.getElementById('modalSubmitBtn');
+    btn.disabled = true; btn.textContent = '⏳ Đang xử lý...';
+
+    try {
+        const res  = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        showToast(data.message || 'Thành công!', 'success');
+        closeModal();
+        loadInventory(whState.page);
+        setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+        showToast(err.message || 'Có lỗi xảy ra', 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = '✓ Xác nhận';
+    }
+}
+
+// ════════════════════════════════════════════
+// QUICK ACTIONS (từ bảng và critical cards)
+// ════════════════════════════════════════════
+function quickImportFromBtn(btn) {
+    openStep2('import', btn.dataset.id, btn.dataset.name, btn.dataset.sku, parseInt(btn.dataset.stock)||0, '');
+}
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('wh-toast');
+    t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    t.className = `show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// Close on overlay click / Esc
+document.getElementById('whModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── INIT ──
+loadInventory(1);
+</script>

@@ -110,12 +110,17 @@
                                     <span class="quantity-label">Số lượng:</span>
                                     <div class="quantity-control">
                                         <a class="quantity-btn" onclick="changeQuantity(-1)">-</a>
-                                        <input type="number" name="product_qty" class="quantity-input" value="1"
-                                            id="quantityInput" min="1">
+                                        <input type="number" name="product_qty" class="quantity-input" value="<%= product.stock > 0 ? 1 : 0 %>"
+                                            id="quantityInput" min="1" max="<%= product.stock %>">
                                         <a class="quantity-btn" onclick="changeQuantity(1)">+</a>
                                     </div>
+                                    <% if (product.stock <= 0) { %>
+                                    <span style="color:#e53935;font-size:13px;font-weight:600;margin-left:8px;">⚠️ Sản phẩm hiện đã hết hàng</span>
+                                    <% } else if (product.stock <= 5) { %>
+                                    <span style="color:#f57c00;font-size:13px;font-weight:600;margin-left:8px;">⚠️ Chỉ còn <%= product.stock %> sản phẩm!</span>
+                                    <% } %>
 
-                                    <button type="button" class="cart-btn" onclick="addToCart(event)">
+                                    <button type="button" class="cart-btn" onclick="addToCart(event)" <% if (product.stock <= 0) { %>disabled style="opacity:0.5;cursor:not-allowed;"<% } %>>
                                         <i class="ri-shopping-cart-2-line"></i> Thêm vào giỏ hàng
                                     </button>
 
@@ -123,7 +128,7 @@
 
                                 <div class="action-buttons">
 
-                                    <button type="submit" name="buy-now" class="primary-btn">
+                                    <button type="submit" name="buy-now" class="primary-btn" <% if (product.stock <= 0) { %>disabled style="opacity:0.5;cursor:not-allowed;"<% } %>>
                                         ĐẶT MUA NGAY
                                         <div style="font-size: 12px; font-weight: normal; margin-top: 3px;">Giao hàng
                                             tận nơi nhanh chóng</div>
@@ -324,6 +329,8 @@
         // QUANTITY CONTROL
         // =========================
 
+        const MAX_STOCK = parseInt('<%= product.stock %>') || 0;
+
         function changeQuantity(amount) {
             const input = document.getElementById("quantityInput");
             let value = parseInt(input.value) || 1;
@@ -331,9 +338,24 @@
             value += amount;
 
             if (value < 1) value = 1;
+            if (value > MAX_STOCK) {
+                value = MAX_STOCK;
+                showCartToast(false, 'Đã đạt giới hạn tồn kho!', `Chỉ còn ${MAX_STOCK} sản phẩm trong kho.`);
+            }
 
             input.value = value;
         }
+
+        // Validate khi người dùng nhập tay
+        document.getElementById("quantityInput").addEventListener('change', function() {
+            let val = parseInt(this.value) || 1;
+            if (val < 1) val = 1;
+            if (val > MAX_STOCK) {
+                val = MAX_STOCK;
+                showCartToast(false, 'Đã đạt giới hạn tồn kho!', `Chỉ còn ${MAX_STOCK} sản phẩm trong kho.`);
+            }
+            this.value = val;
+        });
 
 
         // =========================

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { getAllCategories, getCategories } from "services/admin/category.services";
 import { getAllBrands } from "services/admin/brand.services";
 import { getAllSuppliers } from "services/admin/supplier.services";
-import { autoGenerateSlug, generateSKUWithDB, getAllProducts, getProductsPaginated, getProductById, HandleActiveProduct, HandleCreateProduct, HandleLockProduct, HandleUpdateProduct, incrementViewCount } from "services/admin/product.services";
+import { autoGenerateSlug, generateSKUWithDB, getAllProducts, getProductsPaginated, getProductById, HandleActiveProduct, HandleCreateProduct, HandleLockProduct, HandleUpdateProduct, incrementViewCount, HandleDeleteProduct } from "services/admin/product.services";
 import { getReviewStats } from "services/admin/review.services";
 
 const getProductsPage = async (req: Request, res: Response) => {
@@ -157,4 +157,15 @@ const PostIncrementView = async (req: Request, res: Response) => {
     }
 };
 
-export { getProductsPage, getCreateProductPage, PostCreateProduct, PostActiveProduct, PostLockProduct, getProductDetailPage, PostUpdateProduct, PostIncrementView }
+const PostDeleteProduct = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id as string;
+        await HandleDeleteProduct(id);
+        res.redirect("/admin/products");
+    } catch (e) {
+        console.error("Error deleting product:", e);
+        res.redirect("/admin/products");
+    }
+};
+
+export { getProductsPage, getCreateProductPage, PostCreateProduct, PostActiveProduct, PostLockProduct, getProductDetailPage, PostUpdateProduct, PostIncrementView, PostDeleteProduct }

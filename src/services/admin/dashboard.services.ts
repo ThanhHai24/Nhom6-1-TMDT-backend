@@ -9,6 +9,18 @@ function startOfMonth(date: Date) {
 function startOfYear(date: Date) {
     return new Date(date.getFullYear(), 0, 1);
 }
+function periodRange(month: number | null, year: number): { gte: Date; lt: Date } {
+    if (month !== null) {
+        return {
+            gte: new Date(year, month - 1, 1),
+            lt: new Date(year, month, 1),
+        };
+    }
+    return {
+        gte: new Date(year, 0, 1),
+        lt: new Date(year + 1, 0, 1),
+    };
+}
 
 // ─────────────────────────────────────────────
 // Users
@@ -210,6 +222,95 @@ const getRecentOrders = async (limit = 8) => {
     });
 };
 
+// ─────────────────────────────────────────────
+// Dashboard Stats API (filter by month/year)
+// ─────────────────────────────────────────────
+
+/** Doanh thu theo từng ngày trong tháng hoặc theo từng tháng trong năm */
+const getDashboardStatsByPeriod = async (month: number | null, year: number) => {
+    const range = periodRange(month, year);
+
+    // Revenue total
+    const revenueAgg = await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: { status: 'DELIVERED', createdAt: range },
+    });
+    const revenue = revenueAgg._sum.totalAmount ?? 0;
+
+    // Order count
+    const orderCount = await prisma.order.count({ where: { createdAt: range } });
+
+    // Revenue chart data
+    const orders = await prisma.order.findMany({
+        where: { status: 'DELIVERED', createdAt: range },
+        select: { createdAt: true, totalAmount: true },
+    });
+
+    let revenueChart: number[];
+    let revenueLabels: string[];
+    if (month !== null) {
+        // Theo ngày trong tháng
+        const daysInMonth = new Date(year, month, 0).getDate();
+        revenueChart = Array(daysInMonth).fill(0);
+        revenueLabels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
+        for (const o of orders) {
+            revenueChart[o.createdAt.getDate() - 1] += o.totalAmount;
+        }
+    } else {
+        // Theo tháng trong năm
+        revenueChart = Array(12).fill(0);
+        revenueLabels = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+        for (const o of orders) {
+            revenueChart[o.createdAt.getMonth()] += o.totalAmount;
+        }
+    }
+
+    // Orders chart data
+    const allOrders = await prisma.order.findMany({
+        where: { createdAt: range },
+        select: { createdAt: true },
+    });
+    let ordersChart: number[];
+    if (month !== null) {
+        const daysInMonth = new Date(year, month, 0).getDate();
+        ordersChart = Array(daysInMonth).fill(0);
+        for (const o of allOrders) {
+            ordersChart[o.createdAt.getDate() - 1]++;
+        }
+    } else {
+        ordersChart = Array(12).fill(0);
+        for (const o of allOrders) {
+            ordersChart[o.createdAt.getMonth()]++;
+        }
+    }
+
+    // Order status stats
+    const groups = await prisma.order.groupBy({
+        by: ['status'],
+        _count: { _all: true },
+        where: { createdAt: range },
+    });
+    const statusStats: Record<string, number> = {};
+    for (const g of groups) statusStats[g.status] = g._count._all;
+
+    // Top products
+    const items = await prisma.orderItem.findMany({
+        where: { order: { status: 'DELIVERED', createdAt: range } },
+        include: { product: { select: { name: true, image: true } } },
+    });
+    const map = new Map<string, { name: string; totalQty: number; revenue: number; image: string | null }>();
+    for (const item of items) {
+        const key = item.productId.toString();
+        if (!map.has(key)) map.set(key, { name: item.product.name, totalQty: 0, revenue: 0, image: item.product.image });
+        const entry = map.get(key)!;
+        entry.totalQty += item.quantity;
+        entry.revenue += item.price * item.quantity;
+    }
+    const topProducts = Array.from(map.values()).sort((a, b) => b.totalQty - a.totalQty).slice(0, 8);
+
+    return { revenue, orderCount, revenueChart, revenueLabels, ordersChart, statusStats, topProducts };
+};
+
 export {
     getUserCount, getUserThisMonthCount,
     getProductsCount, getProductThisMonthCount,
@@ -217,4 +318,5 @@ export {
     getOrdersCountThisYear, getOrderStatusStats, getMonthlyOrdersThisYear,
     getTopSellingProducts, getSlowMovingProducts,
     getActivePromotions, getRecentOrders,
+    getDashboardStatsByPeriod,
 };

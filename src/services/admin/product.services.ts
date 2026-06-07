@@ -1,7 +1,12 @@
 import { prisma } from "config/client";
 const autoGenerateSlug = (name: string) => {
-    return name.toLowerCase().replace(/ /g, "-");
-}
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/\//g, "-")      // bỏ dấu /
+        .replace(/\s+/g, "-")     // khoảng trắng -> -
+        .replace(/-+/g, "-");     // tránh ----
+};
 async function generateSKUWithDB(prisma, categoryId: string) {
     // 1. Lấy category từ DB
     const category = await prisma.category.findUnique({
@@ -157,6 +162,39 @@ const HandleUpdateProduct = async function (id: string, name: string, slug: stri
         },
     });
 }
+const HandleDeleteProduct = async (id: string) => {
+    const productId = BigInt(id);
+
+    // 1. Kiểm tra xem sản phẩm đã có trong đơn hàng nào chưa
+    const orderItemsCount = await prisma.orderItem.count({
+        where: { productId }
+    });
+
+    if (orderItemsCount > 0) {
+        // Nếu có đơn hàng, thực hiện soft-delete (chuyển trạng thái sang INACTIVE) để không làm mất lịch sử đơn hàng
+        await prisma.product.update({
+            where: { id: productId },
+            data: { status: 'INACTIVE' }
+        });
+        return { success: true, type: 'soft' };
+    }
+
+    // 2. Không có đơn hàng, tiến hành xoá cứng. Xoá reviews và wishlists trước để tránh lỗi ràng buộc
+    await prisma.review.deleteMany({
+        where: { productId }
+    });
+
+    await prisma.wishlistItem.deleteMany({
+        where: { productId }
+    });
+
+    // 3. Thực hiện xoá sản phẩm
+    await prisma.product.delete({
+        where: { id: productId }
+    });
+
+    return { success: true, type: 'hard' };
+}
 
 
-export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, getProductsPaginated, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct, incrementViewCount }
+export { autoGenerateSlug, generateSKUWithDB, HandleCreateProduct, getAllProducts, getProductsPaginated, HandleActiveProduct, HandleLockProduct, getProductById, HandleUpdateProduct, incrementViewCount, HandleDeleteProduct }

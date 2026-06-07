@@ -1,11 +1,13 @@
 import { getBrandDetailPage, getBrandsPage, getCreateBrandPage, PostActiveBrand, PostCreateBrand, PostDeleteBrand, PostLockBrand, PostUpdateBrand } from 'controllers/admin/brand.controller';
 import { getBrandsByCategoryId } from 'services/admin/brand.services';
 import { getCategoriesPage, getCreateParentCategoryPage, getCreateChildCategoryPage, PostCreateCategory, getCategoryDetailPage, PostUpdateCategory } from 'controllers/admin/category.controller';
-import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage, getWarehousePage } from 'controllers/admin/dashboard.controller';
+import { getDashboardPage, getHistoryPage, getNotificationPage, getPromotionPage } from 'controllers/admin/dashboard.controller';
+import { getDashboardStatsByPeriod } from 'services/admin/dashboard.services';
 import { getOrderDetailPage, getOrders, PostUpdateOrderStatus } from 'controllers/admin/order.controller';
-import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostIncrementView, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
+import { getCreateProductPage, getProductDetailPage, getProductsPage, PostActiveProduct, PostCreateProduct, PostDeleteProduct, PostIncrementView, PostLockProduct, PostUpdateProduct } from 'controllers/admin/product.controller';
 import { getReviewsPage, PostApproveReview, PostDeleteReview, PostRejectReview } from 'controllers/admin/review.controller';
 import { getShippingPage } from 'controllers/admin/shipping.controller';
+import { getWarehousePage, getInventoryAPI, importStockAPI, exportStockAPI, setStockAPI } from 'controllers/admin/warehouse.controller';
 import { getCreateShippingProviderPage, getShippingProviderDetailPage, getShippingProvidersPage, PostActiveShippingProvider, PostCreateShippingProvider, PostDeleteShippingProvider, PostLockShippingProvider, PostUpdateShippingProvider } from 'controllers/admin/shippingProvider.controller';
 import { getCreateSupplierPage, getSupplierDetailPage, getSuppliersPage, PostActiveSupplier, PostCreateSupplier, PostDeleteSupplier, PostLockSupplier, PostUpdateSupplier } from 'controllers/admin/supplier.controller';
 import { getCreateUserPage, getUserDetailPage, getUsers, PostActiveUser, PostCreateUser, PostDeleteUser, PostLockUser, PostUpdateUser } from 'controllers/admin/user.controller';
@@ -58,7 +60,8 @@ const userRoutes = (app: express.Express) => {
     router.post('/product/handleupdate', productUploadMiddleware(), PostUpdateProduct);
     router.post("/products/lock/:id", PostLockProduct);
     router.post("/products/active/:id", PostActiveProduct);
-    router.post("/products/view/:id", PostIncrementView); // API tăng lượt xem (client-side call)
+    router.post("/products/view/:id", PostIncrementView);
+    router.post("/products/delete/:id", PostDeleteProduct);
 
     // Reviews (Catalog roles)
     router.use('/reviews', catalogRoles);
@@ -110,6 +113,11 @@ const userRoutes = (app: express.Express) => {
     // Warehouse (Catalog roles)
     router.use('/warehouse', catalogRoles);
     router.get('/warehouse', getWarehousePage);
+    // Warehouse API
+    router.get('/api/warehouse/inventory', getInventoryAPI);
+    router.post('/api/warehouse/import', importStockAPI);
+    router.post('/api/warehouse/export', exportStockAPI);
+    router.post('/api/warehouse/set-stock', setStockAPI);
 
     // Promotion (Catalog roles)
     router.use('/promotion', catalogRoles);
@@ -140,6 +148,20 @@ const userRoutes = (app: express.Express) => {
             return res.json(brands.map(b => ({ id: Number(b.id), name: b.name, slug: b.slug })));
         } catch (err) {
             return res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    // Dashboard stats API (filter by month/year)
+    router.get('/api/dashboard-stats', async (req, res) => {
+        try {
+            const year = parseInt(req.query.year as string) || new Date().getFullYear();
+            const monthParam = req.query.month as string;
+            const month = monthParam && monthParam !== '' ? parseInt(monthParam) : null;
+            const stats = await getDashboardStatsByPeriod(month, year);
+            return res.json({ success: true, ...stats });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, error: 'Internal server error' });
         }
     });
 

@@ -1,7 +1,4 @@
-
-
 <%
-    // ── Helpers in EJS ──
     const fmtMoney = v => Number(v).toLocaleString('vi-VN');
     const statusLabel = {
         PENDING:'Chờ xử lý', CONFIRMED:'Đã xác nhận',
@@ -14,8 +11,204 @@
     };
 %>
 
-<!-- Page header -->
-<div class="page-header" style="margin-bottom:20px;">
+<style>
+/* ═══════════════════════════════════════
+   SECTION HEADER STYLE
+═══════════════════════════════════════ */
+.dash-section-block {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+    animation: fadeUp .35s ease both;
+}
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.dash-section-block:nth-child(2) { animation-delay:.05s; }
+.dash-section-block:nth-child(3) { animation-delay:.10s; }
+.dash-section-block:nth-child(4) { animation-delay:.15s; }
+.dash-section-block:nth-child(5) { animation-delay:.20s; }
+.dash-section-block:nth-child(6) { animation-delay:.25s; }
+
+.dsb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px 14px;
+    border-bottom: 1px solid #f3f4f6;
+    background: linear-gradient(to right, #fafafa, #fff);
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+}
+.dsb-header:hover { background: linear-gradient(to right, #f3f4f6, #fafafa); }
+.dsb-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.dsb-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.dsb-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+.dsb-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 1px;
+}
+.dsb-toggle-icon {
+    font-size: 16px;
+    color: #9ca3af;
+    transition: transform .3s;
+    line-height: 1;
+}
+.dsb-toggle-icon.collapsed { transform: rotate(-90deg); }
+.dsb-body {
+    padding: 22px;
+    transition: all .3s ease;
+}
+.dsb-body.hidden {
+    display: none;
+}
+
+/* ── Period Filter ── */
+.period-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 11px 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    flex-wrap: wrap;
+}
+.period-filter-bar label { font-size:13px; font-weight:600; color:#374151; white-space:nowrap; }
+.period-filter-bar select {
+    border: 1px solid #d1d5db; border-radius:8px; padding:6px 11px;
+    font-size:13px; color:#374151; background:#f9fafb; cursor:pointer; outline:none;
+    transition: border-color .2s;
+}
+.period-filter-bar select:focus { border-color:#e53935; }
+.filter-sep { width:1px; height:24px; background:#e5e7eb; margin:0 2px; }
+.btn-apply { background:linear-gradient(135deg,#e53935,#b71c1c); color:#fff; border:none; border-radius:8px; padding:7px 16px; font-size:13px; font-weight:600; cursor:pointer; transition:opacity .2s; white-space:nowrap; }
+.btn-apply:hover { opacity:.88; }
+.btn-reset { background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:8px; padding:7px 13px; font-size:13px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+.btn-reset:hover { background:#e5e7eb; }
+.period-viewing { margin-left:auto; font-size:12px; color:#6b7280; }
+.period-viewing strong { color:#e53935; }
+
+/* ── Loader ── */
+.skel-loader {
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; padding:36px; color:#9ca3af; font-size:13px;
+}
+.skel-spin {
+    width:20px; height:20px;
+    border:3px solid #f3f4f6; border-top-color:#e53935;
+    border-radius:50%; animation:spin .7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── KPI inline row ── */
+.kpi-inline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.kpi-inline-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+.kpi-inline-label { font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.kpi-inline-val   { font-size:22px; font-weight:700; color:#111827; line-height:1; }
+.kpi-inline-sub   { font-size:11px; color:#9ca3af; margin-top:4px; }
+
+/* ── Charts ── */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+.chart-wrap { position:relative; }
+
+/* ── Order Status Donut legend ── */
+.status-legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; }
+.status-legend-item { display:flex; align-items:center; gap:5px; }
+.status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+/* ── Top Products Table ── */
+.top-table { width:100%; border-collapse:collapse; font-size:13px; }
+.top-table th { padding:8px 10px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; border-bottom:2px solid #f3f4f6; background:#fafafa; }
+.top-table td { padding:9px 10px; border-bottom:1px solid #f9fafb; vertical-align:middle; }
+.top-table tr:last-child td { border-bottom:none; }
+.rank-badge { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; font-size:11px; font-weight:700; }
+.rank-1 { background:#fbbf24; color:#fff; }
+.rank-2 { background:#9ca3af; color:#fff; }
+.rank-3 { background:#d97706; color:#fff; }
+.rank-n { background:#f3f4f6; color:#374151; }
+.prod-img-sm { width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid #e5e7eb; }
+
+/* ── Slow moving ── */
+.slow-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f9fafb; }
+.slow-item:last-child { border-bottom:none; }
+.slow-stock { font-size:13px; font-weight:700; color:#059669; white-space:nowrap; }
+.slow-stock.high { color:#e53935; }
+
+/* ── Recent Orders Table ── */
+.recent-table { width:100%; border-collapse:collapse; font-size:13px; }
+.recent-table th { padding:9px 10px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; border-bottom:2px solid #f3f4f6; background:#fafafa; white-space:nowrap; }
+.recent-table td { padding:9px 10px; border-bottom:1px solid #f9fafb; vertical-align:middle; }
+.recent-table tr:last-child td { border-bottom:none; }
+.status-pill { display:inline-block; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+.s-PENDING   { background:#fef3c7; color:#92400e; }
+.s-CONFIRMED { background:#dbeafe; color:#1e40af; }
+.s-PROCESSING{ background:#ede9fe; color:#5b21b6; }
+.s-SHIPPED   { background:#d1fae5; color:#065f46; }
+.s-DELIVERED { background:#d1fae5; color:#065f46; }
+.s-CANCELLED { background:#fee2e2; color:#991b1b; }
+.s-RETURNED  { background:#f3f4f6; color:#374151; }
+.order-code  { font-family:monospace; background:#f3f4f6; padding:2px 6px; border-radius:4px; font-size:12px; }
+
+/* ── Promo ── */
+.promo-list { display:flex; flex-direction:column; gap:8px; }
+.promo-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:#fafafa; border:1px solid #f3f4f6; border-radius:9px; }
+.promo-icon { font-size:20px; }
+.promo-name { font-size:13px; font-weight:600; color:#111827; }
+.promo-meta { font-size:11px; color:#6b7280; margin-top:2px; }
+.promo-count{ margin-left:auto; font-size:12px; font-weight:700; color:#e53935; white-space:nowrap; background:#fee2e2; padding:3px 9px; border-radius:20px; }
+
+/* ── Customer stat cards ── */
+.cust-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
+.cust-card  { background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; }
+.cust-icon  { font-size:26px; margin-bottom:8px; }
+.cust-label { font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:.5px; }
+.cust-val   { font-size:26px; font-weight:700; color:#111827; margin:4px 0 2px; line-height:1; }
+.cust-sub   { font-size:11px; color:#9ca3af; }
+
+/* ── Section color accents ── */
+.accent-revenue { background:rgba(229,57,53,.08); }
+.accent-orders  { background:rgba(99,102,241,.08); }
+.accent-product { background:rgba(16,185,129,.08); }
+.accent-customer{ background:rgba(251,191,36,.08); }
+.accent-recent  { background:rgba(107,114,128,.08); }
+</style>
+
+<!-- ── Page Header ── -->
+<div class="page-header" style="margin-bottom:18px;">
     <div>
         <h2>Tổng quan hệ thống</h2>
         <div class="breadcrumb"><%= currentDate %></div>
@@ -23,335 +216,509 @@
     <a href="/admin/orders" class="btn primary" style="text-decoration:none;">Xem đơn hàng →</a>
 </div>
 
-<!-- ── KPI Cards ── -->
-<div class="db-kpi-grid">
-    <div class="kpi-card">
-        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-</svg>
+<!-- ── Period Filter ── -->
+<div class="period-filter-bar">
+    <label>📅 Lọc theo:</label>
+    <select id="filterMonth">
+        <option value="">Cả năm</option>
+        <% for(let m=1;m<=12;m++){ %><option value="<%= m %>">Tháng <%= m %></option><% } %>
+    </select>
+    <select id="filterYear">
+        <% for(let y=currentYear; y>=currentYear-4; y--){ %>
+        <option value="<%= y %>" <%= y===currentYear?'selected':'' %>><%= y %></option>
+        <% } %>
+    </select>
+    <div class="filter-sep"></div>
+    <button class="btn-apply" onclick="applyFilter()">🔍 Áp dụng</button>
+    <button class="btn-reset"  onclick="resetFilter()">↺ Đặt lại</button>
+    <span class="period-viewing">Đang xem: <strong id="periodLabel">...</strong></span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — DOANH THU                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="dash-section-block">
+    <div class="dsb-header" onclick="toggleSection('sec-revenue')">
+        <div class="dsb-header-left">
+            <div class="dsb-icon accent-revenue">💰</div>
+            <div>
+                <div class="dsb-title">Doanh thu</div>
+                <div class="dsb-subtitle">Biểu đồ doanh thu theo kỳ được chọn (chỉ đơn đã giao)</div>
+            </div>
         </div>
-        <div class="kpi-body">
-            <div class="kpi-label">Tổng người dùng</div>
-            <div class="kpi-value"><%= usersCount.toLocaleString('vi-VN') %></div>
-            <div class="kpi-sub">+<%= usersThisMonth %> người mới tháng này</div>
-        </div>
+        <span class="dsb-toggle-icon" id="toggle-sec-revenue">▾</span>
     </div>
-    <div class="kpi-card">
-        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
-  <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
-</svg></div>
-        <div class="kpi-body">
-            <div class="kpi-label">Tổng sản phẩm</div>
-            <div class="kpi-value"><%= productsCount.toLocaleString('vi-VN') %></div>
-            <div class="kpi-sub">+<%= productsThisMonth %> sản phẩm mới tháng này</div>
+    <div class="dsb-body" id="sec-revenue">
+        <!-- Mini KPIs -->
+        <div class="kpi-inline-grid" id="rev-kpi-row">
+            <div class="skel-loader"><div class="skel-spin"></div> Đang tải...</div>
         </div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
-  <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/>
-</svg></div>
-        <div class="kpi-body">
-            <div class="kpi-label">Doanh thu tháng này</div>
-            <div class="kpi-value" style="font-size:16px;"><%= fmtMoney(revenueThisMonth) %> ₫</div>
-            <div class="kpi-sub neutral">Năm <%= currentYear %>: <%= fmtMoney(revenueThisYear) %> ₫</div>
-        </div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16">
-  <path d="M11.354 6.354a.5.5 0 0 0-.708-.708L8 8.293 6.854 7.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
-  <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
-</svg></div>
-        <div class="kpi-body">
-            <div class="kpi-label">Đơn hàng năm <%= currentYear %></div>
-            <div class="kpi-value"><%= ordersThisYear.toLocaleString('vi-VN') %></div>
-            <div class="kpi-sub neutral">Tổng đơn trong năm</div>
+        <!-- Chart -->
+        <div id="rev-chart-wrap">
+            <div class="skel-loader"><div class="skel-spin"></div> Đang tải biểu đồ...</div>
         </div>
     </div>
 </div>
 
-<!-- ── Charts Row 1: Revenue line + Order donut ── -->
-<div class="charts-grid">
-    <div class="chart-card">
-        <div class="chart-card-title">
-            Doanh thu theo tháng — <%= currentYear %>
-            <span class="tag">Chỉ đơn đã giao</span>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — ĐƠN HÀNG                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="dash-section-block">
+    <div class="dsb-header" onclick="toggleSection('sec-orders')">
+        <div class="dsb-header-left">
+            <div class="dsb-icon accent-orders">📦</div>
+            <div>
+                <div class="dsb-title">Đơn hàng</div>
+                <div class="dsb-subtitle">Số lượng và trạng thái đơn hàng theo kỳ</div>
+            </div>
         </div>
-        <canvas id="revenueChart" height="120"></canvas>
+        <span class="dsb-toggle-icon" id="toggle-sec-orders">▾</span>
     </div>
-    <div class="chart-card">
-        <div class="chart-card-title">Trạng thái đơn hàng</div>
-        <canvas id="statusChart" height="200"></canvas>
-        <div id="statusLegend" style="margin-top:14px;font-size:12px;"></div>
+    <div class="dsb-body" id="sec-orders">
+        <div class="kpi-inline-grid" id="ord-kpi-row">
+            <div class="skel-loader"><div class="skel-spin"></div> Đang tải...</div>
+        </div>
+        <div class="two-col">
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Số đơn theo thời gian</div>
+                <div id="ord-chart-wrap"><div class="skel-loader"><div class="skel-spin"></div></div></div>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Phân bổ trạng thái</div>
+                <div id="status-chart-wrap"><div class="skel-loader"><div class="skel-spin"></div></div></div>
+                <div class="status-legend" id="status-legend"></div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- ── Charts Row 2: Orders bar + Top products bar ── -->
-<div class="charts-grid2">
-    <div class="chart-card">
-        <div class="chart-card-title">Số đơn hàng theo tháng — <%= currentYear %></div>
-        <canvas id="ordersChart" height="160"></canvas>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — SẢN PHẨM                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="dash-section-block">
+    <div class="dsb-header" onclick="toggleSection('sec-products')">
+        <div class="dsb-header-left">
+            <div class="dsb-icon accent-product">🏅</div>
+            <div>
+                <div class="dsb-title">Sản phẩm</div>
+                <div class="dsb-subtitle">Top sản phẩm bán chạy & sản phẩm tồn kho cao</div>
+            </div>
+        </div>
+        <span class="dsb-toggle-icon" id="toggle-sec-products">▾</span>
     </div>
-    <div class="chart-card">
-        <div class="chart-card-title">Top sản phẩm bán chạy</div>
-        <canvas id="topProductsChart" height="160"></canvas>
+    <div class="dsb-body" id="sec-products">
+        <div class="two-col" style="align-items:start;">
+            <!-- Top selling -->
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">🏆 Top bán chạy theo kỳ</div>
+                <div id="top-bar-wrap"><div class="skel-loader"><div class="skel-spin"></div></div></div>
+                <div style="margin-top:20px;">
+                    <div id="top-table-wrap"><div class="skel-loader"><div class="skel-spin"></div></div></div>
+                </div>
+            </div>
+            <!-- Slow moving (static) -->
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">📦 Tồn kho cao
+                    <a href="/admin/products" style="font-size:11px;font-weight:400;color:#e53935;margin-left:8px;text-decoration:none;">Xem tất cả →</a>
+                </div>
+                <% if (slowMoving.length === 0) { %>
+                <p style="color:#aaa;text-align:center;padding:24px 0;font-size:13px;">Không có sản phẩm tồn đọng</p>
+                <% } %>
+                <% slowMoving.forEach(p => { %>
+                <div class="slow-item">
+                    <img class="prod-img-sm" src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt="">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= p.name %></div>
+                        <div style="font-size:11px;color:#aaa;"><%= p.sku %> · <%= fmtMoney(p.price) %>₫</div>
+                    </div>
+                    <div class="slow-stock <%= p.stock > 50 ? 'high' : '' %>"><%= p.stock %> chiếc</div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- ── Top Products Table + Slow Moving ── -->
-<div class="charts-grid2">
-    <div class="full-card" style="margin-bottom:0;">
-        <div class="section-header">
-            <h3>🏆 Top sản phẩm bán chạy năm <%= currentYear %></h3>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 4 — KHÁCH HÀNG                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="dash-section-block">
+    <div class="dsb-header" onclick="toggleSection('sec-customers')">
+        <div class="dsb-header-left">
+            <div class="dsb-icon accent-customer">👤</div>
+            <div>
+                <div class="dsb-title">Thống kê khách hàng</div>
+                <div class="dsb-subtitle">Tổng quan về người dùng trong hệ thống</div>
+            </div>
         </div>
-        <table class="top-table">
+        <span class="dsb-toggle-icon" id="toggle-sec-customers">▾</span>
+    </div>
+    <div class="dsb-body" id="sec-customers">
+        <div class="cust-grid">
+            <div class="cust-card">
+                <div class="cust-icon">👥</div>
+                <div class="cust-label">Tổng người dùng</div>
+                <div class="cust-val"><%= usersCount.toLocaleString('vi-VN') %></div>
+                <div class="cust-sub">Toàn hệ thống</div>
+            </div>
+            <div class="cust-card">
+                <div class="cust-icon">🆕</div>
+                <div class="cust-label">Người dùng mới</div>
+                <div class="cust-val"><%= usersThisMonth.toLocaleString('vi-VN') %></div>
+                <div class="cust-sub">Tháng này</div>
+            </div>
+            <div class="cust-card">
+                <div class="cust-icon">📦</div>
+                <div class="cust-label">Tổng sản phẩm</div>
+                <div class="cust-val"><%= productsCount.toLocaleString('vi-VN') %></div>
+                <div class="cust-sub">Đang hoạt động</div>
+            </div>
+            <div class="cust-card">
+                <div class="cust-icon">✨</div>
+                <div class="cust-label">Sản phẩm mới</div>
+                <div class="cust-val"><%= productsThisMonth.toLocaleString('vi-VN') %></div>
+                <div class="cust-sub">Tháng này</div>
+            </div>
+        </div>
+
+        <!-- Active promotions -->
+        <% if (activePromotions.length > 0) { %>
+        <div style="margin-top:22px;">
+            <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">🎫 Khuyến mãi đang áp dụng
+                <a href="/admin/promotion" style="font-size:11px;font-weight:400;color:#e53935;margin-left:8px;text-decoration:none;">Quản lý →</a>
+            </div>
+            <div class="promo-list">
+            <% activePromotions.forEach(promo => { %>
+                <div class="promo-item">
+                    <div class="promo-icon">🎫</div>
+                    <div>
+                        <div class="promo-name"><%= promo.name %></div>
+                        <div class="promo-meta">
+                            <%= promo.type === 'PERCENT' ? `Giảm ${promo.discountValue}%` : promo.type === 'FIXED' ? `Giảm ${fmtMoney(promo.discountValue)}₫` : 'Khuyến mãi' %>
+                            <% if (promo.endDate) { %> · Hết hạn: <%= fmtDate(promo.endDate) %><% } %>
+                        </div>
+                    </div>
+                    <div class="promo-count"><%= promo.coupons.length %> mã</div>
+                </div>
+            <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 5 — ĐƠN HÀNG GẦN NHẤT                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="dash-section-block">
+    <div class="dsb-header" onclick="toggleSection('sec-recent')">
+        <div class="dsb-header-left">
+            <div class="dsb-icon accent-recent">🕐</div>
+            <div>
+                <div class="dsb-title">Thống kê đơn hàng gần nhất</div>
+                <div class="dsb-subtitle">8 đơn hàng mới nhất trong hệ thống</div>
+            </div>
+        </div>
+        <span class="dsb-toggle-icon" id="toggle-sec-recent">▾</span>
+    </div>
+    <div class="dsb-body" id="sec-recent">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <span style="font-size:13px;color:#6b7280;">Hiển thị 8 đơn mới nhất</span>
+            <a href="/admin/orders" class="btn-apply" style="text-decoration:none;font-size:12px;padding:5px 14px;">Xem tất cả →</a>
+        </div>
+        <div style="overflow-x:auto;">
+        <table class="recent-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Ảnh</th>
-                    <th>Tên sản phẩm</th>
-                    <th style="text-align:right;">Đã bán</th>
-                    <th style="text-align:right;">Doanh thu</th>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-            <% const topArr = JSON.parse(topProducts); %>
-            <% if (topArr.length === 0) { %>
-                <tr><td colspan="5" style="text-align:center;color:#aaa;padding:24px;">Chưa có dữ liệu</td></tr>
-            <% } %>
-            <% topArr.forEach((p, i) => { %>
+            <% recentOrders.forEach(o => { %>
                 <tr>
-                    <td><span class="rank-badge <%= i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n' %>"><%= i+1 %></span></td>
-                    <td><img class="prod-img-sm" src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt=""></td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= p.name %></td>
-                    <td style="text-align:right;font-weight:700;color:#059669;"><%= p.totalQty %></td>
-                    <td style="text-align:right;font-weight:600;color:#e53935;"><%= fmtMoney(p.revenue) %>₫</td>
+                    <td><span class="order-code">#<%= o.code %></span></td>
+                    <td style="white-space:nowrap;"><%= o.customerName %></td>
+                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        <%= o.orderItems[0]?.product?.name || '—' %>
+                        <% if (o.orderItems.length > 1) { %><span style="color:#aaa;font-size:11px;"> +<%= o.orderItems.length-1 %></span><% } %>
+                    </td>
+                    <td style="font-weight:600;color:#e53935;white-space:nowrap;"><%= fmtMoney(o.totalAmount) %>₫</td>
+                    <td><span class="status-pill s-<%= o.status %>"><%= statusLabel[o.status] || o.status %></span></td>
+                    <td style="white-space:nowrap;color:#888;"><%= fmtDate(o.createdAt) %></td>
+                    <td><a href="/admin/order/<%= o.id %>" style="font-size:12px;color:#e53935;text-decoration:none;">Chi tiết</a></td>
                 </tr>
             <% }); %>
+            <% if (recentOrders.length === 0) { %>
+                <tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px;">Chưa có đơn hàng nào</td></tr>
+            <% } %>
             </tbody>
         </table>
-    </div>
-
-    <div class="full-card" style="margin-bottom:0;">
-        <div class="section-header">
-            <h3>Sản phẩm tồn kho cao</h3>
-            <a href="/admin/products">Xem tất cả →</a>
         </div>
-        <% slowMoving.forEach(p => { %>
-        <div class="slow-item">
-            <img class="prod-img-sm" src="/admin/productImages/<%= p.image || 'no-image.png' %>" alt="">
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= p.name %></div>
-                <div style="font-size:11px;color:#aaa;"><%= p.sku %> · <%= fmtMoney(p.price) %>₫</div>
-            </div>
-            <div class="slow-stock <%= p.stock > 50 ? 'high' : '' %>"><%= p.stock %> chiếc</div>
-        </div>
-        <% }); %>
-        <% if (slowMoving.length === 0) { %>
-            <p style="color:#aaa;text-align:center;padding:24px 0;font-size:13px;">Không có sản phẩm tồn đọng</p>
-        <% } %>
     </div>
 </div>
 
-<!-- ── Active Promotions ── -->
-<% if (activePromotions.length > 0) { %>
-<div class="full-card" style="margin-top:24px;">
-    <div class="section-header">
-        <h3>Chương trình khuyến mãi đang áp dụng</h3>
-        <a href="/admin/promotion">Quản lý →</a>
-    </div>
-    <div class="promo-list">
-    <% activePromotions.forEach(promo => { %>
-        <div class="promo-item">
-            <div class="promo-icon">🎫</div>
-            <div>
-                <div class="promo-name"><%= promo.name %></div>
-                <div class="promo-meta">
-                    <%= promo.type === 'PERCENT' ? `Giảm ${promo.discountValue}%` : promo.type === 'FIXED' ? `Giảm ${fmtMoney(promo.discountValue)}₫` : 'Khuyến mãi' %>
-                    <% if (promo.endDate) { %> · Hết hạn: <%= fmtDate(promo.endDate) %><% } %>
-                </div>
-            </div>
-            <div class="promo-count"><%= promo.coupons.length %> mã</div>
-        </div>
-    <% }); %>
-    </div>
-</div>
-<% } %>
-
-<!-- ── Recent Orders ── -->
-<div class="full-card" style="margin-top:24px;">
-    <div class="section-header">
-        <h3>🕐 Đơn hàng gần nhất</h3>
-        <a href="/admin/orders">Xem tất cả →</a>
-    </div>
-    <div style="overflow-x:auto;">
-    <table class="recent-table">
-        <thead>
-            <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Sản phẩm</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Thời gian</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-        <% recentOrders.forEach(o => { %>
-            <tr>
-                <td><span class="order-code">#<%= o.code %></span></td>
-                <td><%= o.customerName %></td>
-                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                    <%= o.orderItems[0]?.product?.name || '—' %>
-                    <% if (o.orderItems.length > 1) { %><span style="color:#aaa;font-size:11px;"> +<%= o.orderItems.length-1 %></span><% } %>
-                </td>
-                <td style="font-weight:600;color:#e53935;white-space:nowrap;"><%= fmtMoney(o.totalAmount) %>₫</td>
-                <td><span class="status-pill s-<%= o.status %>"><%= statusLabel[o.status] || o.status %></span></td>
-                <td style="white-space:nowrap;color:#888;"><%= fmtDate(o.createdAt) %></td>
-                <td><a href="/admin/order/<%= o.id %>" style="font-size:12px;color:#e53935;text-decoration:none;">Chi tiết</a></td>
-            </tr>
-        <% }); %>
-        <% if (recentOrders.length === 0) { %>
-            <tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px;">Chưa có đơn hàng nào</td></tr>
-        <% } %>
-        </tbody>
-    </table>
-    </div>
-</div>
-
-</div>
-
+</div><!-- end main content -->
 
 <script>
-// ── Data from server ──
-const monthlyRevenue = <%- monthlyRevenue %>;
-const orderStatusStats = <%- orderStatusStats %>;
-const monthlyOrders = <%- monthlyOrders %>;
-const topProductsData = <%- topProducts %>;
-const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+// ════════════════════════════════════════════
+// TOGGLE SECTIONS
+// ════════════════════════════════════════════
+function toggleSection(id) {
+    const body   = document.getElementById(id);
+    const toggle = document.getElementById('toggle-' + id);
+    if (!body) return;
+    const hidden = body.classList.toggle('hidden');
+    toggle.classList.toggle('collapsed', hidden);
+}
 
-// ── 1. Revenue Line Chart ──
-new Chart(document.getElementById('revenueChart'), {
-    type: 'line',
-    data: {
-        labels: MONTHS,
-        datasets: [{
-            label: 'Doanh thu (VNĐ)',
-            data: monthlyRevenue,
-            borderColor: '#e53935',
-            backgroundColor: 'rgba(229,57,53,.08)',
-            borderWidth: 2.5,
-            tension: 0.4,
-            fill: true,
-            pointBackgroundColor: '#e53935',
-            pointRadius: 4,
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ' ' + Number(ctx.parsed.y).toLocaleString('vi-VN') + ' ₫'
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { callback: v => (v/1e6).toFixed(0) + 'tr' }
-            }
-        }
-    }
-});
+// ════════════════════════════════════════════
+// CHART INSTANCES
+// ════════════════════════════════════════════
+let chartRev = null, chartOrd = null, chartStatus = null, chartTop = null;
 
-// ── 2. Order Status Donut ──
-(function(){
-    const STATUS_LABELS = {
-        PENDING:'Chờ xử lý', CONFIRMED:'Đã xác nhận', PROCESSING:'Đang xử lý',
-        SHIPPED:'Đang giao', DELIVERED:'Đã giao', CANCELLED:'Đã hủy', RETURNED:'Trả hàng'
-    };
-    const STATUS_COLORS = {
-        PENDING:'#fbbf24', CONFIRMED:'#60a5fa', PROCESSING:'#a78bfa',
-        SHIPPED:'#34d399', DELIVERED:'#10b981', CANCELLED:'#f87171', RETURNED:'#9ca3af'
-    };
-    const keys = Object.keys(orderStatusStats);
-    const vals = keys.map(k => orderStatusStats[k]);
-    const total = vals.reduce((a,b)=>a+b,0);
+const STATUS_LABELS = {
+    PENDING:'Chờ xử lý', CONFIRMED:'Đã xác nhận', PROCESSING:'Đang xử lý',
+    SHIPPED:'Đang giao', DELIVERED:'Đã giao', CANCELLED:'Đã hủy', RETURNED:'Trả hàng'
+};
+const STATUS_COLORS = {
+    PENDING:'#fbbf24', CONFIRMED:'#60a5fa', PROCESSING:'#a78bfa',
+    SHIPPED:'#34d399', DELIVERED:'#10b981', CANCELLED:'#f87171', RETURNED:'#9ca3af'
+};
 
-    new Chart(document.getElementById('statusChart'), {
-        type: 'doughnut',
+function fmtM(v) { return Number(v).toLocaleString('vi-VN'); }
+function skel(id) {
+    document.getElementById(id).innerHTML =
+        '<div class="skel-loader"><div class="skel-spin"></div> Đang tải...</div>';
+}
+function getPeriodLabel(m, y) {
+    if (!m || m==='') return `Cả năm ${y}`;
+    const names=['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+    return `${names[parseInt(m)]} / ${y}`;
+}
+
+// ── Section 1: Revenue ──
+function renderRevenue(data) {
+    // KPI
+    document.getElementById('rev-kpi-row').innerHTML = `
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Tổng doanh thu</div>
+            <div class="kpi-inline-val" style="font-size:17px;color:#e53935;">${fmtM(data.revenue)} ₫</div>
+            <div class="kpi-inline-sub">Chỉ đơn đã giao</div>
+        </div>
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Doanh thu TB/kỳ</div>
+            <div class="kpi-inline-val" style="font-size:17px;">${fmtM(Math.round(data.revenueChart.filter(v=>v>0).reduce((a,b)=>a+b,0) / (data.revenueChart.filter(v=>v>0).length||1)))} ₫</div>
+            <div class="kpi-inline-sub">Trên các kỳ có doanh thu</div>
+        </div>
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Kỳ cao nhất</div>
+            <div class="kpi-inline-val" style="font-size:17px;">${fmtM(Math.max(...data.revenueChart))} ₫</div>
+            <div class="kpi-inline-sub">${data.revenueLabels[data.revenueChart.indexOf(Math.max(...data.revenueChart))] || '—'}</div>
+        </div>`;
+
+    // Chart
+    const wrap = document.getElementById('rev-chart-wrap');
+    wrap.innerHTML = '<canvas id="chartRev" height="100"></canvas>';
+    if (chartRev) { chartRev.destroy(); chartRev = null; }
+    chartRev = new Chart(document.getElementById('chartRev'), {
+        type: 'line',
         data: {
-            labels: keys.map(k => STATUS_LABELS[k] || k),
-            datasets: [{ data: vals, backgroundColor: keys.map(k=>STATUS_COLORS[k]||'#ccc'), borderWidth: 2, borderColor:'#fff' }]
+            labels: data.revenueLabels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)', data: data.revenueChart,
+                borderColor: '#e53935', backgroundColor: 'rgba(229,57,53,.07)',
+                borderWidth: 2.5, tension: 0.4, fill: true,
+                pointBackgroundColor: '#e53935',
+                pointRadius: data.revenueLabels.length > 20 ? 2 : 4,
+            }]
         },
         options: {
-            responsive: true, cutout:'68%',
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ' ' + fmtM(ctx.parsed.y) + ' ₫' } }
+            },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => (v/1e6).toFixed(0)+'tr' } } }
+        }
+    });
+}
+
+// ── Section 2: Orders ──
+function renderOrders(data) {
+    // KPI
+    document.getElementById('ord-kpi-row').innerHTML = `
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Tổng đơn hàng</div>
+            <div class="kpi-inline-val" style="color:#6366f1;">${fmtM(data.orderCount)}</div>
+            <div class="kpi-inline-sub">Mọi trạng thái</div>
+        </div>
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Đơn đã giao</div>
+            <div class="kpi-inline-val" style="color:#10b981;">${fmtM(data.statusStats['DELIVERED']||0)}</div>
+            <div class="kpi-inline-sub">Thành công</div>
+        </div>
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Đơn đã hủy</div>
+            <div class="kpi-inline-val" style="color:#e53935;">${fmtM(data.statusStats['CANCELLED']||0)}</div>
+            <div class="kpi-inline-sub">Bị hủy</div>
+        </div>
+        <div class="kpi-inline-card">
+            <div class="kpi-inline-label">Chờ xử lý</div>
+            <div class="kpi-inline-val" style="color:#f59e0b;">${fmtM(data.statusStats['PENDING']||0)}</div>
+            <div class="kpi-inline-sub">Cần xử lý</div>
+        </div>`;
+
+    // Orders bar chart
+    const ordWrap = document.getElementById('ord-chart-wrap');
+    ordWrap.innerHTML = '<canvas id="chartOrd" height="140"></canvas>';
+    if (chartOrd) { chartOrd.destroy(); chartOrd = null; }
+    chartOrd = new Chart(document.getElementById('chartOrd'), {
+        type: 'bar',
+        data: {
+            labels: data.revenueLabels,
+            datasets: [{ label:'Số đơn', data: data.ordersChart, backgroundColor:'rgba(99,102,241,.72)', borderRadius:5 }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    // Status donut
+    const statusWrap = document.getElementById('status-chart-wrap');
+    statusWrap.innerHTML = '<canvas id="chartStatus" height="180"></canvas>';
+    if (chartStatus) { chartStatus.destroy(); chartStatus = null; }
+    const keys = Object.keys(data.statusStats);
+    const vals = keys.map(k => data.statusStats[k]);
+    const total = vals.reduce((a,b)=>a+b,0);
+    chartStatus = new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut',
+        data: {
+            labels: keys.map(k => STATUS_LABELS[k]||k),
+            datasets: [{ data: vals, backgroundColor: keys.map(k=>STATUS_COLORS[k]||'#ccc'), borderWidth:2, borderColor:'#fff' }]
+        },
+        options: {
+            responsive: true, cutout: '65%',
             plugins: {
                 legend: { display: false },
                 tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} (${total?Math.round(ctx.parsed/total*100):0}%)` } }
             }
         }
     });
-
-    // Custom legend
-    const leg = document.getElementById('statusLegend');
-    leg.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px 12px;';
-    keys.forEach((k,i) => {
+    // Legend
+    const leg = document.getElementById('status-legend');
+    leg.innerHTML = keys.map((k,i) => {
         const pct = total ? Math.round(vals[i]/total*100) : 0;
-        leg.innerHTML += `<div style="display:flex;align-items:center;gap:5px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:${STATUS_COLORS[k]||'#ccc'};"></div>
-            <span style="color:#555;">${STATUS_LABELS[k]||k}: <strong>${vals[i]}</strong> (${pct}%)</span>
+        return `<div class="status-legend-item">
+            <div class="status-dot" style="background:${STATUS_COLORS[k]||'#ccc'}"></div>
+            <span style="color:#555;">${STATUS_LABELS[k]||k}: <b>${vals[i]}</b> (${pct}%)</span>
         </div>`;
-    });
+    }).join('');
     if (total===0) leg.innerHTML = '<span style="color:#aaa;">Chưa có đơn hàng</span>';
-})();
+}
 
-// ── 3. Monthly Orders Bar ──
-new Chart(document.getElementById('ordersChart'), {
-    type: 'bar',
-    data: {
-        labels: MONTHS,
-        datasets: [{
-            label: 'Số đơn',
-            data: monthlyOrders,
-            backgroundColor: 'rgba(99,102,241,.7)',
-            borderRadius: 6,
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-    }
-});
+// ── Section 3: Products ──
+function renderProducts(data) {
+    const tp = data.topProducts;
 
-// ── 4. Top Products Horizontal Bar ──
-(function(){
-    const names = topProductsData.map(p => p.name.length>22 ? p.name.slice(0,22)+'…' : p.name);
-    const qtys  = topProductsData.map(p => p.totalQty);
-    new Chart(document.getElementById('topProductsChart'), {
-        type: 'bar',
-        data: {
-            labels: names,
-            datasets: [{
-                label: 'Đã bán',
-                data: qtys,
-                backgroundColor: 'rgba(16,185,129,.75)',
-                borderRadius: 5,
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
-    });
-    if (topProductsData.length === 0) {
-        document.getElementById('topProductsChart').parentElement.innerHTML +=
-            '<p style="text-align:center;color:#aaa;font-size:13px;margin-top:20px;">Chưa có dữ liệu bán hàng</p>';
+    // Bar chart
+    const barWrap = document.getElementById('top-bar-wrap');
+    barWrap.innerHTML = '<canvas id="chartTop" height="140"></canvas>';
+    if (chartTop) { chartTop.destroy(); chartTop = null; }
+    if (tp.length > 0) {
+        chartTop = new Chart(document.getElementById('chartTop'), {
+            type: 'bar',
+            data: {
+                labels: tp.map(p => p.name.length>20 ? p.name.slice(0,20)+'…' : p.name),
+                datasets: [{ label:'Đã bán', data: tp.map(p=>p.totalQty), backgroundColor:'rgba(16,185,129,.75)', borderRadius:5 }]
+            },
+            options: {
+                indexAxis:'y', responsive:true,
+                plugins: { legend:{ display:false } },
+                scales: { x:{ beginAtZero:true, ticks:{ stepSize:1 } } }
+            }
+        });
+    } else {
+        barWrap.innerHTML = '<p style="text-align:center;color:#aaa;font-size:13px;padding:20px 0;">Chưa có dữ liệu bán hàng</p>';
     }
+
+    // Table
+    const tableWrap = document.getElementById('top-table-wrap');
+    if (tp.length === 0) {
+        tableWrap.innerHTML = '<p style="text-align:center;color:#aaa;font-size:13px;">Chưa có dữ liệu</p>';
+        return;
+    }
+    tableWrap.innerHTML = `
+        <table class="top-table">
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tên sản phẩm</th><th style="text-align:right;">Đã bán</th><th style="text-align:right;">Doanh thu</th></tr></thead>
+            <tbody>${tp.map((p,i) => `
+                <tr>
+                    <td><span class="rank-badge ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n'}">${i+1}</span></td>
+                    <td><img class="prod-img-sm" src="/admin/productImages/${p.image||'no-image.png'}" alt=""></td>
+                    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</td>
+                    <td style="text-align:right;font-weight:700;color:#059669;">${p.totalQty}</td>
+                    <td style="text-align:right;font-weight:600;color:#e53935;">${fmtM(p.revenue)}₫</td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+}
+
+// ════════════════════════════════════════════
+// LOAD DASHBOARD DATA
+// ════════════════════════════════════════════
+async function loadDashboard(month, year) {
+    const label = getPeriodLabel(month, year);
+    document.getElementById('periodLabel').textContent = label;
+
+    // Reset loaders
+    skel('rev-kpi-row'); skel('rev-chart-wrap');
+    skel('ord-kpi-row'); skel('ord-chart-wrap'); skel('status-chart-wrap');
+    document.getElementById('status-legend').innerHTML = '';
+    skel('top-bar-wrap'); skel('top-table-wrap');
+
+    try {
+        const params = new URLSearchParams({ year });
+        if (month) params.append('month', month);
+        const res  = await fetch(`/admin/api/dashboard-stats?${params}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        // Render từng section với hiệu ứng cascade
+        renderRevenue(data);
+        setTimeout(() => renderOrders(data), 100);
+        setTimeout(() => renderProducts(data), 200);
+    } catch (err) {
+        console.error(err);
+        document.getElementById('rev-kpi-row').innerHTML =
+            '<p style="color:#e53935;padding:16px;">Lỗi tải dữ liệu. Vui lòng thử lại.</p>';
+    }
+}
+
+function applyFilter() {
+    const m = document.getElementById('filterMonth').value;
+    const y = document.getElementById('filterYear').value;
+    loadDashboard(m, y);
+}
+function resetFilter() {
+    const now = new Date();
+    document.getElementById('filterMonth').value = '';
+    document.getElementById('filterYear').value  = now.getFullYear();
+    loadDashboard('', now.getFullYear());
+}
+
+// Khởi tạo với tháng hiện tại
+(function() {
+    const now = new Date();
+    document.getElementById('filterMonth').value = now.getMonth() + 1;
+    document.getElementById('filterYear').value  = now.getFullYear();
+    loadDashboard(now.getMonth() + 1, now.getFullYear());
 })();
 </script>

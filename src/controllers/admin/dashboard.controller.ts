@@ -69,12 +69,6 @@ const getDashboardPage = async (req: Request, res: Response) => {
     });
 };
 
-const getWarehousePage = async (req: Request, res: Response) => {
-    res.render("admin/warehouse/warehouse", {
-        layout: "admin/layout/main",
-        title: "Quản lý kho"
-    });
-};
 
 const getPromotionPage = async (req: Request, res: Response) => {
     res.render("admin/promotion/promotion", {
@@ -97,4 +91,4 @@ const getHistoryPage = async (req: Request, res: Response) => {
     });
 };
 
-export { getDashboardPage, getWarehousePage, getPromotionPage, getNotificationPage, getHistoryPage };
+export { getDashboardPage, getPromotionPage, getNotificationPage, getHistoryPage };
