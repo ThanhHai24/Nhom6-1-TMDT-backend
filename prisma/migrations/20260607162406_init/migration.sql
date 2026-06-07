@@ -48,6 +48,14 @@ CREATE TABLE `brands` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `category_brands` (
+    `categoryId` BIGINT NOT NULL,
+    `brandId` BIGINT NOT NULL,
+
+    PRIMARY KEY (`categoryId`, `brandId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `suppliers` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(150) NOT NULL,
@@ -80,6 +88,8 @@ CREATE TABLE `products` (
     `isNew` BOOLEAN NOT NULL DEFAULT false,
     `isFeatured` BOOLEAN NOT NULL DEFAULT false,
     `specifications` JSON NULL,
+    `warranty` INTEGER NULL,
+    `viewCount` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `categoryId` BIGINT NOT NULL,
@@ -201,7 +211,11 @@ CREATE TABLE `reviews` (
     `userId` BIGINT NULL,
     `productId` BIGINT NULL,
     `rating` INTEGER NOT NULL,
+    `title` VARCHAR(255) NULL,
     `comment` TEXT NULL,
+    `status` ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -260,8 +274,30 @@ CREATE TABLE `sessions` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `banners` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NULL,
+    `image` VARCHAR(255) NOT NULL,
+    `link` VARCHAR(255) NULL,
+    `type` VARCHAR(50) NOT NULL,
+    `position` VARCHAR(50) NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `status` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `categories` ADD CONSTRAINT `categories_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `category_brands` ADD CONSTRAINT `category_brands_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `category_brands` ADD CONSTRAINT `category_brands_brandId_fkey` FOREIGN KEY (`brandId`) REFERENCES `brands`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `products` ADD CONSTRAINT `products_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

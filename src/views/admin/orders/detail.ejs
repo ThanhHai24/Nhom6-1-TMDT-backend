@@ -1,6 +1,12 @@
 
                     <div style="padding:24px; flex:1;">
 
+                    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+                        <div style="background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px; margin-bottom:20px; color:#C5221F; font-size:14px;">
+                            <%= error_msg %>
+                        </div>
+                    <% } %>
+
                     <!-- Page header -->
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
                       <div>
@@ -8,24 +14,47 @@
                         <div style="font-size:12px;color:#5F5E5A;margin-top:2px;">Hệ quản trị → Đơn hàng → <%= order.code %></div>
                       </div>
                       <div style="display:flex;gap:8px;align-items:center;">
-                        <button class="btn outline" style="background:transparent;color:#185FA5;border:1px solid #185FA5;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">⬇ Xuất PDF</button>
-                        
-                        <% if (order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'RETURNED') { %>
+                        <% 
+                          let nextStatus = '';
+                          let nextStatusLabel = '';
+                          let canUpdateNextStatus = false;
+                          let canCancel = user && (user.role === 'ADMIN' || user.role === 'MANAGER');
+
+                          if (order.status === 'PENDING') {
+                              nextStatus = 'CONFIRMED';
+                              nextStatusLabel = 'Xác nhận đơn hàng';
+                              if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'RECEPTIONIST')) {
+                                  canUpdateNextStatus = true;
+                              }
+                          } else if (order.status === 'CONFIRMED') {
+                              nextStatus = 'PROCESSING';
+                              nextStatusLabel = 'Bắt đầu đóng gói';
+                              if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'WAREHOUSE')) {
+                                  canUpdateNextStatus = true;
+                              }
+                          } else if (order.status === 'PROCESSING') {
+                              nextStatus = 'SHIPPED';
+                              nextStatusLabel = 'Giao cho vận chuyển';
+                              if (user && (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'WAREHOUSE')) {
+                                  canUpdateNextStatus = true;
+                              }
+                          } else if (order.status === 'SHIPPED') {
+                              nextStatus = 'DELIVERED';
+                              nextStatusLabel = 'Xác nhận đã giao';
+                              if (user && (user.role === 'ADMIN' || user.role === 'MANAGER')) {
+                                  canUpdateNextStatus = true;
+                              }
+                          }
+                        %>
+
+                        <% if (canCancel && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'RETURNED') { %>
                         <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
                             <input type="hidden" name="status" value="CANCELLED">
                             <button type="submit" class="btn" style="background:#A32D2D;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;">Hủy đơn</button>
                         </form>
                         <% } %>
 
-                        <% 
-                          let nextStatus = '';
-                          let nextStatusLabel = '';
-                          if (order.status === 'PENDING') { nextStatus = 'CONFIRMED'; nextStatusLabel = 'Xác nhận đơn hàng'; }
-                          else if (order.status === 'CONFIRMED') { nextStatus = 'PROCESSING'; nextStatusLabel = 'Bắt đầu đóng gói'; }
-                          else if (order.status === 'PROCESSING') { nextStatus = 'SHIPPED'; nextStatusLabel = 'Giao cho vận chuyển'; }
-                          else if (order.status === 'SHIPPED') { nextStatus = 'DELIVERED'; nextStatusLabel = 'Xác nhận đã giao'; }
-                        %>
-                        <% if (nextStatus) { %>
+                        <% if (canUpdateNextStatus && nextStatus) { %>
                         <form action="/admin/order/<%= order.id %>/updateStatus" method="POST" style="margin:0;">
                             <input type="hidden" name="status" value="<%= nextStatus %>">
                             <button type="submit" class="btn" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;"><%= nextStatusLabel %></button>

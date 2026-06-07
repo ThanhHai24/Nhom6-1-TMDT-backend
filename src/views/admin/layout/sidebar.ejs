@@ -32,7 +32,7 @@
             Người dùng
         </a>
         <% } %>
-        <% if (user && ['ADMIN', 'MANAGER', 'WAREHOUSE'].includes(user.role)) { %>
+        <% if (user && ['ADMIN', 'MANAGER'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/categories' ? 'active' : '' %>" href="/admin/categories">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path
@@ -88,6 +88,8 @@
             </svg>
             Quản lý kho
         </a>
+        <% } %>
+        <% if (user && ['ADMIN', 'MANAGER'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/promotion' ? 'active' : '' %>" href="/admin/promotion">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M2 8l3-5h6l3 5-6 7-6-7z" />
@@ -95,7 +97,6 @@
             </svg>
             Khuyến mãi
         </a>
-        <% if (user && ['ADMIN', 'MANAGER'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl.startsWith('/admin/banners') ? 'active' : '' %>" href="/admin/banners">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="1" y="2" width="14" height="12" rx="1.5" />
@@ -105,7 +106,6 @@
             </svg>
             Quản lý Banner/Slides
         </a>
-        <% } %>
         <a class="nav-item <%= currentUrl === '/admin/shipping-providers' ? 'active' : '' %>" href="/admin/shipping-providers">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M1 9h10V3H1v6z" />
@@ -116,7 +116,7 @@
             Đơn vị vận chuyển
         </a>
         <% } %>
-        <% if (user && ['ADMIN', 'MANAGER', 'RECEPTIONIST', 'WAREHOUSE'].includes(user.role)) { %>
+        <% if (user && ['ADMIN', 'MANAGER', 'WAREHOUSE'].includes(user.role)) { %>
         <a class="nav-item <%= currentUrl === '/admin/shipping' ? 'active' : '' %>" href="/admin/shipping">
             <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M1 9h10V3H1v6z" />

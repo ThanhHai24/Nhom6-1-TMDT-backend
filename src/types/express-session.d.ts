@@ -7,6 +7,7 @@ export interface CartItem {
   quantity: number;
   image: string;
   sku: string;
+  stock?: number;
 }
 
 declare module "express-session" {

@@ -10,48 +10,36 @@ const getHotProducts = async function () {
     return products
 }
 
-const getLaptopProducts = async function () {
-    const products = await prisma.product.findMany({
+const getProductsByCategorySlug = async function (slug: string, take?: number) {
+    const category = await prisma.category.findUnique({
+        where: { slug },
+        include: { children: { select: { id: true } } }
+    });
+    if (!category) return [];
+    const categoryIds = [category.id, ...category.children.map(c => c.id)];
+    return await prisma.product.findMany({
         where: {
-            OR: [
-                { categoryId: 4 },
-                { categoryId: 18 },
-                { categoryId: 19 },
-                { categoryId: 20 }
-            ]
+            categoryId: { in: categoryIds },
+            status: "ACTIVE"
         },
-        take:10
-    })
-    return products
+        take: take
+    });
+}
+
+const getLaptopProducts = async function () {
+    return await getProductsByCategorySlug("laptop", 10);
 }
 
 const getPCProducts = async function () {
-    const products = await prisma.product.findMany({
-        where: {
-            categoryId: 1,
-        },
-        take:10
-    })
-    return products
+    return await getProductsByCategorySlug("pc", 10);
 }
 
 const getCPUProducts = async function () {
-    const products = await prisma.product.findMany({
-        where: {
-            categoryId: 7,
-        }
-    })
-    return products
+    return await getProductsByCategorySlug("cpu-bo-vi-xu-ly");
 }
 
 const getGPUProducts = async function () {
-    const products = await prisma.product.findMany({
-        where: {
-            categoryId: 8,
-        },
-        take:10
-    })
-    return products
+    return await getProductsByCategorySlug("vga-card-do-hoa", 10);
 }
 
 const getProductBySlug = async function (slug: string) {

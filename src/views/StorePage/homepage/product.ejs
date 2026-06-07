@@ -210,10 +210,9 @@
 
 
                 <section class="info-section">
-                    <div class="info-container">
-                        
+                    <div class="info-container">                        
+                        <% if (product.description && product.description.trim() !== "") { %>
                         <div class="description">
-
                             <h2 class="description-title">Giới thiệu sản phẩm: <%= product.name %></h2>
                             <div class="description-detail" id="description-content">
                                 <%- product.description %>
@@ -221,6 +220,7 @@
                             <div style="text-align:center; margin-top: 12px;">
                                 <a class="toggle-btn" onclick="toggleSection('description-content', this)">Xem thêm</a>
                             </div>
+                            <% } %>
 
                         </div>
                         

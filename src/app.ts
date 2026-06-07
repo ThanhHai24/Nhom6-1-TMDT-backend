@@ -62,7 +62,25 @@ app.use(passport.session());
 // middleware to share user data to all views globally
 app.use(async (req, res, next) => {
     res.locals.user = req.user;
-    res.locals.cart = req.session.cart || [];
+    let cartWithStock = [];
+    if (req.session.cart && req.session.cart.length > 0) {
+        try {
+            const productIds = req.session.cart.map(item => BigInt(item.productId));
+            const products = await prisma.product.findMany({
+                where: { id: { in: productIds } },
+                select: { id: true, stock: true }
+            });
+            const stockMap = new Map(products.map(p => [p.id.toString(), p.stock]));
+            cartWithStock = req.session.cart.map(item => ({
+                ...item,
+                stock: stockMap.get(item.productId) ?? 0
+            }));
+        } catch (err) {
+            console.error("Error fetching cart stock:", err);
+            cartWithStock = req.session.cart;
+        }
+    }
+    res.locals.cart = cartWithStock;
     res.locals.cartCount = req.session.cart ? req.session.cart.reduce((total, item) => total + item.quantity, 0) : 0;
 
     // Flash message: đọc error_msg từ session rồi xoá (chỉ hiện 1 lần)

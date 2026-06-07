@@ -1,63 +1,602 @@
 import { prisma } from "config/client";
 
 const seedCategoryBrands = async () => {
-
-    // Lấy tất cả categories và brands theo slug
-    const categories = await prisma.category.findMany();
-    const brands = await prisma.brand.findMany();
-
-    const catMap = new Map(categories.map(c => [c.slug, c.id]));
-    const brandMap = new Map(brands.map(b => [b.slug, b.id]));
-
-    // Helper: tạo link giữa 1 category và nhiều brands
-    const link = (catSlug: string, brandSlugs: string[]) => {
-        const categoryId = catMap.get(catSlug);
-        if (!categoryId) return [];
-        return brandSlugs
-            .map(bs => ({ categoryId, brandId: brandMap.get(bs) }))
-            .filter((row): row is { categoryId: bigint; brandId: bigint } =>
-                row.brandId !== undefined
-            );
-    };
-
-    const data = [
-        // ── PC Gaming / Văn phòng / Đồ họa ─────────────────────────
-        ...link("pc-gaming",    ["asus", "msi", "gigabyte", "asrock", "intel", "amd", "nvidia", "corsair", "kingston", "gskill", "crucial", "seagate", "western-digital", "cooler-master", "thermaltake", "nzxt", "phanteks", "lian-li", "inwin"]),
-        ...link("pc-van-phong", ["asus", "msi", "gigabyte", "asrock", "intel", "amd", "kingston", "crucial", "seagate", "western-digital", "cooler-master"]),
-        ...link("pc-do-hoa",    ["asus", "msi", "gigabyte", "asrock", "intel", "amd", "nvidia", "corsair", "kingston", "gskill", "crucial", "seagate", "western-digital", "cooler-master", "nzxt"]),
-
-        // ── Laptop ──────────────────────────────────────────────────
-        ...link("laptop-gaming",    ["asus", "msi", "lenovo", "acer", "dell", "hp"]),
-        ...link("laptop-van-phong", ["asus", "lenovo", "acer", "dell", "hp"]),
-        ...link("laptop-do-hoa",    ["asus", "dell", "hp", "lenovo", "msi"]),
-
-        // ── Linh kiện ───────────────────────────────────────────────
-        ...link("cpu-bo-vi-xu-ly",    ["intel", "amd"]),
-        ...link("vga-card-do-hoa",    ["nvidia", "amd", "asus", "msi", "gigabyte", "zotac"]),
-        ...link("ram-bo-nho-trong",   ["corsair", "kingston", "gskill", "crucial", "hyperx", "samsung"]),
-        ...link("o-cung-hdd-ssd",     ["samsung", "seagate", "western-digital", "sandisk", "crucial", "toshiba"]),
-        ...link("mainboard-bo-mach-chu", ["asus", "msi", "gigabyte", "asrock", "biostar"]),
-        ...link("psu-nguon-may-tinh", ["corsair", "cooler-master", "thermaltake", "asus", "msi"]),
-        ...link("case-vo-may-tinh",   ["nzxt", "phanteks", "lian-li", "inwin", "cooler-master", "thermaltake", "asus"]),
-        ...link("tan-nhiet-pc",       ["cooler-master", "corsair", "nzxt", "thermaltake", "asus"]),
-        ...link("quat-tan-nhiet",     ["cooler-master", "corsair", "nzxt", "thermaltake", "asus"]),
-
-        // ── Thiết bị ngoại vi ───────────────────────────────────────
-        ...link("ban-phim",  ["logitech", "razer", "steelseries", "hyperx", "corsair", "asus", "msi"]),
-        ...link("chuot",     ["logitech", "razer", "steelseries", "asus", "msi"]),
-        ...link("tai-nghe",  ["logitech", "razer", "steelseries", "hyperx", "corsair"]),
-
-        // ── Màn hình ────────────────────────────────────────────────
-        ...link("man-hinh",  ["asus", "msi", "lg", "samsung", "acer", "dell"]),
-    ];
-
-    if (data.length === 0) {
-        console.log("[Seed] CategoryBrands: no data to insert (categories/brands not seeded yet?).");
+    const count = await prisma.categoryBrand.count();
+    if (count > 0) {
+        console.log("[Seed] categoryBrand: already seeded, skipping.");
         return;
     }
 
-    await prisma.categoryBrand.createMany({ data, skipDuplicates: true });
-    console.log(`[Seed] CategoryBrands: seeded ${data.length} links successfully.`);
+    await prisma.categoryBrand.createMany({
+        data: [
+        {
+            categoryId: BigInt("7"),
+            brandId: BigInt("1")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("1")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("1")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("1")
+        },
+        {
+            categoryId: BigInt("7"),
+            brandId: BigInt("2")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("2")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("2")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("2")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("2")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("3")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("3")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("3")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("11"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("12"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("15"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("17"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("20"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("4")
+        },
+        {
+            categoryId: BigInt("4"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("5"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("11"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("12"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("17"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("5")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("6")
+        },
+        {
+            categoryId: BigInt("20"),
+            brandId: BigInt("6")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("6")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("7")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("7")
+        },
+        {
+            categoryId: BigInt("20"),
+            brandId: BigInt("7")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("8")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("8")
+        },
+        {
+            categoryId: BigInt("20"),
+            brandId: BigInt("8")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("8")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("9")
+        },
+        {
+            categoryId: BigInt("20"),
+            brandId: BigInt("9")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("9")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("10")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("10")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("10")
+        },
+        {
+            categoryId: BigInt("6"),
+            brandId: BigInt("11")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("12"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("15"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("18"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("12")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("13")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("13")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("13")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("13")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("13")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("14")
+        },
+        {
+            categoryId: BigInt("17"),
+            brandId: BigInt("14")
+        },
+        {
+            categoryId: BigInt("18"),
+            brandId: BigInt("14")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("15")
+        },
+        {
+            categoryId: BigInt("17"),
+            brandId: BigInt("15")
+        },
+        {
+            categoryId: BigInt("18"),
+            brandId: BigInt("15")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("16")
+        },
+        {
+            categoryId: BigInt("17"),
+            brandId: BigInt("16")
+        },
+        {
+            categoryId: BigInt("18"),
+            brandId: BigInt("16")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("17")
+        },
+        {
+            categoryId: BigInt("16"),
+            brandId: BigInt("17")
+        },
+        {
+            categoryId: BigInt("18"),
+            brandId: BigInt("17")
+        },
+        {
+            categoryId: BigInt("12"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("15"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("18")
+        },
+        {
+            categoryId: BigInt("12"),
+            brandId: BigInt("19")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("19")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("19")
+        },
+        {
+            categoryId: BigInt("15"),
+            brandId: BigInt("19")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("19")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("20")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("20")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("20")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("20")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("21")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("21")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("21")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("21")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("22")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("23")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("24")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("24")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("24")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("24")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("24")
+        },
+        {
+            categoryId: BigInt("9"),
+            brandId: BigInt("25")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("25")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("25")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("26")
+        },
+        {
+            categoryId: BigInt("5"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("10"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("11"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("19"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("21"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("27")
+        },
+        {
+            categoryId: BigInt("11"),
+            brandId: BigInt("28")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("28")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("28")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("28")
+        },
+        {
+            categoryId: BigInt("11"),
+            brandId: BigInt("29")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("32")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("32")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("33")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("33")
+        },
+        {
+            categoryId: BigInt("15"),
+            brandId: BigInt("33")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("33")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("33")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("34")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("34")
+        },
+        {
+            categoryId: BigInt("13"),
+            brandId: BigInt("35")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("35")
+        },
+        {
+            categoryId: BigInt("8"),
+            brandId: BigInt("36")
+        },
+        {
+            categoryId: BigInt("14"),
+            brandId: BigInt("37")
+        },
+        {
+            categoryId: BigInt("2"),
+            brandId: BigInt("38")
+        },
+        {
+            categoryId: BigInt("22"),
+            brandId: BigInt("38")
+        },
+        {
+            categoryId: BigInt("23"),
+            brandId: BigInt("38")
+        },
+        {
+            categoryId: BigInt("24"),
+            brandId: BigInt("38")
+        }
+        ],
+    });
+
+    console.log("[Seed] categoryBrand: seeded successfully.");
 };
 
 export default seedCategoryBrands;

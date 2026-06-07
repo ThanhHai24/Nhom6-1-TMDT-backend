@@ -87,7 +87,8 @@ const addToCart = async (req: Request, res: Response) => {
                 price: product.price,
                 quantity: quantity,
                 image: product.image || "no-image.png",
-                sku: product.sku
+                sku: product.sku,
+                stock: product.stock
             });
         }
 
@@ -227,7 +228,9 @@ const checkout = async (req: Request, res: Response) => {
             res.locals.cart = [];
             res.locals.cartCount = 0;
             res.render("StorePage/cart/cart", {
-                success_msg: "Đặt hàng thành công! Chúng tôi sẽ liên hệ xác nhận đơn hàng sớm nhất."
+                success_msg: "Đặt hàng thành công! Chúng tôi sẽ liên hệ xác nhận đơn hàng sớm nhất.",
+                layout: "StorePage/layout/main",
+                title: "Đặt hàng thành công"
             });
         });
     } catch (error) {
@@ -285,7 +288,8 @@ const addBulkToCart = async (req: Request, res: Response) => {
                     price: product.price,
                     quantity: finalQty,
                     image: product.image || "no-image.png",
-                    sku: product.sku
+                    sku: product.sku,
+                    stock: product.stock
                 });
             }
         }

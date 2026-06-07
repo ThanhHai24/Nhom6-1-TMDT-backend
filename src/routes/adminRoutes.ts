@@ -38,6 +38,7 @@ const userRoutes = (app: express.Express) => {
     const adminOnly = requireRole(['ADMIN']);
     const catalogRoles = requireRole(['ADMIN', 'MANAGER']);
     const orderRoles = requireRole(['ADMIN', 'MANAGER', 'RECEPTIONIST', 'WAREHOUSE']);
+    const warehouseRoles = requireRole(['ADMIN', 'MANAGER', 'WAREHOUSE']);
 
     // Dashboard (all admin roles — already covered by router.use above)
     router.get('/dashboard', getDashboardPage);
@@ -123,10 +124,11 @@ const userRoutes = (app: express.Express) => {
     router.get('/order/:id', getOrderDetailPage);
     router.post('/order/:id/updateStatus', PostUpdateOrderStatus);
 
-    // Warehouse (Catalog roles)
-    router.use('/warehouse', catalogRoles);
+    // Warehouse (Catalog roles & Warehouse staff)
+    router.use('/warehouse', warehouseRoles);
     router.get('/warehouse', getWarehousePage);
     // Warehouse API
+    router.use('/api/warehouse', warehouseRoles);
     router.get('/api/warehouse/inventory', getInventoryAPI);
     router.post('/api/warehouse/import', importStockAPI);
     router.post('/api/warehouse/export', exportStockAPI);
@@ -156,8 +158,8 @@ const userRoutes = (app: express.Express) => {
     router.post("/banners/delete/:id", PostDeleteBanner);
 
 
-    // Shipping (Order roles)
-    router.use('/shipping', orderRoles);
+    // Shipping (Warehouse roles)
+    router.use('/shipping', warehouseRoles);
     router.get('/shipping', getShippingPage);
 
     // Notification (All admin roles)
