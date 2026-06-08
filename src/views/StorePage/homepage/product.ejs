@@ -52,7 +52,7 @@
 
                             <div class="warranty-info">
                                 <span class="warranty-badge">Bảo hành:</span>
-                                <span>36 Tháng</span>
+                                <span><%= product.warranty %> Tháng</span>
                                 <span style="margin-left: 15px;">|</span>
                                 <span style="margin-left: 10px;">Tình trạng:</span>
                                 <% if(product.stock> 0){%>
@@ -181,21 +181,26 @@
                             <% relatedProducts.forEach(function(rp) { %>
                             <a href="/product/<%= rp.slug %>" style="text-decoration: none; color: inherit; flex-shrink: 0; display: block;">
                                 <div class="product-card">
-                                    <% if (rp.isHot) { %>
-                                    <div class="bestseller-label">Hot</div>
+                                    <% if (rp.isHot == true) { %> 
+                                        <div class="bestseller-label">Hot</div>
                                     <% } %>
+
                                     <div class="product-image">
-                                        <img src="/admin/productImages/<%= rp.image %>" alt="<%= rp.name %>" loading="lazy">
+                                        <img src="/admin/productImages/<%= rp.image%>" alt="<%= rp.name%>">
                                     </div>
-                                    <h3 class="product-title"><%= rp.name %></h3>
-                                    <div class="product-price">
-                                        <%= rp.price.toLocaleString('vi-VN') %>đ
-                                        <% if (rp.originalPrice && rp.originalPrice > rp.price) { %>
-                                        <span class="original-price"><%= rp.originalPrice.toLocaleString('vi-VN') %>đ</span>
-                                        <% } %>
+                                    <h3 class="product-title"><%= rp.name%></h3>
+                                    <div class="product-price"><%= rp.price.toLocaleString('vi-VN')%>đ
+
+                                        <span class="original-price"><%= rp.price.toLocaleString('vi-VN')%>đ</span>
+
                                     </div>
+
                                     <div class="product-stats">
-                                        <span>⭐ Đã bán: <%= rp.sold || 0 %></span>
+                                        <%if(rp.stock <= 0){%>
+                                        <span style="color: red;">Hết hàng</span>
+                                        <%}else{%>
+                                        <span style="color: green;"><i class="bi bi-check-circle-fill"></i> Còn hàng</span>
+                                        <%}%>
                                     </div>
                                 </div>
                             </a>

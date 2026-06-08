@@ -44,36 +44,88 @@ const PostCreateProduct = async (req: Request, res: Response) => {
         isHot, isNew, isFeatured, warranty
     } = req.body;
 
-    const specKeys = req.body.specKey || req.body['specKey[]'] || [];
-    const specValues = req.body.specValue || req.body['specValue[]'] || [];
+    try {
+        if (!name || name.trim() === '') {
+            throw new Error('Tên sản phẩm không được để trống');
+        }
+        if (name.trim().length > 150) {
+            throw new Error('Tên sản phẩm không được vượt quá 150 ký tự');
+        }
+        if (!category) {
+            throw new Error('Vui lòng chọn danh mục sản phẩm');
+        }
+        if (!brand) {
+            throw new Error('Vui lòng chọn thương hiệu');
+        }
+        if (!supplier) {
+            throw new Error('Vui lòng chọn nhà phân phối');
+        }
 
-    let specifications: any = null;
-    if (specKeys.length > 0) {
-        specifications = [];
-        if (Array.isArray(specKeys)) {
-            for (let i = 0; i < specKeys.length; i++) {
-                if (specKeys[i] && specValues[i]) {
-                    specifications.push({ key: specKeys[i], value: specValues[i] });
-                }
-            }
-        } else if (typeof specKeys === 'string') {
-            if (specKeys && specValues) {
-                specifications.push({ key: specKeys, value: specValues });
+        const costVal = Number(cost);
+        if (cost === undefined || cost === null || cost === '' || isNaN(costVal) || costVal < 0 || !Number.isInteger(costVal)) {
+            throw new Error('Giá nhập phải là số nguyên không âm');
+        }
+
+        const priceVal = Number(price);
+        if (price === undefined || price === null || price === '' || isNaN(priceVal) || priceVal < 0 || !Number.isInteger(priceVal)) {
+            throw new Error('Giá bán phải là số nguyên không âm');
+        }
+        if (priceVal < costVal) {
+            throw new Error('Giá bán không được nhỏ hơn giá nhập');
+        }
+
+        const stockVal = Number(stock);
+        if (stock === undefined || stock === null || stock === '' || isNaN(stockVal) || stockVal < 0 || !Number.isInteger(stockVal)) {
+            throw new Error('Số lượng tồn kho phải là số nguyên không âm');
+        }
+
+        if (lowStockThreshold !== undefined && lowStockThreshold !== null && lowStockThreshold !== '') {
+            const thresholdVal = Number(lowStockThreshold);
+            if (isNaN(thresholdVal) || thresholdVal < 0 || !Number.isInteger(thresholdVal)) {
+                throw new Error('Ngưỡng cảnh báo hết hàng phải là số nguyên không âm');
             }
         }
-        if (specifications.length === 0) specifications = null;
+
+        if (shortDescription && shortDescription.length > 255) {
+            throw new Error('Mô tả ngắn không được vượt quá 255 ký tự');
+        }
+
+        const uploadedFiles = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const coverImage = uploadedFiles?.['image']?.[0];
+        if (!coverImage) {
+            throw new Error('Vui lòng chọn ảnh bìa sản phẩm');
+        }
+
+        const specKeys = req.body.specKey || req.body['specKey[]'] || [];
+        const specValues = req.body.specValue || req.body['specValue[]'] || [];
+
+        let specifications: any = null;
+        if (specKeys.length > 0) {
+            specifications = [];
+            if (Array.isArray(specKeys)) {
+                for (let i = 0; i < specKeys.length; i++) {
+                    if (specKeys[i] && specValues[i]) {
+                        specifications.push({ key: specKeys[i], value: specValues[i] });
+                    }
+                }
+            } else if (typeof specKeys === 'string') {
+                if (specKeys && specValues) {
+                    specifications.push({ key: specKeys, value: specValues });
+                }
+            }
+            if (specifications.length === 0) specifications = null;
+        }
+
+        const sku = await generateSKUWithDB(prisma, category);
+        const slug = autoGenerateSlug(name);
+        const productImages = uploadedFiles?.['images'] ?? [];
+
+        await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage.filename, productImages.map((img) => img.filename), isHot, isNew, isFeatured, category, brand, supplier, specifications, warranty ?? null);
+        res.redirect("/admin/products");
+    } catch (err: any) {
+        req.session.error_msg = err.message || 'Có lỗi xảy ra khi tạo sản phẩm';
+        res.redirect("/admin/products/create");
     }
-
-    const sku = await generateSKUWithDB(prisma, category);
-    const slug = autoGenerateSlug(name);
-
-    // Khi dùng multer .fields(), req.files là object { fieldname: File[] }
-    const uploadedFiles = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const coverImage = uploadedFiles?.['image']?.[0];
-    const productImages = uploadedFiles?.['images'] ?? [];
-
-    await HandleCreateProduct(name, slug, sku, shortDescription, description, cost, price, stock, lowStockThreshold, coverImage?.filename, productImages.map((img) => img.filename), isHot, isNew, isFeatured, category, brand, supplier, specifications, warranty ?? null);
-    res.redirect("/admin/products");
 }
 
 const PostActiveProduct = async (req: Request, res: Response) => {
@@ -111,41 +163,99 @@ const getProductDetailPage = async (req: Request, res: Response) => {
 const PostUpdateProduct = async (req: Request, res: Response) => {
     const { id, name, category, cost, price, stock, lowStockThreshold, brand, supplier, shortDescription, description, isHot, isNew, isFeatured, existingCover, existingImages, warranty } = req.body;
 
-    const specKeys = req.body.specKey || req.body['specKey[]'] || [];
-    const specValues = req.body.specValue || req.body['specValue[]'] || [];
+    try {
+        if (!id) {
+            throw new Error('Thiếu ID sản phẩm cần cập nhật');
+        }
+        if (!name || name.trim() === '') {
+            throw new Error('Tên sản phẩm không được để trống');
+        }
+        if (name.trim().length > 150) {
+            throw new Error('Tên sản phẩm không được vượt quá 150 ký tự');
+        }
+        if (!category) {
+            throw new Error('Vui lòng chọn danh mục sản phẩm');
+        }
+        if (!brand) {
+            throw new Error('Vui lòng chọn thương hiệu');
+        }
+        if (!supplier) {
+            throw new Error('Vui lòng chọn nhà phân phối');
+        }
 
-    let specifications: any = null;
-    if (specKeys.length > 0) {
-        specifications = [];
-        if (Array.isArray(specKeys)) {
-            for (let i = 0; i < specKeys.length; i++) {
-                if (specKeys[i] && specValues[i]) {
-                    specifications.push({ key: specKeys[i], value: specValues[i] });
-                }
-            }
-        } else if (typeof specKeys === 'string') {
-            if (specKeys && specValues) {
-                specifications.push({ key: specKeys, value: specValues });
+        const costVal = Number(cost);
+        if (cost === undefined || cost === null || cost === '' || isNaN(costVal) || costVal < 0 || !Number.isInteger(costVal)) {
+            throw new Error('Giá nhập phải là số nguyên không âm');
+        }
+
+        const priceVal = Number(price);
+        if (price === undefined || price === null || price === '' || isNaN(priceVal) || priceVal < 0 || !Number.isInteger(priceVal)) {
+            throw new Error('Giá bán phải là số nguyên không âm');
+        }
+        if (priceVal < costVal) {
+            throw new Error('Giá bán không được nhỏ hơn giá nhập');
+        }
+
+        const stockVal = Number(stock);
+        if (stock === undefined || stock === null || stock === '' || isNaN(stockVal) || stockVal < 0 || !Number.isInteger(stockVal)) {
+            throw new Error('Số lượng tồn kho phải là số nguyên không âm');
+        }
+
+        if (lowStockThreshold !== undefined && lowStockThreshold !== null && lowStockThreshold !== '') {
+            const thresholdVal = Number(lowStockThreshold);
+            if (isNaN(thresholdVal) || thresholdVal < 0 || !Number.isInteger(thresholdVal)) {
+                throw new Error('Ngưỡng cảnh báo hết hàng phải là số nguyên không âm');
             }
         }
-        if (specifications.length === 0) specifications = null;
+
+        if (shortDescription && shortDescription.length > 255) {
+            throw new Error('Mô tả ngắn không được vượt quá 255 ký tự');
+        }
+
+        const uploadedFiles = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const coverImage = uploadedFiles?.['image']?.[0];
+
+        const finalCover = coverImage?.filename || existingCover;
+        if (!finalCover) {
+            throw new Error('Vui lòng chọn ảnh bìa sản phẩm');
+        }
+
+        const specKeys = req.body.specKey || req.body['specKey[]'] || [];
+        const specValues = req.body.specValue || req.body['specValue[]'] || [];
+
+        let specifications: any = null;
+        if (specKeys.length > 0) {
+            specifications = [];
+            if (Array.isArray(specKeys)) {
+                for (let i = 0; i < specKeys.length; i++) {
+                    if (specKeys[i] && specValues[i]) {
+                        specifications.push({ key: specKeys[i], value: specValues[i] });
+                    }
+                }
+            } else if (typeof specKeys === 'string') {
+                if (specKeys && specValues) {
+                    specifications.push({ key: specKeys, value: specValues });
+                }
+            }
+            if (specifications.length === 0) specifications = null;
+        }
+
+        const slug = autoGenerateSlug(name);
+        const productImages = uploadedFiles?.['images'] ?? [];
+
+        let finalImages: string[] = [];
+        if (existingImages) {
+            if (Array.isArray(existingImages)) finalImages.push(...existingImages);
+            else finalImages.push(existingImages);
+        }
+        finalImages.push(...productImages.map(img => img.filename));
+
+        await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot, isNew, isFeatured, category, brand, supplier, specifications, warranty ?? null);
+        res.redirect("/admin/products");
+    } catch (err: any) {
+        req.session.error_msg = err.message || 'Có lỗi xảy ra khi cập nhật sản phẩm';
+        res.redirect(`/admin/products/${id || ''}`);
     }
-    const slug = autoGenerateSlug(name);
-    const uploadedFiles = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const coverImage = uploadedFiles?.['image']?.[0];
-    const productImages = uploadedFiles?.['images'] ?? [];
-
-    const finalCover = coverImage?.filename || existingCover;
-
-    let finalImages: string[] = [];
-    if (existingImages) {
-        if (Array.isArray(existingImages)) finalImages.push(...existingImages);
-        else finalImages.push(existingImages);
-    }
-    finalImages.push(...productImages.map(img => img.filename));
-
-    await HandleUpdateProduct(id, name, slug, shortDescription, description, cost, price, stock, lowStockThreshold, finalCover, finalImages, isHot, isNew, isFeatured, category, brand, supplier, specifications, warranty ?? null);
-    res.redirect("/admin/products");
 }
 const PostIncrementView = async (req: Request, res: Response) => {
     try {

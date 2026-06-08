@@ -3226,7 +3226,7 @@ main {
 
 .quick-range-btn {
     background-color: #e53935;
-    color: white;
+    color: rgb(68, 68, 68);
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
@@ -4980,4 +4980,16 @@ main {
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
     }
+}
+
+.product-badge.new {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #0F5B99;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
 }

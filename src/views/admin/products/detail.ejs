@@ -13,6 +13,11 @@
 
                         <form action="/admin/product/handleupdate" method="POST" onsubmit="submitAddProduct(event);"
                             enctype="multipart/form-data">
+                            <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+                                <div style="background:#FCE8E6; border:1px solid #FAD2CF; border-radius:8px; padding:12px; margin-bottom:20px; color:#C5221F; font-size:14px;">
+                                    <%= error_msg %>
+                                </div>
+                            <% } %>
                             <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
 
                                 <!-- Left: Main form -->
@@ -43,7 +48,7 @@
                                                     style="font-family:monospace;" disabled value="<%= product?.sku %>">
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label">Thương hiệu</label>
+                                                <label class="form-label">Thương hiệu <span style="color:#E24B4A">*</span></label>
                                                 <select name="brand" class="form-input form-select" id="inp-brand">
                                                     <option value="">-- Chọn Thương hiệu --</option>
                                                     <% brands.forEach( function (brand) { %>
@@ -68,7 +73,7 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label">Nhà phân phối</label>
+                                                <label class="form-label">Nhà phân phối <span style="color:#E24B4A">*</span></label>
                                                 <select name="supplier" class="form-input form-select"
                                                     id="inp-supplier">
                                                     <option value="">-- Chọn nhà phân phối --</option>
@@ -1017,7 +1022,10 @@
                     const compType = specKey.toLowerCase();
                     const filtered = allStoreProducts.filter(p => {
                         const cN = p.categoryName.toLowerCase(), cS = p.categorySlug.toLowerCase();
-                        if (compType === 'cpu'           && (cS.includes('cpu')  || cN.includes('cpu')  || cN.includes('vi xử lý')))  return true;
+                        if (compType === 'cpu') {
+                            if (cS.includes('cooler') || cS.includes('tan-nhiet') || cN.includes('tản nhiệt') || cN.includes('quạt')) return false;
+                            return (cS.includes('cpu') || cN.includes('cpu') || cN.includes('vi xử lý'));
+                        }
                         if (compType === 'mainboard'     && (cS.includes('main') || cN.includes('main') || cN.includes('bo mạch')))    return true;
                         if (compType === 'ram'           && (cS.includes('ram')  || cN.includes('ram')  || cN.includes('bộ nhớ')))    return true;
                         if (compType === 'vga'           && (cS.includes('vga')  || cN.includes('card') || cN.includes('đồ họa')))    return true;
@@ -1192,15 +1200,123 @@
                 const errors = [];
                 const name = document.getElementById('inp-name').value.trim();
                 const category = document.getElementById('inp-category').value;
+                const brand = document.getElementById('inp-brand').value;
+                const supplier = document.getElementById('inp-supplier').value;
                 const cost = document.getElementById('inp-cost').value;
                 const price = document.getElementById('inp-price').value;
                 const stock = document.getElementById('inp-stock').value;
+                const lowStockAlert = document.getElementById('inp-stock-alert').value;
+                const shortDesc = document.getElementById('inp-short-desc').value.trim();
 
-                if (!name) errors.push('Tên sản phẩm không được để trống');
-                if (!category) errors.push('Vui lòng chọn danh mục sản phẩm');
-                if (!cost || parseFloat(cost) < 0) errors.push('Giá nhập không hợp lệ');
-                if (!price || parseFloat(price) < 0) errors.push('Giá bán không hợp lệ');
-                if (!stock || parseInt(stock) < 0) errors.push('Số lượng tồn kho không hợp lệ');
+                // 1. Tên sản phẩm
+                if (!name) {
+                    errors.push('Tên sản phẩm không được để trống');
+                } else if (name.length > 150) {
+                    errors.push('Tên sản phẩm không được vượt quá 150 ký tự');
+                }
+
+                // 2. Danh mục
+                if (!category) {
+                    errors.push('Vui lòng chọn danh mục sản phẩm');
+                }
+
+                // 3. Thương hiệu
+                if (!brand) {
+                    errors.push('Vui lòng chọn thương hiệu');
+                }
+
+                // 4. Nhà phân phối
+                if (!supplier) {
+                    errors.push('Vui lòng chọn nhà phân phối');
+                }
+
+                // 5. Giá nhập
+                if (cost === '') {
+                    errors.push('Giá nhập không được để trống');
+                } else {
+                    const costVal = parseFloat(cost);
+                    if (isNaN(costVal) || costVal < 0 || !Number.isInteger(costVal)) {
+                        errors.push('Giá nhập phải là số nguyên không âm');
+                    }
+                }
+
+                // 6. Giá bán
+                if (price === '') {
+                    errors.push('Giá bán không được để trống');
+                } else {
+                    const priceVal = parseFloat(price);
+                    if (isNaN(priceVal) || priceVal < 0 || !Number.isInteger(priceVal)) {
+                        errors.push('Giá bán phải là số nguyên không âm');
+                    } else if (cost !== '') {
+                        const costVal = parseFloat(cost);
+                        if (!isNaN(costVal) && priceVal < costVal) {
+                            errors.push('Giá bán không được nhỏ hơn giá nhập');
+                        }
+                    }
+                }
+
+                // 7. Số lượng tồn kho
+                if (stock === '') {
+                    errors.push('Số lượng tồn kho không được để trống');
+                } else {
+                    const stockVal = parseFloat(stock);
+                    if (isNaN(stockVal) || stockVal < 0 || !Number.isInteger(stockVal)) {
+                        errors.push('Số lượng tồn kho phải là số nguyên không âm');
+                    }
+                }
+
+                // 8. Ngưỡng cảnh báo hết hàng
+                if (lowStockAlert !== '') {
+                    const alertVal = parseFloat(lowStockAlert);
+                    if (isNaN(alertVal) || alertVal < 0 || !Number.isInteger(alertVal)) {
+                        errors.push('Ngưỡng cảnh báo hết hàng phải là số nguyên không âm');
+                    }
+                }
+
+                // 9. Mô tả ngắn
+                if (shortDesc.length > 255) {
+                    errors.push('Mô tả ngắn không được vượt quá 255 ký tự');
+                }
+
+                // 10. Validate Ảnh bìa (Cover Image)
+                const coverInput = document.getElementById('coverImageFile');
+                const existingCoverEl = document.getElementById('existingCover');
+                const hasExistingCover = existingCoverEl && existingCoverEl.value !== '';
+                
+                if (!hasExistingCover && (!coverInput.files || coverInput.files.length === 0)) {
+                    errors.push('Vui lòng chọn ảnh bìa sản phẩm');
+                } else if (coverInput.files && coverInput.files.length > 0) {
+                    const file = coverInput.files[0];
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    const allowedExtensions = ['jpeg', 'jpg', 'png', 'webp'];
+                    
+                    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(extension)) {
+                        errors.push('Định dạng ảnh bìa không hợp lệ. Chỉ chấp nhận JPG, JPEG, PNG, WEBP');
+                    }
+                    if (file.size > 5 * 1024 * 1024) {
+                        errors.push('Dung lượng ảnh bìa không được vượt quá 5MB');
+                    }
+                }
+
+                // 11. Validate Ảnh phụ (Product Images)
+                const productImagesInput = document.getElementById('productImagesFile');
+                if (productImagesInput && productImagesInput.files && productImagesInput.files.length > 0) {
+                    const files = Array.from(productImagesInput.files);
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                    const allowedExtensions = ['jpeg', 'jpg', 'png', 'webp'];
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(extension)) {
+                            errors.push(`Định dạng ảnh phụ "${file.name}" không hợp lệ. Chỉ chấp nhận JPG, JPEG, PNG, WEBP`);
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            errors.push(`Dung lượng ảnh phụ "${file.name}" không được vượt quá 5MB`);
+                        }
+                    }
+                }
 
                 const errBox = document.getElementById('form-errors');
                 const errList = document.getElementById('error-list');
@@ -1209,13 +1325,23 @@
                     errList.innerHTML = errors.map(e => '<li>' + e + '</li>').join('');
                     errBox.style.display = 'block';
                     errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Re-enable form button if we blocked submission
+                    const btn = event.submitter;
+                    if (btn) {
+                        btn.textContent = btn.getAttribute('data-original-text') || 'Cập nhật sản phẩm';
+                        btn.disabled = false;
+                    }
                     return;
                 }
                 errBox.style.display = 'none';
 
                 const btn = event.submitter;
-                btn.textContent = 'Đang lưu...';
-                btn.disabled = true;
+                if (btn) {
+                    btn.setAttribute('data-original-text', btn.textContent);
+                    btn.textContent = btn.closest('form').action.includes('update') ? 'Đang lưu...' : 'Đang thêm...';
+                    setTimeout(() => btn.disabled = true, 50);
+                }
             }
         </script>
 

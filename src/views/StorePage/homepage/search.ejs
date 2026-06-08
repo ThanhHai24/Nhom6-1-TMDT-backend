@@ -134,10 +134,16 @@
 
                         </div>
                         <% } else { %>
-                        <div class="product-price"><%= p.price.toLocaleString('vi-VN')%>đ</div>
+                        <div style="font-size: 22px; color: #e61e1e;" class="price">
+                            <span class="price"><%= p.price.toLocaleString('vi-VN')%>đ</span>
+                        </div>
                         <% } %>
                         <div class="product-stats">
-                            <span>⭐ Đã bán: <%= p.sold%></span>
+                            <%if(p.stock <= 0){%>
+                            <span style="color: red;">Hết hàng</span>
+                            <%}else{%>
+                            <span style="color: green;"><i class="bi bi-check-circle-fill"></i> Còn hàng</span>
+                            <%}%>
                         </div>
                     </div>
                 </a>

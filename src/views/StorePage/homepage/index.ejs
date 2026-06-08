@@ -98,7 +98,13 @@
 
                             </div>
                             <div class="product-stats">
-                                
+                                <% if (hotproduct.stock <= 0) { %>
+                                    <span style="color: red;">Hết hàng</span>
+                                <% } else { %>
+                                    <span style="color: green;">
+                                        <i class="bi bi-check-circle-fill"></i> Còn hàng
+                                    </span>
+                                <% } %>
                             </div>
                         </div>
                     </a>
@@ -224,7 +230,13 @@
                         </div>
 
                         <div class="product-stats">
-                            
+                            <% if (pc.stock <= 0) { %>
+                                <span style="color: red;">Hết hàng</span>
+                            <% } else { %>
+                                <span style="color: green;">
+                                    <i class="bi bi-check-circle-fill"></i> Còn hàng
+                                </span>
+                            <% } %>
                         </div>
                     </div>
                 </a>
@@ -263,7 +275,11 @@
                         </div>
 
                         <div class="product-stats">
-                            
+                            <%if(laptop.stock <= 0){%>
+                            <span style="color: red;">Hết hàng</span>
+                            <%}else{%>
+                            <span style="color: green;"><i class="bi bi-check-circle-fill"></i> Còn hàng</span>
+                            <%}%>
                         </div>
                     </div>
                 </a>
@@ -300,9 +316,12 @@
                             <span class="original-price"><%= cpu.price.toLocaleString('vi-VN')%>đ</span>
 
                         </div>
-
                         <div class="product-stats">
-                            
+                            <%if(cpu.stock <= 0){%>
+                            <span style="color: red;">Hết hàng</span>
+                            <%}else{%>
+                            <span style="color: green;"><i class="bi bi-check-circle-fill"></i> Còn hàng</span>
+                            <%}%>
                         </div>
                     </div>
                 </a>
@@ -317,7 +336,7 @@
         <div class="section-header">
             <h2 class="section-title">CARD MÀN HÌNH - VGA</h2>
             <div class="filter-options">
-                <a href="/card-man-hinh-vga" class="filter-option">Xem Tất Cả</a>
+                <a href="/vga-card-do-hoa" class="filter-option">Xem Tất Cả</a>
             </div>
         </div>
         <div class="product-slider">
@@ -341,7 +360,11 @@
                         </div>
 
                         <div class="product-stats">
-                            
+                            <%if(gpu.stock <= 0){%>
+                            <span style="color: red;">Hết hàng</span>
+                            <%}else{%>
+                            <span style="color: green;"><i class="bi bi-check-circle-fill"></i> Còn hàng</span>
+                            <%}%>
                         </div>
                     </div>
                 </a>
