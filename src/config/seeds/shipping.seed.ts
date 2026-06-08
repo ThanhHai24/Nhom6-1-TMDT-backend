@@ -9,15 +9,15 @@ const seedShipping = async () => {
 
     await prisma.shippingProvider.createMany({
         data: [
-        {
-            id: BigInt("1"),
-            name: "Vận chuyển Ảo (Mock)",
-            code: "VIRTUAL",
-            apiKey: "N/A",
-            status: "ACTIVE",
-            createdAt: new Date("2026-06-07T08:04:06.485Z"),
-            updatedAt: new Date("2026-06-07T08:04:06.485Z")
-        }
+            {
+                id: BigInt("1"),
+                name: "Vận chuyển Ảo (Mock)",
+                code: "VIRTUAL",
+                apiKey: "N/A",
+                status: "ACTIVE",
+                createdAt: new Date("2026-06-07T08:04:06.485Z"),
+                updatedAt: new Date("2026-06-07T08:04:06.485Z")
+            }
         ],
     });
 
